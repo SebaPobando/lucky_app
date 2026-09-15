@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Mi credencial · Lucky Point Coffee{% endblock %}
+{% block descripcion %}Estamos preparando tu carnet digital con QR y saldo de Lucky Points. Vuelve pronto.{% endblock %}
+{% block contenido %}
+<main class="auth"><div class="auth__card">
+<img class="auth__mascot" src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+<div class="auth__eyebrow">Próximamente</div>
+<h1 class="auth__title">Tu credencial digital está en camino</h1>
+<p class="auth__lead">Estamos preparando tu carnet digital con QR y saldo de Lucky Points. Vuelve pronto.</p>
+<a class="btn btn--primary" href="{{ url_for('dashboard') }}">Volver al dashboard</a>
+</div></main>
+{% endblock %}

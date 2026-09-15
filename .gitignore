@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.log
+.DS_Store
+
+# Buzón de correos de desarrollo: cuando no hay SMTP configurado, la app
+# escribe acá cada correo en vez de mandarlo. Son datos de prueba.
+buzon/

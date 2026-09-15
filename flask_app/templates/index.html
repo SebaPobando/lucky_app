@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Gestión de Usuarios</h1>
+
+    <form action="/crear" method="POST">
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="email" name="email" placeholder="Correo" required>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <hr>
+
+    <h2>Lista de usuarios</h2>
+    {% if usuarios %}
+        <ul>
+            {% for u in usuarios %}
+                <li>{{ u.nombre }} - {{ u.email }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hay usuarios registrados.</p>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

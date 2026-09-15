@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lucky Point Coffee · Café de especialidad en Osorno</title>
+  <meta name="description" content="Café de especialidad en Osorno, Chile. Revisa nuestra carta digital y compra café en grano y accesorios en la tienda online." />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://www.luckypointcoffee.cl/" />
+
+<!-- Open Graph / redes sociales -->
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="es_CL" />
+<meta property="og:site_name" content="Lucky Point Coffee" />
+<meta property="og:title" content="Lucky Point Coffee · Café de especialidad en Osorno" />
+  <meta property="og:description" content="Carta digital y tienda online de café en grano y accesorios de Lucky Point Coffee." />
+<meta property="og:url" content="https://www.luckypointcoffee.cl/" />
+<meta property="og:image" content="https://www.luckypointcoffee.cl/assets/images/og-cover.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Lucky Point Coffee · Café de especialidad en Osorno" />
+  <meta name="twitter:description" content="Carta digital y tienda online de café en grano y accesorios de Lucky Point Coffee." />
+<meta name="twitter:image" content="https://www.luckypointcoffee.cl/assets/images/og-cover.jpg" />
+
+<!-- Datos estructurados (SEO + AEO): negocio local -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CafeOrCoffeeShop",
+  "@id": "https://www.luckypointcoffee.cl/#negocio",
+  "name": "Lucky Point Coffee",
+  "image": "https://www.luckypointcoffee.cl/assets/images/og-cover.jpg",
+  "url": "https://www.luckypointcoffee.cl/",
+  "telephone": "+56927212760",
+  "priceRange": "$$",
+  "servesCuisine": "Café de especialidad",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Bernardo O'Higgins 969",
+    "addressLocality": "Osorno",
+    "addressRegion": "Los Lagos",
+    "addressCountry": "CL"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "reviewCount": "135"
+  },
+  "openingHoursSpecification": [
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:30", "closes": "20:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "09:30", "closes": "14:00" }
+  ],
+  "menu": "https://www.luckypointcoffee.cl/#carta",
+  "sameAs": ["https://www.instagram.com/luckypointcoffee/"]
+}
+</script>
+
+<!-- Datos estructurados (AEO): información útil del local -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Dónde está ubicada Lucky Point Coffee?",
+      "acceptedAnswer": { "@type": "Answer", "text": "En Bernardo O'Higgins 969, Osorno, Región de Los Lagos, Chile. Atendemos de lunes a sábado de 8:30 a 20:00 y domingo de 9:30 a 14:00." }
+    }
+  ]
+}
+</script>
+
+<!-- Datos estructurados (AEO): autoria del sitio -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://www.luckypointcoffee.cl/#sitio",
+  "name": "Lucky Point Coffee",
+  "url": "https://www.luckypointcoffee.cl/",
+  "inLanguage": "es-CL",
+  "about": { "@id": "https://www.luckypointcoffee.cl/#negocio" },
+  "publisher": { "@id": "https://www.luckypointcoffee.cl/#negocio" },
+  "creator": {
+    "@type": "Person",
+    "@id": "https://www.luckypointcoffee.cl/#desarrollador",
+    "name": "Sr. Jengibre",
+    "url": "https://www.linkedin.com/in/sebapoba/",
+    "sameAs": ["https://www.linkedin.com/in/sebapoba/"],
+    "jobTitle": "Desarrollador de software",
+    "description": "Desarrollador de software en Osorno, Chile. Programo el sitio de Lucky Point Coffee.",
+    "knowsAbout": ["Desarrollo de software", "Desarrollo web", "Frontend", "Backend", "HTML", "CSS", "JavaScript", "Accesibilidad web"],
+    "workLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Osorno",
+        "addressRegion": "Los Lagos",
+        "addressCountry": "CL"
+      }
+    }
+  }
+}
+</script>
+
+<!-- Design System: tokens, fuentes (Handgoal + Montserrat) y resets base -->
+<link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/logo.jpeg') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+<link href="https://awards.infcdn.net/2024/circle_v2.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carrito.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tienda-rapida.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/agenda.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/muro.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cuenta-nav.css') }}" />
+<script src="{{ url_for('static', filename='js/config.js') }}"></script>
+<script src="{{ url_for('static', filename='js/account.js') }}"></script>
+
+<style>
+  /* =======================================================================
+     index.html — estilos de página (BEM) construidos sobre los tokens del
+     Design System. Pensado para migrarse luego a componentes React/Vue.
+     ======================================================================= */
+
+  /* --- Layout helpers ---------------------------------------------------- */
+  .container {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+  .section { padding-block: var(--sp-8); }
+  .section__eyebrow {
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-caption);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  /* ---------------------- Puente a Gladiatore ----------------------
+     Bloque oscuro dentro de una página crema: contrasta a propósito, para
+     que se lea como "otra marca" y no como una sección más de la cafetería. */
+  .gladiatore-puente {
+    margin-top: var(--sp-7);
+    display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap;
+    background: #0A0908; border-radius: var(--r-md);
+    padding: var(--sp-5) var(--sp-6);
+    border: 1px solid rgba(232, 200, 138, .22);
+    background-image: radial-gradient(ellipse 60% 120% at 12% 50%, rgba(196,30,36,.28), transparent 62%);
+  }
+  .gladiatore-puente__logo { width: 74px; height: auto; border-radius: 8px; flex: none; }
+  .gladiatore-puente__texto { flex: 1 1 260px; }
+  .gladiatore-puente__eyebrow {
+    margin: 0; color: #E8C88A; font-size: .64rem; font-weight: 700;
+    letter-spacing: .28em; text-transform: uppercase;
+  }
+  .gladiatore-puente__titulo {
+    margin: 6px 0 4px; color: #fff; font-size: 1.16rem; font-weight: 700;
+    letter-spacing: .01em;
+  }
+  .gladiatore-puente__bajada { margin: 0; color: #9A9086; font-size: .88rem; }
+  .gladiatore-puente__btn {
+    flex: none; background: #C41E24; color: #fff; text-decoration: none;
+    font-weight: 700; font-size: .9rem; padding: 13px 24px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .gladiatore-puente__btn:hover { background: #E03A32; }
+  @media (max-width: 640px) {
+    .gladiatore-puente { padding: var(--sp-5); gap: var(--sp-4); }
+    .gladiatore-puente__btn { width: 100%; text-align: center; }
+  }
+
+  .section__title { margin-block: var(--sp-2) var(--sp-5); }
+
+  /* --- Botón (BEM block reutilizable) ------------------------------------ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: 0.9375rem;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    padding: 14px 26px;
+    border-radius: var(--r-pill);
+    border: var(--bw-strong) solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform var(--dur-fast) var(--ease),
+                filter var(--dur-fast) var(--ease),
+                background var(--dur) var(--ease);
+  }
+  .btn:hover { filter: brightness(1.06); }
+  .btn:active { transform: scale(0.97); }
+  .btn--primary { background: var(--lp-forest); color: var(--lp-cream-50); border-color: var(--lp-forest); }
+  .btn--dark    { background: var(--lp-espresso); color: var(--lp-cream-50); border-color: var(--lp-espresso); }
+  .btn--gold    { background: var(--lp-gold); color: var(--lp-espresso); border-color: var(--lp-gold); }
+  .btn--outline { background: transparent; color: var(--lp-espresso); border-color: var(--border-strong); }
+  .btn--lg      { padding: 17px 32px; font-size: 1.0625rem; }
+  .btn--sm      { padding: 10px 18px; font-size: 0.8125rem; }
+  .btn--block   { display: flex; width: 100%; }
+
+  /* --- Header / navegación ----------------------------------------------- */
+  /* Anula el padding-top de account.css: aquí el header es sticky, no fixed, así que no necesita ese espacio de compensación. */
+  body { padding-top: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  /* Nota: el blur va en ::before (no en .header) para que .header no cree un
+     "containing block" de position:fixed y así el menú móvil (nav) se
+     posicione respecto al viewport y no quede recortado/transparente. */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: var(--bw) solid var(--border);
+  }
+  .header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(252, 248, 241, 0.86);
+    backdrop-filter: blur(10px);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    height: 68px;
+  }
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    text-decoration: none;
+  }
+  .header__brand-name {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--lp-espresso);
+    line-height: 1;
+  }
+  .header__brand-tag {
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: 0.6rem;
+    letter-spacing: 0.36em;
+    color: var(--lp-forest);
+  }
+  .nav { display: flex; align-items: center; gap: var(--sp-2); }
+  .nav__link {
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: 0.875rem;
+    color: var(--lp-coffee-500);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .nav__link:hover { background: var(--surface-sand); color: var(--lp-espresso); }
+  .nav__points {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--lp-gold-bg);
+    color: #8A5E13;
+    font-weight: var(--fw-bold);
+    font-size: 0.8rem;
+    padding: 7px 13px;
+    border-radius: var(--r-pill);
+    text-decoration: none;
+  }
+  .header__toggle span { transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+
+  /* Token estrella (★) reutilizable */
+  .star-token {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--lp-gold);
+    color: var(--lp-espresso);
+    font-size: 9px;
+    font-weight: 900;
+  }
+
+  /* --- Hero -------------------------------------------------------------- */
+  .hero {
+    position: relative;
+    color: var(--lp-cream-50);
+    background:
+      linear-gradient(150deg, rgba(42,28,18,0.30), rgba(42,28,18,0.78)),
+      linear-gradient(150deg, var(--lp-coffee-500), var(--lp-espresso));
+    background-size: cover;
+    background-position: center;
+  }
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding-block: var(--sp-9);
+    max-width: 640px;
+  }
+  .hero__eyebrow {
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-caption);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--lp-gold-soft);
+  }
+  .hero__title {
+    color: var(--lp-cream-50);
+    font-size: var(--fs-display);
+    line-height: var(--lh-display);
+    margin: 0;
+  }
+  .hero__text {
+    font-size: var(--fs-lead);
+    color: rgba(252, 248, 241, 0.86);
+    margin: 0;
+    max-width: 46ch;
+  }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .hero__banner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    background: rgba(252, 248, 241, 0.12);
+    border: var(--bw) solid rgba(252, 248, 241, 0.22);
+    border-radius: var(--r-pill);
+    padding: 10px 18px 10px 12px;
+    backdrop-filter: blur(6px);
+    align-self: flex-start;
+  }
+  .hero__banner-star {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--lp-gold);
+    color: var(--lp-espresso);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 900;
+  }
+  .hero__banner-text { font-size: 0.85rem; color: var(--lp-cream-50); }
+  .hero__banner-text strong { display: block; font-weight: var(--fw-bold); }
+
+  /* --- Nosotros ---------------------------------------------------------- */
+  .about__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-6);
+    align-items: center;
+  }
+  .about__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-xl);
+  }
+  .about__media-actions {
+    margin-top: var(--sp-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .about__lead { font-size: var(--fs-lead); color: var(--text-strong); }
+
+  /* --- Premios -------------------------------------------------------- */
+  .awards__grid { display: flex; flex-wrap: wrap; gap: var(--sp-6); margin-top: var(--sp-6); }
+  .awards__item { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); text-decoration: none; width: 140px; text-align: center; }
+  .awards__badge { width: 120px; height: 120px; object-fit: contain; border-radius: 50%; box-shadow: var(--shadow-sm); transition: transform var(--dur) var(--ease-out); }
+  .awards__badge--zoom { object-fit: cover; transform: scale(1.35); }
+  .awards__item:hover .awards__badge--zoom { transform: scale(1.4) translateY(-3px); }
+  .awards__item:hover .awards__badge { transform: translateY(-4px) scale(1.03); }
+  .awards__badge--placeholder { display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--lp-cream-200), var(--lp-cream-300)); box-shadow: none; padding: var(--sp-2); }
+  .awards__item--pending { cursor: pointer; width: auto; }
+  .awards__item--pending .awards__badge { transition: none; }
+  .awards__label { font-family: var(--font-body); font-weight: var(--fw-semibold); font-size: 0.85rem; color: var(--text-strong); }
+  .about__stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+  .stat {
+    background: var(--surface-sand);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+  }
+  .stat__num { font-family: var(--font-display); font-size: 1.8rem; color: var(--lp-forest); line-height: 1; }
+  .stat__num2 { font-family: var(--font-display); font-size: 0.78rem; color: var(--lp-forest); line-height: 1; margin-top:20px; }
+  .stat__label { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; }
+
+  /* --- Carta ------------------------------------------------------------- */
+  .carta { background: var(--surface-raised); }
+  .carta__tabs {
+    display: flex;
+    gap: var(--sp-2);
+    overflow-x: auto;
+    padding-block: var(--sp-2);
+    margin-bottom: var(--sp-5);
+    scrollbar-width: none;
+  }
+  .carta__tabs::-webkit-scrollbar { display: none; }
+
+  /* --- Botón a la carta de Gladiatore, junto a las categorías ---
+     Va en negro y rojo, no en la paleta de la cafetería: es otra marca y
+     conviene que se lea así, no como una categoría más de la carta. */
+  /* La fila NO envuelve: si envolviera, el bloque de pestañas se lleva el
+     ancho completo y el botón cae solo a una tercera línea. Nowrap lo deja
+     anclado a la derecha, y son las pestañas las que se acomodan por dentro. */
+  .carta__tabs-fila {
+    display: flex; align-items: flex-start; gap: var(--sp-3);
+    margin-bottom: var(--sp-5); flex-wrap: nowrap;
+  }
+  .carta__tabs-fila .carta__tabs { flex: 1 1 auto; min-width: 0; margin-bottom: 0; }
+  /* Con espacio de sobra las pestañas se acomodan en dos filas en vez de
+     desplazarse: el botón de Gladiatore ocupa ~190px y, con la tira que se
+     desplaza, empujaba Pastelería y Bollería fuera de la vista sin ninguna
+     señal de que siguieran ahí. En el teléfono se mantiene el desplazamiento,
+     que es lo natural con el dedo. */
+  @media (min-width: 721px) {
+    .carta__tabs-fila .carta__tabs { flex-wrap: wrap; overflow-x: visible; }
+  }
+  .tab-gladiatore {
+    flex: none;
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: var(--font-body); font-weight: var(--fw-bold); font-size: 0.85rem;
+    padding: 8px 16px 8px 8px; border-radius: var(--r-pill);
+    background: #0A0908; color: #F3E7D0; text-decoration: none;
+    border: 1px solid rgba(232, 200, 138, .3);
+    white-space: nowrap;
+    transition: background var(--dur) var(--ease);
+  }
+  .tab-gladiatore img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+  .tab-gladiatore:hover { background: #C41E24; border-color: #C41E24; }
+  @media (max-width: 720px) {
+    /* En un teléfono no caben las dos cosas en la misma fila. */
+    .carta__tabs-fila { flex-direction: column; align-items: stretch; }
+    .tab-gladiatore { justify-content: center; }
+  }
+  .carta__tab {
+    flex-shrink: 0;
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: 0.875rem;
+    padding: 9px 18px;
+    border-radius: var(--r-pill);
+    border: var(--bw-strong) solid var(--border-strong);
+    background: transparent;
+    color: var(--lp-coffee-600);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--dur) var(--ease);
+  }
+  .carta__tab--active {
+    background: var(--lp-forest);
+    color: var(--lp-cream-50);
+    border-color: var(--lp-forest);
+  }
+  .carta__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--sp-5);
+  }
+  .menu-item {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-card);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+  }
+  .menu-item__body { min-width: 0; padding: var(--sp-4) var(--sp-5) var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; }
+  .menu-item__head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+  .menu-item__name {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--text-strong);
+    line-height: 1.05;
+    margin: 0;
+  }
+  .menu-item__tag {
+    font-family: var(--font-body);
+    font-weight: var(--fw-semibold);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: var(--r-pill);
+    background: var(--lp-gold-bg);
+    color: #8A5E13;
+  }
+  .menu-item__desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  /* El precio público se muestra en CLP hasta habilitar Lucky Points. */
+  .price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    flex-shrink: 0;
+    text-align: left;
+    margin-top: auto;
+    padding-top: var(--sp-2);
+  }
+  .price__clp {
+    font-family: var(--font-body);
+    font-weight: var(--fw-bold);
+    font-size: 1.15rem;
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+  .price__points {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-body);
+    font-weight: var(--fw-bold);
+    font-size: 0.75rem;
+    color: #8A5E13;
+    background: var(--lp-gold-bg);
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+
+  /* --- Tienda ------------------------------------------------------------ */
+  .card-size { display: flex; gap: 6px; margin: 0 0 var(--sp-3); }
+  .card-size input { position: absolute; opacity: 0; pointer-events: none; }
+  .card-size label { padding: 4px 12px; border-radius: var(--r-pill); border: 1.5px solid var(--border-strong);
+    background: var(--surface-card); font-size: 0.78rem; font-weight: var(--fw-semibold); color: var(--text-body);
+    cursor: pointer; transition: all var(--dur-fast) var(--ease-out); }
+  .card-size label:hover { border-color: var(--accent); }
+  .card-size input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--text-on-dark); }
+  .shop__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--sp-5);
+  }
+  a.product { text-decoration: none; color: inherit; }
+  .product {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-card);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+  }
+  .product:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .product__media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 3;
+    padding: var(--sp-3);
+    overflow: hidden;
+    background: var(--surface-sand);
+    border-bottom: var(--bw) solid var(--border);
+  }
+  .product__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .product__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-5);
+    flex: 1;
+  }
+  .product__name { font-family: var(--font-display); font-size: 1.35rem; color: var(--text-strong); margin: 0; line-height: 1.05; }
+  .product__desc { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+  .product__foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+  .price--inline { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: var(--sp-2) var(--sp-3); min-width: 0; }
+
+  /* --- Fidelización ------------------------------------------------------ */
+  .loyalty { background: var(--surface-raised); }
+  .loyalty__rule {
+    background: var(--lp-forest);
+    color: var(--lp-cream-50);
+    border-radius: var(--r-xl);
+    padding: var(--sp-7) var(--sp-6);
+    text-align: center;
+    margin-bottom: var(--sp-6);
+  }
+  .loyalty__rule-eyebrow { color: var(--lp-gold-soft); }
+  .loyalty__rule-big {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    color: var(--lp-cream-50);
+    margin: var(--sp-2) 0;
+  }
+  .loyalty__rule-text { color: rgba(252, 248, 241, 0.82); max-width: 46ch; margin-inline: auto; }
+  .loyalty__steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--sp-4);
+  }
+  .step {
+    background: var(--surface-card);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--sp-5);
+  }
+  .step__num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--lp-gold-bg);
+    color: #8A5E13;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    margin-bottom: var(--sp-3);
+  }
+  .step__title { font-family: var(--font-display); font-size: 1.4rem; margin: 0 0 6px; }
+  .step__text { font-size: 0.875rem; color: var(--text-muted); margin: 0; }
+
+  .loyalty__buy {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sp-6);
+    margin-top: var(--sp-7);
+  }
+  .points-packs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--sp-3);
+  }
+  .points-pack {
+    position: relative;
+    background: var(--surface-card);
+    border: var(--bw) solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    text-align: center;
+  }
+  .points-pack--popular { border-color: var(--lp-gold); }
+  .points-pack__badge {
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--lp-gold);
+    color: var(--lp-espresso);
+    font-family: var(--font-body);
+    font-weight: var(--fw-bold);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    white-space: nowrap;
+  }
+  .points-pack__pts { font-family: var(--font-display); font-size: 1.15rem; color: var(--text-strong); }
+  .points-pack__price { font-family: var(--font-body); font-weight: var(--fw-semibold); font-size: 0.9rem; color: var(--text-muted); }
+
+  /* --- Footer ------------------------------------------------------------ */
+  .footer { background: var(--lp-espresso); color: var(--text-on-dark); margin-top: var(--sp-9); }
+  .footer__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--sp-6);
+    padding-block: var(--sp-8) var(--sp-6);
+  }
+  .footer__brand-name { font-family: var(--font-display); font-size: 1.6rem; line-height: 0.95; }
+  .footer__text { color: var(--text-on-dark-mut); font-size: 0.85rem; margin-top: var(--sp-3); max-width: 28ch; }
+  .footer__title {
+    color: var(--lp-gold-soft);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: var(--sp-3);
+  }
+  .footer__list { list-style: none; padding: 0; margin: 0; }
+  .footer__list li { margin-bottom: var(--sp-2); }
+  .footer__link { color: var(--text-on-dark-mut); font-size: 0.875rem; text-decoration: none; }
+  .footer__link:hover { color: var(--lp-cream-50); }
+  .footer__social { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); }
+  .footer__social a {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: var(--bw) solid rgba(255,255,255,0.18);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--lp-cream-50);
+    font-family: var(--font-body);
+    font-weight: var(--fw-bold);
+    font-size: 0.8rem;
+    text-decoration: none;
+    transition: background var(--dur) var(--ease);
+  }
+  .footer__social a:hover { background: rgba(255,255,255,0.12); }
+  .footer__dev { display: inline-block; margin-top: 6px; font-size: 0.78rem; }
+  .footer__dev strong { color: var(--text-on-dark); font-weight: var(--fw-semibold); }
+  .footer__dev a { color: var(--text-on-dark); text-decoration: underline; text-underline-offset: 2px; }
+  .footer__dev a:hover { color: var(--lp-gold-soft); }
+  .footer__bottom {
+    border-top: var(--bw) solid rgba(255,255,255,0.1);
+    padding: var(--sp-4) var(--gutter);
+    text-align: center;
+    color: var(--text-on-dark-mut);
+    font-size: 0.75rem;
+  }
+
+  /* --- Mascotas decorativas (Lucky & Point) ------------------------------- */
+  .mascot { position: absolute; pointer-events: none; filter: drop-shadow(0 8px 16px rgba(42,28,18,0.25)); z-index: 2; width: 100px; height: auto; object-fit: contain; }
+  /* Las mascotas van rotadas y absolutas: al girar, la esquina del rectángulo
+     se sale del contenedor y aparecía una barra de scroll horizontal de 2 px
+     en toda la página. Se recorta en la sección, no en <body>: recortar el
+     body rompería el `position: sticky` del header. */
+  .section, .carta, .hero { overflow-x: clip; }
+  .mascot--hero { right: clamp(12px, 4vw, 48px); bottom: -14px; z-index: 3; width: clamp(72px, 12vw, 110px); }
+  .mascot--about { top: -20px; right: -14px; z-index: 3; width: clamp(58px, 10vw, 78px); }
+  .mascot--carta { top: -22px; right: -8px; left: auto; transform: rotate(8deg); width: clamp(48px, 8vw, 60px); }
+  .mascot--puntos { right: 12px; bottom: -14px; width: clamp(60px, 10vw, 80px); }
+  .mascot--tienda { top: -12px; right: 4px; transform: rotate(9deg); width: clamp(48px, 8vw, 60px); }
+  .mascot--talleres { top: -14px; right: 6px; transform: rotate(-7deg); width: clamp(48px, 8vw, 62px); }
+  .mascot--mural { top: -24px; left: 6px; transform: rotate(-6deg); width: clamp(48px, 8vw, 64px); }
+  .mascot--registro { top: -26px; right: 8px; transform: rotate(7deg); width: clamp(48px, 8vw, 60px); }
+
+  /* --- Intro: granos de café cayendo (una vez, al cargar) --------------- */
+  .beans-intro { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+  .bean { position: absolute; top: -5vh; width: 14px; height: 20px; background: linear-gradient(155deg, var(--lp-coffee-500), var(--lp-espresso)); border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; opacity: 0; animation-name: beanFall; animation-timing-function: cubic-bezier(.55,.05,.65,.95); animation-fill-mode: forwards; will-change: transform, opacity; }
+  .bean::after { content: ""; position: absolute; left: 50%; top: 12%; bottom: 12%; width: 1px; background: rgba(252,248,241,.4); transform: translateX(-50%) rotate(10deg); }
+  @keyframes beanFall { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 8% { opacity: .95; } 88% { opacity: .95; } 100% { opacity: 0; transform: translateY(112vh) rotate(360deg); } }
+  @keyframes beanFallRev { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 8% { opacity: .95; } 88% { opacity: .95; } 100% { opacity: 0; transform: translateY(112vh) rotate(-360deg); } }
+  @media (prefers-reduced-motion: reduce) { .beans-intro { display: none; } }
+
+  .header__brand-logo { height: clamp(32px, 5vw, 44px); width: auto; object-fit: contain; border-radius: var(--radius-sm); }
+  .footer__logo { height: 76px; width: auto; object-fit: contain; margin-bottom: var(--sp-2); border-radius: var(--radius-sm); cursor: pointer; }
+
+  /* --- Hero: foto de fondo real ------------------------------------------- */
+  .hero__media { position: absolute; inset: 0; z-index: 0; }
+  .hero__scrim { position: absolute; inset: 0; z-index: 1; background: linear-gradient(150deg, rgba(42,28,18,0.35), rgba(42,28,18,0.82)); }
+  .hero__inner { position: relative; z-index: 2; }
+  .hero__btn--ghost { color: var(--lp-cream-50); border-color: rgba(252,248,241,0.45); }
+
+  /* --- Ícono del filtro "Café" (logo) -------------------------------------- */
+  .carta__tab { display: inline-flex; align-items: center; gap: 6px; }
+  .carta__tab-icon { width: 18px; height: 18px; border-radius: 50%; overflow: hidden; flex-shrink: 0; }
+  .carta__heading { position: relative; display: inline-block; padding-right: clamp(56px, 9vw, 72px); }
+
+  /* --- Ubicación: mapa compacto -------------------------------------------- */
+  .map-compact { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; background: var(--surface-card); border: var(--bw) solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .map-compact__info { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); justify-content: center; }
+  .map-compact__title { font-family: var(--font-display); font-size: 1.4rem; margin: 0; color: var(--text-strong); }
+  .map-compact__meta { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
+  .map-compact__rating { color: var(--lp-gold); font-weight: var(--fw-bold); }
+  .map-compact__rating-count { color: var(--text-muted); font-weight: var(--fw-regular); }
+  .map-compact__frame { display: block; position: relative; aspect-ratio: 16 / 9; background: var(--surface-sand); }
+  .map-compact__frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
+
+  /* --- Próximamente --------------------------------------------------------- */
+  .lead-form { margin-top: var(--sp-6); max-width: 480px; }
+  .lead-form__label { display: block; font-size: 0.85rem; color: var(--text-body); margin-bottom: var(--sp-2); font-weight: var(--fw-medium); }
+  .lead-form__row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .lead-form__input { flex: 1; min-width: 180px; padding: 12px 16px; border-radius: var(--r-md); border: var(--bw-strong) solid var(--border-strong); font-family: var(--font-body); font-size: 0.9rem; background: var(--surface-card); }
+  .lead-form__input:focus { outline: none; border-color: var(--lp-forest); box-shadow: var(--shadow-focus); }
+  .lead-form__success { margin-top: var(--sp-3); color: var(--lp-forest); font-weight: var(--fw-semibold); font-size: 0.9rem; }
+
+  /* --- Maquetas: nota de demo ----------------------------------------------- */
+  .demo-note { display: inline-block; background: var(--surface-sand); color: var(--text-muted); font-size: 0.7rem; font-weight: var(--fw-semibold); letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 10px; border-radius: var(--r-pill); margin-bottom: var(--sp-3); }
+
+  /* --- Mural de deseos ------------------------------------------------------- */
+  .mural__form { display: flex; flex-direction: column; gap: var(--sp-3); max-width: 420px; margin: var(--sp-5) 0 var(--sp-6); }
+  .mural__textarea { padding: 12px 16px; border-radius: var(--r-md); border: var(--bw-strong) solid var(--border-strong); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; min-height: 80px; background: var(--surface-card); }
+  .mural__textarea:focus { outline: none; border-color: var(--lp-forest); box-shadow: var(--shadow-focus); }
+  .mural__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-4); }
+  .wish { background: var(--lp-gold-bg); border-radius: var(--r-md); padding: var(--sp-4); box-shadow: var(--shadow-xs); display: flex; flex-direction: column; gap: var(--sp-2); }
+  .wish__msg { font-size: 0.9rem; color: var(--lp-espresso); margin: 0; }
+  .wish__meta { font-size: 0.75rem; color: #8A5E13; font-weight: var(--fw-semibold); }
+
+  /* --- Calendario de actividades ---------------------------------------------- */
+  .calendar__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--sp-4); }
+  .event { background: var(--surface-card); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-5); box-shadow: var(--shadow-xs); display: flex; flex-direction: column; gap: var(--sp-2); }
+  .event__date { font-family: var(--font-display); font-size: 1.1rem; color: var(--lp-forest); }
+  .event__title { font-family: var(--font-body); font-weight: var(--fw-bold); font-size: 1rem; color: var(--text-strong); margin: 0; }
+  .event__text { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+  .event__form { display: none; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-2); }
+  .event__form--open { display: flex; }
+  .event__form input { padding: 10px 14px; border-radius: var(--r-sm); border: var(--bw-strong) solid var(--border-strong); font-family: var(--font-body); font-size: 0.85rem; }
+  .event__success { font-size: 0.8rem; color: var(--lp-forest); font-weight: var(--fw-semibold); margin: 0; }
+
+  /* --- Registro (maqueta) ------------------------------------------------------ */
+  .register__wrap { display: flex; justify-content: center; }
+  .register__card { max-width: 440px; width: 100%; background: var(--surface-card); border: var(--bw) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); padding: var(--sp-6); }
+  .register__form { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-5); }
+  .register__hint { font-size: 0.75rem; color: var(--text-muted); margin: 2px 0 var(--sp-2); }
+  .register__hint--error { color: var(--lp-danger); }
+  .register__hint--ok { color: var(--lp-forest); }
+  .register__success { margin-top: var(--sp-3); color: var(--lp-forest); font-weight: var(--fw-semibold); font-size: 0.9rem; }
+
+  /* =======================================================================
+     Responsive — Mobile First. A partir de 768px se expande el layout.
+     ======================================================================= */
+  @media (max-width: 767px) {
+    .nav__link { padding: 12px var(--sp-3); }
+    .nav__points { margin-top: var(--sp-2); justify-content: center; }
+    .mascot--hero { width: 74px; bottom: -8px; right: 10px; }
+    .mascot--puntos { width: 58px; right: 8px; bottom: -10px; }
+    .mascot--about, .mascot--carta, .mascot--tienda, .mascot--talleres, .mascot--mural, .mascot--registro { width: 46px; }
+  }
+
+  @media (min-width: 768px) {
+    .about__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr); }
+    .about__stats { grid-template-columns: repeat(4, 1fr); }
+    .carta__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-7); }
+    .loyalty__buy { grid-template-columns: repeat(2, 1fr); }
+    .map-compact { grid-template-columns: 1fr 1fr; }
+    .map-compact__frame { aspect-ratio: auto; }
+  }
+
+  /* --- Volver arriba ------------------------------------------------------ */
+  .to-top {
+    position: fixed;
+    right: var(--sp-4);
+    bottom: calc(var(--sp-4) + env(safe-area-inset-bottom, 0px));
+    z-index: 60;
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%; cursor: pointer;
+    background: var(--accent); color: var(--text-on-dark);
+    box-shadow: 0 0 0 2px var(--lp-cream-50), var(--shadow-md);
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease),
+                visibility var(--dur) var(--ease), background var(--dur-fast) var(--ease);
+  }
+  .to-top--visible { opacity: 1; visibility: visible; transform: none; }
+  .to-top:hover { background: var(--accent-hover); }
+  .to-top:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--lp-cream-50), var(--shadow-focus); }
+  .to-top__icon { width: 20px; height: 20px; }
+  @media (prefers-reduced-motion: reduce) { .to-top { transition: none; } }
+  @media (min-width: 768px) {
+    .to-top { right: var(--sp-5); bottom: var(--sp-5); width: 52px; height: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================ HEADER ============================ -->
+<header class="header">
+  <div class="container header__inner">
+    <a class="header__brand" href="#inicio" aria-label="Lucky Point Coffee — Inicio">
+      <img class="header__brand-logo" id="headerLogo" src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="" />
+      <span class="header__brand-name">Lucky Point</span>
+      <span class="header__brand-tag">COFFEE</span>
+    </a>
+
+    {% set inicio = '' %}
+    {% include '_nav.html' %}
+
+    {% include '_carrito-boton.html' %}
+    <button class="header__toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+<div class="beans-intro" id="beansIntro" aria-hidden="true"></div>
+  <!-- ============================ HERO ============================ -->
+  <section class="hero" id="inicio">
+    <div class="hero__media"><img src="{{ url_for('static', filename='img/hero-lucky-point.jpg') }}" alt="Letrero de Lucky Point en O'Higgins #969, Osorno" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%" /></div>
+    <div class="hero__scrim"></div>
+    <div class="container">
+      <div class="hero__inner">
+      <span class="hero__eyebrow">Café de especialidad · Osorno</span>
+      <h1 class="hero__title">Tu punto de la suerte para un buen café</h1>
+      <p class="hero__text">Tostamos en pequeños lotes y servimos cada taza con cuidado. Y cada compra te acerca a tu próximo café gratis con Lucky Points.</p>
+      <div class="hero__actions">
+        <a class="btn btn--primary btn--lg" href="#carta">Menú</a>
+        <a class="btn btn--outline btn--lg hero__btn--ghost" href="#tienda">Tienda</a>
+        <a class="btn btn--gold btn--lg" href="#puntos"><span class="star-token">★</span> Compra tus Lucky Points</a>
+      </div>
+      <div class="hero__banner">
+        <span class="hero__banner-star">★</span>
+        <span class="hero__banner-text"><strong>Programa Lucky Points</strong>recarga tus puntos · canjea por café</span>
+      </div>
+      </div>
+    </div>
+    <img class="mascot mascot--hero" src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}" alt="" aria-hidden="true" />
+  </section>
+
+  <!-- ============================ NOSOTROS ============================ -->
+  <section class="section" id="nosotros">
+    <div class="container about__grid">
+      <div>
+        <span class="section__eyebrow">Quiénes somos</span>
+        <h2 class="section__title">Café con raíces en el sur</h2>
+        <p class="about__lead">Esa misma dedicación por cuidarte es la que nos llevó a obsesionarnos con la excelencia en cada taza que servimos.</p>
+        <p>No dejamos nada al azar; a través de nuestra propia tostaduría, Lucky Point Coffee Roasters, seleccionamos y tostamos nuestros granos para asegurar la máxima calidad. Nuestra verdadera pasión se encuentra en el arte del café filtrado y en nuestra innovadora línea de coctelería de autor sin alcohol (mocktails), diseñada para sorprender tu paladar en cada visita.</p>
+        <p>Te invitamos a tomar asiento, relajarte y dejarnos hacer lo que mejor sabemos hacer. Ven a vivir la experiencia Lucky Point.</p>
+        <div class="about__stats">
+          <div class="stat"><div class="stat__num">2024</div><div class="stat__num2">Año de fundación</div></div>
+          <div class="stat"><div class="stat__num">+30</div><div class="stat__num2">Bebidas en carta</div></div>
+          <div class="stat"><div class="stat__num">+6</div><div class="stat__num2">Cafés en barra</div></div>
+        </div>
+      </div>
+      <div class="about__media" style="overflow:visible">
+        <div style="position:absolute;inset:0;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lg)">
+          <img class="about__photo" src="{{ url_for('static', filename='img/equipo-lucky-point.jpg') }}" alt="Equipo de Lucky Point Coffee" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+        </div>
+        <img class="mascot mascot--about" src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+      </div>
+      <div class="about__media-actions">
+        <a class="btn btn--gold btn--sm" href="#carta">Ver la carta</a>
+        <a class="btn btn--dark btn--sm" href="#tienda">Ir a la tienda</a>
+        <a class="btn btn--outline btn--sm" href="#puntos">Compra tus Lucky Points</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ PREMIOS ============================ -->
+  <section class="section awards" id="premios">
+    <div class="container">
+      <span class="section__eyebrow">Reconocimientos</span>
+      <h2 class="section__title">Premios y menciones</h2>
+      <div class="awards__grid">
+        <a class="awards__item" href="https://www.thebestcoffeeshopschile.cl/the-best/lucky-point-coffee/" target="_blank" rel="noopener">
+          <img class="awards__badge" src="https://www.thebestcoffeeshopschile.cl/wp-content/uploads/2026/03/1241534.svg" alt="The Best Coffee Shops Chile" />
+          <span class="awards__label">The Best Coffee Shops Chile 2025</span>
+        </a>
+        <div class="awards__item awards__item--pending">
+          <div id="circle-r-ribbon" onclick="if(event.target.nodeName.toLowerCase() != 'a') {window.open(this.querySelector('.r-ribbon_title').href);return 0;}">
+            <div class="r-ribbon_ahead">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="220px" height="220px" viewBox="0 0 160 160">
+                <defs><path id="heading-arc" d="M 30 80 a 50 50 0 1 1 100 0"></path></defs>
+                <text class="r-ribbon_ahead-heading f12" fill="#000" text-anchor="middle">
+                  <textPath startOffset="50%" xlink:href="#heading-arc">Best coffeehouse</textPath>
+                </text>
+              </svg>
+            </div>
+            <p class="r-ribbon_year">2026</p>
+            <a href="https://restaurantguru.com/Lucky-Point-Coffee-Osorno" class="r-ribbon_title f14" target="_blank" rel="noopener">Lucky Point Coffee</a>
+            <div class="r-ribbon_ahead r-ribbon_ahead-bottom">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="165px" height="165px" viewBox="0 0 120 120">
+                <defs><path id="subheading-arc" d="M 12 60 a 48 48 0 0 0 96 0"></path></defs>
+                <text class="r-ribbon_ahead-subh" fill="#000" text-anchor="middle">
+                  <textPath startOffset="50%" xlink:href="#subheading-arc"><a href="https://restaurantguru.com" target="_blank" rel="noopener">Restaurant Guru</a></textPath>
+                </text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CARTA ============================ -->
+  <section class="carta section" id="carta">
+    <div class="container">
+      <div class="carta__heading">
+        <span class="section__eyebrow">Carta digital</span>
+        <h2 class="section__title">Nuestra carta</h2>
+        <img class="mascot mascot--carta" src="{{ url_for('static', filename='img/mascotas/lucky-tomando.png') }}" alt="" aria-hidden="true" />
+      </div>
+      <p style="color: var(--text-muted); max-width: 52ch; margin-top: calc(var(--sp-5) * -1 + var(--sp-2));">Todos los precios están expresados en pesos chilenos.</p>
+
+      {# Las pestañas son una tira que se desplaza; el botón de Gladiatore va
+         FUERA de ella para que no se pierda al hacer scroll horizontal. #}
+      <div class="carta__tabs-fila">
+        <div class="carta__tabs" id="cartaTabs" role="tablist" aria-label="Categorías de la carta"></div>
+        <a class="tab-gladiatore" href="{{ url_for('gladiatore') }}">
+          <img src="{{ url_for('static', filename='img/gladiatore/logo.jpg') }}" alt="" aria-hidden="true" />
+          Pizzas y Pastas
+        </a>
+      </div>
+      <div class="carta__grid" id="cartaGrid"></div>
+
+      <!-- ===================== PUENTE A GLADIATORE =====================
+           Los colores van en línea y no en styles.css a propósito: son de
+           otra marca. Meterlos en el sistema de diseño de Lucky Point sería
+           empezar a mezclar dos identidades que conviene tener separadas. -->
+      <aside class="gladiatore-puente">
+        <img class="gladiatore-puente__logo"
+             src="{{ url_for('static', filename='img/gladiatore/logo.jpg') }}"
+             alt="" aria-hidden="true" />
+        <div class="gladiatore-puente__texto">
+          <p class="gladiatore-puente__eyebrow">También nuestro</p>
+          <p class="gladiatore-puente__titulo">Gladiatore · Napoli Style Pizza</p>
+          <p class="gladiatore-puente__bajada">
+            Auténtica pizza napolitana, recién salida del horno.
+          </p>
+        </div>
+        <a class="gladiatore-puente__btn" href="{{ url_for('gladiatore') }}">
+          Ver la carta de Gladiatore
+        </a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================ TIENDA ============================ -->
+  <section class="section" id="tienda" style="position: relative;">
+    <div class="container">
+      <span class="section__eyebrow">Tienda online</span>
+      <h2 class="section__title">Llévate Lucky Point a casa</h2>
+      <img class="mascot mascot--tienda" src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+
+      {#
+        Las tarjetas salen del catálogo de Shopify (config/shopify.py). Precio
+        y stock incluidos: acá NO se escribe ningún precio a mano. Antes sí, y
+        eso significaba que el mismo número vivía en este archivo, en
+        tienda-productos.js y en Shopify — tres copias que se separaban a la
+        primera vez que alguien subía un precio y olvidaba el código.
+
+        Si Shopify no contesta, `tienda` viene None y se pintan las tarjetas
+        del bloque de abajo, que son una foto del catálogo escrita a mano.
+      #}
+      {#
+        Pastillas de categoría. La categoría de cada producto la pone Shopify
+        (campo «Tipo de producto»); config/shopify.py la deduce cuando está en
+        blanco. El orden de las pastillas es el orden en que los productos
+        vienen en la colección, igual que las tarjetas.
+
+        Con una sola categoría no se pintan: una pestaña única no filtra nada
+        y solo agrega ruido. Tampoco se pintan en el camino del respaldo
+        (Shopify caído), donde las tarjetas están escritas a mano y no tienen
+        categoría que ofrecer.
+      #}
+      {% if tienda %}
+      {% set categorias = tienda | map(attribute='categoria') | unique | list %}
+      {% if categorias | length > 1 %}
+      <div class="shop__tabs" id="shopTabs" role="group" aria-label="Filtrar la tienda por categoría">
+        <button class="shop__tab shop__tab--active" type="button" data-cat="" aria-pressed="true">Todos</button>
+        {% for c in categorias %}
+        <button class="shop__tab" type="button" data-cat="{{ c }}" aria-pressed="false">{{ c }}</button>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <div class="shop__grid" id="shopGrid">
+        {% if tienda %}
+          {#
+            Las tarjetas van AGRUPADAS por categoría: primero todos los cafés,
+            después los accesorios. Mezclados se leían como un montón: dos
+            cafés, unos filtros, más café. Dentro de cada grupo manda el orden
+            de la colección de Shopify, así que reordenar ahí se sigue notando
+            acá; lo único que el sitio decide es que un grupo no se parta.
+
+            El orden de los grupos es el mismo de las pastillas —la categoría
+            del primer producto de la colección va primero—, así que se cambia
+            desde Shopify: sube un café al principio y el café encabeza.
+          #}
+          {% for c in categorias %}
+          {% for p in tienda | selectattr('categoria', 'equalto', c) %}
+          <article class="product product--interactive{{ ' product--agotado' if p.agotado }}"
+                   data-categoria="{{ p.categoria }}">
+            {% if p.imagen %}
+            <div class="product__media">
+              <img class="product__image" src="{{ p.imagen }}"
+                   alt="{{ p.imagen_alt or p.name }}" loading="lazy" decoding="async" />
+            </div>
+            {% endif %}
+            <div class="product__body">
+              <h3 class="product__name">
+                <a class="product__link" href="{{ url_for('producto') }}?id={{ p.id }}">{{ p.name }}</a>
+              </h3>
+              {# La descripción de Shopify puede ser larga; en la tarjeta se
+                 corta y la ficha la muestra entera. #}
+              <p class="product__desc">{{ p.desc | truncate(95, True, '…') }}</p>
+              <div class="product__foot">
+                <div class="price price--inline">
+                  <span class="price__clp">
+                    {{ 'Desde ' if p.type != 'acc' }}${{ '{:,}'.format(p.desde_clp).replace(',', '.') }} CLP
+                  </span>
+                </div>
+                {% if p.agotado %}
+                {# Se muestra igual, marcado. Esconderlo haría creer que se
+                   dejó de vender (decisión de Seba). #}
+                <span class="product__agotado">Agotado por ahora</span>
+                {% else %}
+                <button class="btn btn--primary btn--block product__add" type="button"
+                        data-lp-rapido="{{ p.id }}">
+                  {{ 'Agregar al carrito' if p.type == 'acc' else 'Elegir y agregar' }}
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+          {% endfor %}
+        {% else %}
+        <article class="product product--interactive">
+          <div class="product__body">
+            <h3 class="product__name">
+              <a class="product__link" href="{{ url_for('producto') }}?id=brasil">Brasil Peaberry</a>
+            </h3>
+            <p class="product__desc">Notas dulces y achocolatadas, cuerpo sedoso.</p>
+            <div class="product__foot">
+              <div class="price price--inline">
+                <span class="price__clp">Desde $12.990 CLP</span>
+              </div>
+              <button class="btn btn--primary btn--block product__add" type="button" data-lp-rapido="brasil">Elegir y agregar</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="product product--interactive">
+          <div class="product__body">
+            <h3 class="product__name">
+              <a class="product__link" href="{{ url_for('producto') }}?id=colombia">Colombia Huila</a>
+            </h3>
+            <p class="product__desc">Cítrico y equilibrado, retrogusto a chocolate.</p>
+            <div class="product__foot">
+              <div class="price price--inline">
+                <span class="price__clp">Desde $12.990 CLP</span>
+              </div>
+              <button class="btn btn--primary btn--block product__add" type="button" data-lp-rapido="colombia">Elegir y agregar</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="product product--interactive">
+          <div class="product__body">
+            <h3 class="product__name">
+              <a class="product__link" href="{{ url_for('producto') }}?id=filtros-01">Filtros V60 · Tamaño 01</a>
+            </h3>
+            <p class="product__desc">100 filtros de papel para tu V60, tamaño 01.</p>
+            <div class="product__foot">
+              <div class="price price--inline">
+                <span class="price__clp">$6.990 CLP</span>
+              </div>
+              <button class="btn btn--primary btn--block product__add" type="button" data-lp-rapido="filtros-01">Agregar al carrito</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="product product--interactive">
+          <div class="product__body">
+            <h3 class="product__name">
+              <a class="product__link" href="{{ url_for('producto') }}?id=filtros-02">Filtros V60 · Tamaño 02</a>
+            </h3>
+            <p class="product__desc">100 filtros de papel para tu V60, tamaño 02.</p>
+            <div class="product__foot">
+              <div class="price price--inline">
+                <span class="price__clp">$7.990 CLP</span>
+              </div>
+              <button class="btn btn--primary btn--block product__add" type="button" data-lp-rapido="filtros-02">Agregar al carrito</button>
+            </div>
+          </div>
+        </article>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ TALLERES ============================ -->
+  <!-- La agenda se pinta en el servidor para el primer render y el HTML que
+       ve Google; agenda.js la refresca contra /api/v1/agenda porque los
+       cupos cambian cada vez que alguien se inscribe. -->
+  <section class="section" id="talleres" style="position: relative;">
+    <div class="container">
+      <span class="section__eyebrow">Agenda</span>
+      <h2 class="section__title">Talleres y catas</h2>
+      <img class="mascot mascot--talleres" src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}" alt="" aria-hidden="true" />
+
+      <div class="agenda agenda--landing" data-agenda {% if not agenda %}hidden{% endif %}>
+        {% for a in agenda %}
+        <a class="evento" href="{{ a.url }}">
+          {% if a.imagen %}
+          <img class="evento__afiche" src="{{ a.imagen }}" alt="Afiche de {{ a.nombre }}" loading="lazy" onerror="this.hidden=true" />
+          {% endif %}
+          <div class="evento__contenido">
+            <div class="evento__fecha">
+              <div class="evento__dia">{{ a.dia }}</div>
+              <div class="evento__mes">{{ a.mes }}</div>
+            </div>
+            <div class="evento__cuerpo">
+              <h3 class="evento__nombre">{{ a.nombre }}</h3>
+              <p class="evento__dato">{{ a.cuando }}</p>
+              {% if a.lugar %}<p class="evento__dato">{{ a.lugar }}</p>{% endif %}
+              <div class="evento__pie">
+                <span class="pastilla pastilla--precio">{{ a.precio_fmt }}</span>
+                {% if a.agotada %}
+                  <span class="pastilla pastilla--agotada">Sin cupos</span>
+                {% elif a.libres <= 3 %}
+                  <span class="pastilla pastilla--pocos">Quedan {{ a.libres }} cupo{{ 's' if a.libres != 1 }}</span>
+                {% else %}
+                  <span class="pastilla pastilla--libre">{{ a.libres }} cupos</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="sin-nada" data-agenda-vacio {% if agenda %}hidden{% endif %}>
+        <img src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+        <p style="margin:0 0 var(--sp-2)"><b>Todavía no hay actividades publicadas.</b></p>
+        <p style="margin:0;font-size:.88rem">Estamos preparando las próximas catas y talleres. Vuelve pronto.</p>
+      </div>
+
+      <p class="agenda__pie" data-agenda-pie {% if not agenda %}hidden{% endif %}>
+        <a class="btn btn--outline" href="{{ url_for('actividades') }}">Ver toda la agenda</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ MURO DE DESEOS ============================ -->
+  <!-- Mismo trato que la agenda: el servidor pinta los deseos aprobados para
+       el primer render y el HTML que ve Google, y muro.js los refresca contra
+       /api/v1/muro. Acá el refresco pesa más todavía, porque el muro está
+       moderado: un mensaje que se rechaza tiene que salir de la portada sin
+       esperar a que alguien vuelva a desplegar el sitio. -->
+  <section class="section" id="muro">
+    <div class="container">
+      <span class="section__eyebrow">La gente dice</span>
+      <h2 class="section__title">Muro de deseos</h2>
+      <p style="color:var(--text-muted);max-width:56ch;margin:0 0 var(--sp-6)">
+        Cuéntanos qué te gustaría encontrar la próxima vez que pases.
+      </p>
+
+      {% with volver = 'landing' %}
+        {% include '_muro-form.html' %}
+      {% endwith %}
+
+      {#
+        El carrusel son TRES cajas anidadas y el orden importa:
+
+          [data-muro-carrusel]  la caja entera. Es la que se esconde cuando no
+                                hay nada que mostrar.
+          [data-muro]           la pista que se desplaza. muro.js le reemplaza
+                                el innerHTML al refrescar, así que acá adentro
+                                NO puede ir nada que deba sobrevivir.
+          [data-muro-controles] las flechas. Van FUERA de la pista justamente
+                                por lo anterior: dentro, el primer refresco se
+                                las llevaría.
+
+        Sin JavaScript esto sigue siendo un carrusel: se arrastra con el dedo
+        y se mueve con las flechas del teclado. Los botones son un extra.
+      #}
+      <div class="carrusel" data-muro-carrusel {% if not muro %}hidden{% endif %}>
+        <div class="carrusel__controles" data-muro-controles hidden>
+          <button class="carrusel__btn" type="button" data-muro-ir="-1"
+                  aria-label="Ver los deseos anteriores" aria-controls="muroPista">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button class="carrusel__btn" type="button" data-muro-ir="1"
+                  aria-label="Ver los deseos siguientes" aria-controls="muroPista">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+
+        {# tabindex="0" para que se pueda recorrer con el teclado: un div con
+           scroll no recibe foco solo, y sin foco las flechas no lo mueven. #}
+        <div class="muro muro--carrusel" id="muroPista" data-muro
+             data-muro-limite="{{ muro_limite }}"
+             tabindex="0" role="region" aria-label="Deseos que ha dejado la gente">
+          {% for m in muro %}
+          <article class="deseo">
+            <p class="deseo__texto">{{ m.mensaje }}</p>
+            <div class="deseo__pie">
+              <span class="deseo__autor">{{ m.nickname }}</span>
+              <span class="deseo__fecha">{{ m.cuando }}</span>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="muro__vacio" data-muro-vacio {% if muro %}hidden{% endif %}>
+        <img src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+        <p style="margin:0 0 var(--sp-2)"><b>El muro está esperando el primero.</b></p>
+        <p style="margin:0;font-size:.88rem">Deja tu deseo y lo publicamos apenas lo revisemos.</p>
+      </div>
+
+      <p class="muro__pie" data-muro-pie {% if not muro %}hidden{% endif %}>
+        <a class="btn btn--outline" href="{{ url_for('muro') }}">Ver todo el muro</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ FIDELIZACIÓN ============================ -->
+  <section class="loyalty section" id="puntos">
+    <div class="container">
+      <div class="loyalty__rule" style="position: relative;">
+        <span class="demo-note">Próximamente</span>
+        <span class="section__eyebrow loyalty__rule-eyebrow">Compra tus Lucky Points</span>
+        <div class="loyalty__rule-big">Recarga tus Lucky Points</div>
+        <p class="loyalty__rule-text">Recarga tus Lucky Points por adelantado: mientras más recargas, más rinden gracias al bono por volumen. Sin tarjetas ni complicaciones, y no vencen.</p>
+        <img class="mascot mascot--puntos" src="{{ url_for('static', filename='img/mascotas/cheers.png') }}" alt="" aria-hidden="true" />
+      </div>
+
+      <div class="loyalty__steps">
+        <div class="step">
+          <div class="step__num">1</div>
+          <h3 class="step__title">Elige</h3>
+          <p class="step__text">Pide tus bebidas y productos favoritos en la cafetería o en la tienda online.</p>
+        </div>
+        <div class="step">
+          <div class="step__num">2</div>
+          <h3 class="step__title">Recarga</h3>
+          <p class="step__text">Recarga tus Lucky Points por adelantado y rinden más gracias al bono por volumen.</p>
+        </div>
+        <div class="step">
+          <div class="step__num">3</div>
+          <h3 class="step__title">Canjea</h3>
+          <p class="step__text">Usa tus puntos para descontar tus bebidas y productos favoritos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ UBICACIÓN ============================ -->
+  <section class="section" id="ubicacion">
+    <div class="container">
+      <span class="section__eyebrow">Visítanos</span>
+      <h2 class="section__title">Encuéntranos en Osorno</h2>
+      <div class="map-compact">
+        <div class="map-compact__info">
+          <h3 class="map-compact__title">Bernardo O'Higgins 969, Osorno</h3>
+          <div class="map-compact__meta">
+            <span class="map-compact__rating">★ 4,8 <span class="map-compact__rating-count">(135 reseñas de Google)</span></span>
+            <span class="map-compact__hours">Lun–Sáb · 8:30–20:00 · Dom · 9:30–14:00</span>
+          </div>
+          <a class="btn btn--dark btn--sm" href="https://www.google.com/maps/dir/?api=1&destination=Bernardo+O%27Higgins+969%2C+Osorno%2C+Chile" target="_blank" rel="noopener">Cómo llegar</a>
+        </div>
+        <a class="map-compact__frame" href="https://www.google.com/maps/search/?api=1&query=Bernardo+O%27Higgins+969+Osorno+Chile" target="_blank" rel="noopener" aria-label="Abrir ubicación en Google Maps">
+          <iframe src="https://www.google.com/maps?q=Bernardo+O%27Higgins+969,+Osorno,+Chile&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación Lucky Point Coffee"></iframe>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+  <div class="container footer__grid">
+    <div>
+      <img class="footer__logo" src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="" />
+      <div class="footer__brand-name">Lucky Point<br/>Coffee</div>
+      <p class="footer__text">Café de especialidad en el corazón de Osorno, Chile.</p>
+    </div>
+    <div>
+      <h4 class="footer__title">Explorar</h4>
+      <ul class="footer__list">
+        <li><a class="footer__link" href="#carta">Carta</a></li>
+        <li><a class="footer__link" href="#tienda">Tienda</a></li>
+        <li><a class="footer__link" href="#talleres">Talleres</a></li>
+        <li><a class="footer__link" href="#puntos">Puntos</a></li>
+        <li><a class="footer__link" href="#muro">Muro de deseos</a></li>
+        <li><a class="footer__link" href="#nosotros">Quiénes somos</a></li>
+        <li><a class="footer__link" href="#ubicacion">Ubicación</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="footer__title">Visítanos</h4>
+      <p class="footer__text" style="max-width: none;">
+        Bernardo O'Higgins 969, Osorno<br/>
+        Región de Los Lagos, Chile<br/>
+        Lun–Sáb · 8:30–20:00<br/>
+        Dom · 9:30–14:00
+      </p>
+    </div>
+    <div>
+      <h4 class="footer__title">Síguenos</h4>
+      <p class="footer__text" style="max-width: none;">contacto@luckypointcoffee.cl<br/>+56 9 2721 2760</p>
+      <div class="footer__social">
+        <a href="https://www.instagram.com/luckypointcoffee/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+        <a href="https://wa.me/56927212760" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.38 1.26 4.79L2 22l5.44-1.36a9.9 9.9 0 0 0 4.6 1.14h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.13-2.9-7-1.87-1.88-4.35-2.87-7.01-2.87Zm0 1.67c2.22 0 4.3.86 5.87 2.43a8.23 8.23 0 0 1 2.43 5.83c0 4.55-3.72 8.25-8.3 8.25a8.3 8.3 0 0 1-4.22-1.15l-.3-.18-3.23.81.86-3.14-.2-.32a8.2 8.2 0 0 1-1.27-4.4c0-4.56 3.72-8.13 8.36-8.13Zm-4.42 4.4c-.16 0-.42.06-.64.31s-.85.83-.85 2.02.87 2.35.99 2.51c.12.16 1.7 2.6 4.13 3.64 2.03.87 2.44.7 2.88.66.44-.04 1.42-.58 1.62-1.15.2-.56.2-1.04.14-1.15-.06-.1-.22-.16-.46-.28-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.4-1.33-1.64-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.32-.75-1.8-.2-.47-.4-.4-.54-.41-.14-.01-.3-.01-.46-.01Z"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer__bottom" id="footerCredit">© 2026 Lucky Point Coffee · Hecho con cariño en el sur de Chile<br /><span class="footer__dev">Sitio diseñado y programado por <a href="https://www.linkedin.com/in/sebapoba/" target="_blank" rel="noopener"><strong>Sr. Jengibre</strong></a>, desarrollador en Osorno.</span></div>
+</footer>
+
+<script>
+  /* ---- Cierra el menú móvil al navegar ---- */
+  (function () {
+    var nav = document.getElementById('nav');
+    var toggle = document.getElementById('navToggle');
+    nav.addEventListener('click', function (e) {
+      if (e.target.matches('a')) {
+        nav.classList.remove('nav--open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+
+  /* ---- Cuenta en el header ---- */
+  (function () {
+    window.__lpHeaderHandled = true;
+    if (typeof lpInitHeader === 'function') lpInitHeader();
+  })();
+
+  /* ---- Copia de respaldo de la carta ----
+     La carta real vive en la base de datos y se pide a /api/v1/menu.
+     Esto es solo el plan B para cuando la API no responda. ---- */
+  (function () {
+    var wrap = document.getElementById('beansIntro');
+    if (!wrap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var count = window.innerWidth < 640 ? 12 : 20;
+    var maxEnd = 0;
+    for (var i = 0; i < count; i++) {
+      var bean = document.createElement('span');
+      bean.className = 'bean';
+      var left = Math.random() * 100;
+      var size = 0.7 + Math.random() * 0.7;
+      var duration = 1.3 + Math.random() * 0.7;
+      var delay = Math.random() * 0.5;
+      var spin = Math.random() < 0.5 ? 1 : -1;
+      bean.style.left = left + 'vw';
+      bean.style.transform = 'scale(' + size.toFixed(2) + ')';
+      bean.style.animationDuration = duration + 's';
+      bean.style.animationDelay = delay + 's';
+      bean.style.setProperty('--spin', spin);
+      if (spin < 0) bean.style.animationName = 'beanFallRev';
+      wrap.appendChild(bean);
+      maxEnd = Math.max(maxEnd, duration + delay);
+    }
+    setTimeout(function () { wrap.remove(); }, (maxEnd + 0.3) * 1000);
+  })();
+
+  /* ---- Copia de respaldo de la carta ----
+     La carta real vive en la base de datos y se pide a /api/v1/menu.
+     Esto es solo el plan B para cuando la API no responda. ---- */
+  var MENU_RESPALDO = [
+    { id: 'cafe', label: 'Café', items: [
+      { name: 'Long Black', clp: 3200, desc: 'Espresso doble vertido sobre agua caliente.' },
+      { name: 'Espresso Doble', clp: 3000, desc: '36 g extraídos a 9 bar, alta concentración de sabores.' },
+      { name: 'Short Black', clp: 3200, desc: 'Espresso simple vertido sobre agua caliente.' },
+      { name: 'Filtrado', clp: 3800, desc: 'Vertido de agua sobre cama de café en filtro de papel.' },
+      { name: 'Latte', clp: 3800, desc: 'Espresso simple con leche texturizada y una sutil espuma.' },
+      { name: 'Capuccino', clp: 3800, desc: 'Espresso doble con leche y espuma en partes iguales.' },
+      { name: 'Flat White', clp: 3800, desc: 'Espresso doble con leche y espuma en partes iguales.' }
+    ]},
+    { id: 'dulces', label: 'Café dulces', items: [
+      { name: 'Mokka', clp: 4200, desc: 'Espresso doble emulsionado con chocolate, leche y espuma.' },
+      { name: 'Bombom', clp: 4200, desc: 'Espresso doble con leche condensada, leche y espuma.' },
+      { name: 'Vaniglia', clp: 4200, desc: 'Espresso doble con sirup de vainilla macerada y leche.' },
+      { name: 'Mokka Blanco', clp: 4200, desc: 'Espresso doble emulsionado con chocolate blanco y leche.' },
+      { name: 'Mokka Nutella', clp: 5500, tag: 'Favorito', desc: 'Espresso doble emulsionado con nutella y leche.' }
+    ]},
+    { id: 'choco', label: 'Chocolatozos', items: [
+      { name: 'Nutellatte', clp: 5500, desc: 'Mezcla de nutella y leche texturizada.' },
+      { name: 'Chocolate Blanco', clp: 5000, desc: 'Chocolate blanco, crema, leche condensada y leche.' },
+      { name: 'Chocolate Caliente', clp: 5000, desc: 'Chocolate de leche, crema, cacao amargo y leche.' }
+    ]},
+    { id: 'te', label: 'Té e infusiones', items: [
+      { name: 'Té Negro', clp: 3000, desc: 'Mezcla natural de té negro tradicional.' },
+      { name: 'Infusión Roibos', clp: 3000, desc: 'Infusión de hojas de rooibos.' },
+      { name: 'Té Chai', clp: 3000, desc: 'Té con canela, cardamomo, jengibre y clavo. Leche +500.' },
+      { name: 'Té Cedrón', clp: 3000, desc: 'Té de cedrón con cáscaras de naranja.' },
+      { name: 'Matcha Latte', clp: 4500, desc: 'Té matcha con leche texturizada.' },
+      { name: 'Matcha Latte Vainilla', clp: 5000, desc: 'Matcha con leche y syrup casero de vainilla.' }
+    ]},
+    { id: 'jugos', label: 'Jugos', items: [
+      { name: 'Jugo de Piña', clp: 4000, desc: 'Jugo natural de piña.' },
+      { name: 'Jugo de Mango', clp: 4000, desc: 'Jugo natural de mango.' },
+      { name: 'Jugo de Frambuesa', clp: 4000, desc: 'Jugo natural de frambuesa.' },
+      { name: 'Limonada', clp: 4000, desc: 'Limonada natural.' },
+      { name: 'Jugo de Naranja', clp: 3500, desc: 'Jugo natural de naranja.' },
+      { name: 'Agua Natural', clp: 2500, desc: 'Agua natural.' }
+    ]},
+    { id: 'verano', label: 'Carta verano', items: [
+      { name: 'Aerocano', clp: 4500, tag: 'Verano', desc: 'Espresso doble texturizado con agua y hielo.' },
+      { name: 'Filtrado Frío', clp: 4200, desc: 'Filtrado recibido sobre cama de hielo.' },
+      { name: 'Espresso Frío', clp: 3300, desc: 'Doble shot de espresso sobre cama de hielo.' },
+      { name: 'Cold Brew', clp: 4500, desc: 'Café infusionado en frío por 24 horas.' },
+      { name: 'Espresso Tonic', clp: 5500, desc: 'Espresso y agua tónica.' },
+      { name: 'Iced Vaniglia', clp: 5000, desc: 'Doble shot, leche texturizada en frío y sirup de vainilla.' },
+      { name: 'Iced Capuccino', clp: 4500, desc: 'Doble shot con leche texturizada en frío.' },
+      { name: 'Iced Latte', clp: 4500, desc: 'Un shot de espresso y leche fría.' },
+      { name: 'Iced Moka', clp: 5000, desc: 'Doble shot, leche en frío emulsionada con chocolate.' },
+      { name: 'Iced Bombón', clp: 5000, desc: 'Doble shot, leche en frío con leche condensada.' },
+      { name: 'Matcha Latte Frío', clp: 5000, desc: 'Matcha suave mezclado con leche, cremoso y equilibrado.' },
+      { name: 'Matcha Vainilla Frío', clp: 6000, desc: 'Matcha con leche fría y un toque de vainilla.' }
+    ]},
+    { id: 'sandwich', label: 'Sándwich', items: [
+      { name: 'Ave Pimentón', clp: 5500, desc: 'Ciabatta, pollo desmenuzado, lechuga y mayo de morrones.' },
+      { name: 'Croissant', clp: 5500, desc: 'Hojaldre horneado, relleno con jamón y queso.' },
+      { name: 'Tostadas Palta y Huevo', clp: 7000, desc: 'Masa madre, dos huevos, palta, sal, pimienta y oliva.' },
+      { name: 'Huevo Tocino Queso', clp: 7000, desc: 'Masa madre, huevo frito, tocino y queso mantecoso.' },
+      { name: 'Baba Ganoush', clp: 5500, desc: 'Masa madre, salteado de morrón, berenjena y tomate.' },
+      { name: 'Mechada con Queso', clp: 6000, desc: 'Masa madre, carne mechada jugosa y queso derretido.' },
+      { name: 'Caprese', clp: 8000, desc: 'Masa madre, cherry, queso cabra, albahaca y oliva.' },
+      { name: 'El Serrano', clp: 8000, desc: 'Masa madre, jamón serrano, brie, rúcula y oliva.' },
+      { name: 'Tostadas con Palta', clp: 5500, desc: 'Masa madre, palta laminada, sal, pimienta y oliva.' }
+    ]},
+    { id: 'pasteleria', label: 'Pastelería', items: [
+      { name: 'Cheesecake Matcha', clp: 5000, desc: 'Base cremosa de matcha con corazón de limón.' },
+      { name: 'Tiramisú', clp: 6000, desc: 'Bizcocho al café, crema de mascarpone y cacao.' },
+      { name: 'Tartaleta de Frambuesa', clp: 4500, desc: 'Base crujiente, crema suave y frambuesas frescas.' },
+      { name: 'Pie de Limón', clp: 3500, desc: 'Base crujiente, crema de limón y merengue ligero.' },
+      { name: 'Galletón', clp: 3000, desc: 'Oreo o limón, suave por dentro y crocante por fuera.' },
+      { name: 'Barra Proteína Chocolate', clp: 4000, desc: 'Whey, creatina, chocolate bitter, frutos secos y coco.' },
+      { name: 'Barquillos', clp: 2000, desc: 'Crujientes y rellenos de manjar cremoso.' },
+      { name: 'Barra Proteína Semillas', clp: 3000, desc: 'Almendras, maní, semillas, cranberry y chocolate.' }
+    ]},
+    { id: 'bolleria', label: 'Bollería', items: [
+      { name: 'Croissant de Nutella', clp: 5000, desc: 'Hojaldre crujiente relleno de Nutella cremosa.' },
+      { name: 'NY Roll Pistacho', clp: 5000, desc: 'Masa hojaldrada rellena de crema de pistacho.' },
+      { name: 'Rollo de Canela', clp: 4000, desc: 'Masa suave con canela y glaseado dulce.' },
+      { name: 'Media Luna', clp: 2000, desc: 'Masa hojaldrada, suave por dentro y dorada por fuera.' }
+    ]}
+  ];
+
+  /* ---- Render de la carta con pestañas ---- */
+  function montarCarta(MENU) {
+    var tabsEl = document.getElementById('cartaTabs');
+    var gridEl = document.getElementById('cartaGrid');
+
+    function formatCLP(clp) { return '$' + clp.toLocaleString('es-CL'); }
+
+    function renderCategory(cat) {
+      gridEl.innerHTML = cat.items.map(function (it) {
+        var tag = it.tag ? '<span class="menu-item__tag">' + it.tag + '</span>' : '';
+        return '' +
+          '<article class="menu-item menu-item--no-media">' +
+            '<div class="menu-item__body">' +
+              '<div class="menu-item__head"><h3 class="menu-item__name">' + it.name + '</h3>' + tag + '</div>' +
+              '<p class="menu-item__desc">' + (it.desc || '') + '</p>' +
+              '<div class="price">' +
+                '<span class="price__clp">' + formatCLP(it.clp) + ' CLP</span>' +
+              '</div>' +
+            '</div>' +
+          '</article>';
+      }).join('');
+    }
+
+    function setActive(id) {
+      Array.prototype.forEach.call(tabsEl.children, function (btn) {
+        var on = btn.dataset.id === id;
+        btn.classList.toggle('carta__tab--active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      var cat = MENU.filter(function (c) { return c.id === id; })[0];
+      if (cat) renderCategory(cat);
+    }
+
+    tabsEl.innerHTML = MENU.map(function (c) {
+      return '<button class="carta__tab" role="tab" data-id="' + c.id + '">' + c.label + '</button>';
+    }).join('');
+
+    tabsEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('.carta__tab');
+      if (btn) setActive(btn.dataset.id);
+    });
+
+    setActive(MENU[0].id);
+  }
+
+  /* ---- La carta se pide a la base de datos ----
+     Si la API falla (servidor abajo, sin red, base caída) se usa la copia
+     de arriba. La carta nunca desaparece del sitio. ---- */
+  (function () {
+    fetch('/api/v1/menu?marca=lucky-point', { headers: { Accept: 'application/json' } })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (datos) {
+        if (!Array.isArray(datos) || !datos.length) throw new Error('respuesta vacía');
+        montarCarta(datos);
+      })
+      .catch(function (err) {
+        console.warn('[carta] la API no respondió, uso la copia local:', err.message);
+        montarCarta(MENU_RESPALDO);
+      });
+  })();
+
+  /* ---- Próximamente: captura de correo (sin backend aún) ---- */
+  (function () {
+    var form = document.getElementById('leadForm');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('leadSuccess').hidden = false;
+      form.querySelector('.lead-form__row').hidden = true;
+    });
+  })();
+
+  /* ---- Mural de deseos (maqueta, datos de ejemplo) ---- */
+  (function () {
+    var grid = document.getElementById('muralGrid');
+    var form = document.getElementById('muralForm');
+    if (!grid || !form) return;
+    var WISHES = [
+      { name: 'Javiera', msg: 'El mokka nutella me salvó el semestre. ¡Gracias equipo!', date: '12 jun' },
+      { name: 'Cristóbal', msg: 'Ojalá pongan más mesas afuera para el verano.', date: '8 jun' },
+      { name: 'Fran', msg: 'El filtrado de esta semana estuvo increíble, más de eso porfa.', date: '2 jun' }
+    ];
+    function render() {
+      grid.innerHTML = WISHES.map(function (w) {
+        return '<div class="wish"><p class="wish__msg">"' + w.msg + '"</p><span class="wish__meta">' + w.name + ' · ' + w.date + '</span></div>';
+      }).join('');
+    }
+    render();
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = document.getElementById('muralName').value.trim();
+      var msg = document.getElementById('muralMsg').value.trim();
+      if (!name || !msg) return;
+      WISHES.unshift({ name: name, msg: msg, date: 'en revisión' });
+      render();
+      form.reset();
+    });
+  })();
+
+  /* ---- Calendario de actividades (maqueta, datos de ejemplo) ---- */
+  (function () {
+    var grid = document.getElementById('calendarGrid');
+    if (!grid) return;
+    var EVENTS = [
+      { date: '26 jul', title: 'Cata de origen: Etiopía', text: 'Degustación guiada de nuestro lote de Yirgacheffe.' },
+      { date: '2 ago', title: 'Taller de latte art', text: 'Aprende las bases del arte en leche con nuestros baristas.' },
+      { date: '16 ago', title: 'Noche de mocktails', text: 'Presentamos la nueva carta de coctelería de autor sin alcohol.' }
+    ];
+    grid.innerHTML = EVENTS.map(function (ev, i) {
+      return '<article class="event">' +
+        '<span class="event__date">' + ev.date + '</span>' +
+        '<h3 class="event__title">' + ev.title + '</h3>' +
+        '<p class="event__text">' + ev.text + '</p>' +
+        '<button class="btn btn--outline btn--sm" type="button" data-open="' + i + '">Inscribirme</button>' +
+        '<form class="event__form" data-form="' + i + '">' +
+          '<input type="email" placeholder="Tu correo" required />' +
+          '<button class="btn btn--primary btn--sm" type="submit">Confirmar</button>' +
+          '<p class="event__success" hidden>¡Inscripción registrada!</p>' +
+        '</form>' +
+      '</article>';
+    }).join('');
+    grid.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-open]');
+      if (!btn) return;
+      var form = grid.querySelector('[data-form="' + btn.dataset.open + '"]');
+      form.classList.toggle('event__form--open');
+    });
+    grid.addEventListener('submit', function (e) {
+      if (!e.target.matches('.event__form')) return;
+      e.preventDefault();
+      e.target.querySelector('input').hidden = true;
+      e.target.querySelector('button[type=submit]').hidden = true;
+      e.target.querySelector('.event__success').hidden = false;
+    });
+  })();
+
+  /* ---- Registro (maqueta): validación de RUT chileno en el front ---- */
+  (function () {
+    var form = document.getElementById('registerForm');
+    if (!form) return;
+    var rutInput = document.getElementById('regRut');
+    var hint = document.getElementById('rutHint');
+
+    function validateRut(rut) {
+      rut = rut.replace(/[.\s]/g, '').replace('-', '');
+      if (rut.length < 2) return false;
+      var body = rut.slice(0, -1);
+      var dv = rut.slice(-1).toUpperCase();
+      if (!/^\d+$/.test(body)) return false;
+      var sum = 0, mul = 2;
+      for (var i = body.length - 1; i >= 0; i--) {
+        sum += parseInt(body[i], 10) * mul;
+        mul = mul === 7 ? 2 : mul + 1;
+      }
+      var res = 11 - (sum % 11);
+      var dvCalc = res === 11 ? '0' : res === 10 ? 'K' : String(res);
+      return dvCalc === dv;
+    }
+
+    rutInput.addEventListener('input', function () {
+      var v = rutInput.value.trim();
+      if (!v) { hint.textContent = 'Formato chileno con dígito verificador.'; hint.className = 'register__hint'; return; }
+      var ok = validateRut(v);
+      hint.textContent = ok ? 'RUT válido.' : 'RUT inválido, revisa el dígito verificador.';
+      hint.className = 'register__hint ' + (ok ? 'register__hint--ok' : 'register__hint--error');
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!validateRut(rutInput.value.trim())) {
+        hint.textContent = 'RUT inválido, revisa el dígito verificador.';
+        hint.className = 'register__hint register__hint--error';
+        return;
+      }
+      document.getElementById('registerSuccess').hidden = false;
+      form.reset();
+    });
+  })();
+</script>
+
+<!-- ============================ VOLVER ARRIBA ============================ -->
+<button class="to-top" id="toTop" type="button" aria-label="Volver arriba">
+  <svg class="to-top__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>
+  </svg>
+</button>
+
+<script>
+(function(){
+  var btn = document.getElementById("toTop");
+  if (!btn) return;
+
+  var SHOW_AT = 400;   /* px de scroll antes de que aparezca */
+  var ticking = false;
+
+  function update(){
+    btn.classList.toggle("to-top--visible", window.scrollY > SHOW_AT);
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", function(){
+    if (!ticking) { ticking = true; window.requestAnimationFrame(update); }
+  }, { passive: true });
+
+  btn.addEventListener("click", function(){
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  });
+
+  update();
+})();
+</script>
+<script src="{{ url_for('static', filename='js/tienda-productos.js') }}"></script>
+{% if tienda %}
+{# El catálogo de Shopify pisa al respaldo. Va acá, inline y síncrono, y no
+   por fetch: el modal de elección rápida se inicializa unas líneas más abajo
+   y tiene que encontrar ya los precios buenos. Con un fetch alcanzaría a
+   abrirse con los del respaldo. #}
+<script>window.LP_TIENDA.cargar({{ tienda | tojson }});</script>
+{% endif %}
+{# Filtro por categoría de la tienda. Se filtra en el navegador y no en el
+   servidor a propósito: el catálogo son ocho productos que ya están en la
+   página, así que cambiar de pastilla es instantáneo y no recarga ni pierde
+   la posición del scroll. Si algún día son cientos, esto se cambia por una
+   consulta al servidor y las pastillas siguen igual. #}
+<script>
+  (function () {
+    var tabs = document.getElementById('shopTabs');
+    var grid = document.getElementById('shopGrid');
+    if (!tabs || !grid) return;   // una sola categoría, o el respaldo
+
+    var tarjetas = Array.prototype.slice.call(grid.children);
+
+    tabs.addEventListener('click', function (e) {
+      var btn = e.target.closest('.shop__tab');
+      if (!btn) return;
+      var cat = btn.dataset.cat;
+
+      Array.prototype.forEach.call(tabs.children, function (b) {
+        var on = b === btn;
+        b.classList.toggle('shop__tab--active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+
+      tarjetas.forEach(function (t) {
+        // cat === '' es «Todos». `hidden` y no una clase: el estado queda en
+        // el DOM y el lector de pantalla se salta la tarjeta oculta.
+        t.hidden = !!cat && t.dataset.categoria !== cat;
+      });
+    });
+  })();
+</script>
+<script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tienda-rapida.js') }}"></script>
+<script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
+<script src="{{ url_for('static', filename='js/muro.js') }}"></script>
+</body>
+</html>

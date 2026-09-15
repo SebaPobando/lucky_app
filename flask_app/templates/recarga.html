@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Recargar puntos · Lucky Point Coffee{% endblock %}
+{% block descripcion %}Estamos afinando los paquetes de recarga. Muy pronto podrás comprar Lucky Points aquí.{% endblock %}
+{% block contenido %}
+<main class="auth"><div class="auth__card">
+<img class="auth__mascot" src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+<div class="auth__eyebrow">Próximamente</div>
+<h1 class="auth__title">Recarga de Lucky Points</h1>
+<p class="auth__lead">Estamos afinando los paquetes de recarga. Muy pronto podrás comprar Lucky Points aquí.</p>
+<a class="btn btn--primary" href="{{ url_for('dashboard') }}">Volver al dashboard</a>
+</div></main>
+{% endblock %}

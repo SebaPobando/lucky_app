@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Administración · Lucky Point Coffee{% endblock %}
+{% block descripcion %}Panel de administración.{% endblock %}
+
+{% block head_extra %}
+<style>
+  .panel { display: grid; gap: var(--sp-4); margin-top: var(--sp-6); }
+  @media (min-width: 760px) { .panel { grid-template-columns: repeat(2, 1fr); } }
+  .panel__card {
+    display: block; padding: var(--sp-5) var(--sp-6); text-decoration: none;
+    background: var(--surface-card); border: var(--bw) solid var(--border);
+    border-radius: var(--r-md); color: inherit;
+    transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .panel__card:hover { border-color: var(--lp-forest); transform: translateY(-2px); }
+  .panel__tit { font-family: var(--font-display); font-size: 1.3rem;
+    color: var(--lp-espresso); margin: 0 0 6px; }
+  .panel__desc { color: var(--text-muted); font-size: .88rem; margin: 0; line-height: 1.6; }
+  .panel__dato { display: inline-block; margin-top: var(--sp-3); font-size: .78rem;
+    font-weight: var(--fw-bold); color: #8A5E13; background: var(--lp-gold-bg);
+    padding: 4px 11px; border-radius: var(--r-pill); }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<main class="section"><div class="container" style="max-width:860px">
+  <div class="auth__eyebrow">Administración</div>
+  <h1 style="margin:6px 0 0">Panel</h1>
+  <p style="color:var(--text-muted);margin:var(--sp-2) 0 0">
+    Solo tú ves esto. Para el resto, estas páginas no existen.
+  </p>
+
+  {# Todo lo de admin cuelga de acá y no del menú de arriba: cada enlace nuevo
+     en la barra la empujaba a partirse en dos líneas. Así la barra queda fija
+     y este panel crece lo que haga falta. #}
+  <div class="panel">
+    <a class="panel__card" href="{{ url_for('admin_carta_inicio') }}">
+      <h2 class="panel__tit">Carta</h2>
+      <p class="panel__desc">
+        Precios, descripciones, disponibilidad y categorías de Lucky Point
+        y Gladiatore.
+      </p>
+      <span class="panel__dato">{{ productos }} productos</span>
+    </a>
+
+    <a class="panel__card" href="{{ url_for('admin_actividades') }}">
+      <h2 class="panel__tit">Actividades</h2>
+      <p class="panel__desc">
+        Talleres y catas: crearlas, publicarlas, cupos y quién se inscribió.
+      </p>
+      <span class="panel__dato">
+        {{ publicadas }} publicada{{ 's' if publicadas != 1 }}
+      </span>
+    </a>
+
+    <a class="panel__card" href="{{ url_for('admin_muro') }}">
+      <h2 class="panel__tit">Muro de deseos</h2>
+      <p class="panel__desc">
+        Lo que la gente deja escrito en la portada. Nada se publica hasta que
+        lo apruebas acá.
+      </p>
+      {# El dato que importa es lo que está esperando: es lo único que pide
+         que hagas algo. Cuando no hay nada pendiente se muestra el total,
+         para que la pastilla no quede diciendo "0" como si algo fallara. #}
+      {% if muro.pendiente %}
+      <span class="panel__dato">
+        {{ muro.pendiente }} esperando revisión
+      </span>
+      {% else %}
+      <span class="panel__dato">
+        {{ muro.aprobado }} publicado{{ 's' if muro.aprobado != 1 }}
+      </span>
+      {% endif %}
+    </a>
+
+    <a class="panel__card" href="{{ url_for('admin_usuarios') }}">
+      <h2 class="panel__tit">Cuentas</h2>
+      <p class="panel__desc">
+        Quién se ha registrado, y bloquear o devolver el acceso a alguien.
+      </p>
+      {# Lo bloqueado va primero porque es lo excepcional: si hay una cuenta
+         bloqueada conviene verlo de reojo sin entrar. #}
+      {% if usuarios.bloqueado %}
+      <span class="panel__dato">
+        {{ usuarios.bloqueado }} bloqueada{{ 's' if usuarios.bloqueado != 1 }}
+      </span>
+      {% else %}
+      <span class="panel__dato">
+        {{ usuarios.total }} cuenta{{ 's' if usuarios.total != 1 }}
+      </span>
+      {% endif %}
+    </a>
+  </div>
+</div></main>
+{% endblock %}
