@@ -62,8 +62,8 @@
 <li><a class="footer__link" href="{{ url_for('dashboard') }}">Mi cuenta</a></li>
 </ul></div>
 <div><h4 class="footer__title">Visítanos</h4><p class="footer__text" style="max-width:none">Bernardo O'Higgins 969, Osorno<br/>Región de Los Lagos, Chile<br/>Lun–Sáb · 8:30–20:00<br/>Dom · 9:30–14:00</p></div>
-<div><h4 class="footer__title">Síguenos</h4><p class="footer__text" style="max-width:none">hola@luckypoint.cl<br/>+56 9 1234 5678</p><div class="footer__social"><a href="#" aria-label="Instagram">IG</a><a href="#" aria-label="Facebook">FB</a><a href="#" aria-label="WhatsApp">WA</a></div></div>
-</div><div class="footer__bottom" id="footerCredit">© 2026 Lucky Point Coffee · Hecho con cariño en el sur de Chile</div></footer>
+{% include '_footer_contacto.html' %}
+</div>{% include '_footer_credito.html' %}</footer>
 <script src="{{ url_for('static', filename='js/account.js') }}"></script>
 <script src="{{ url_for('static', filename='js/carrito.js') }}"></script>
 {% block page_js %}{% endblock %}

@@ -167,8 +167,13 @@ img{max-width:100%;display:block}
 .footer__link{color:rgba(252,248,241,.75);font-size:.875rem;text-decoration:none}
 .footer__link:hover{color:var(--lp-cream-50)}
 .footer__social{display:flex;gap:10px;margin-top:var(--sp-3)}
-.footer__social a{color:var(--lp-cream-50);font-size:.75rem;font-weight:700;background:rgba(252,248,241,.12);width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.footer__social a{color:var(--lp-cream-50);width:38px;height:38px;border:var(--bw) solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:background var(--dur) var(--ease)}
+.footer__social a:hover{background:rgba(255,255,255,.12)}
 .footer__bottom{max-width:var(--container);margin:var(--sp-7) auto 0;padding-inline:var(--gutter);border-top:var(--bw) solid rgba(252,248,241,.14);padding-top:var(--sp-5);font-size:.78rem;color:rgba(252,248,241,.5)}
+.footer__dev{display:inline-block;margin-top:6px;font-size:.78rem}
+.footer__dev strong{color:var(--text-on-dark);font-weight:var(--fw-semibold)}
+.footer__dev a{color:var(--text-on-dark);text-decoration:underline;text-underline-offset:2px}
+.footer__dev a:hover{color:var(--lp-gold-soft)}
 
 /* En un teléfono angosto, la marca completa (logo + nombre + COFFEE) más la
    hamburguesa no caben. El "COFFEE" es lo prescindible: el logo y el nombre
