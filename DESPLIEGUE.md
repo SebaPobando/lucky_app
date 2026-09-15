@@ -98,16 +98,34 @@ Para comprobar que quedó bien:
 
 ## 5. Cómo arranca
 
-El `Procfile` ya dice:
+El `Procfile` tiene UNA sola línea, y así se queda:
 
-    web: gunicorn server:app --workers 2 --bind 0.0.0.0:$PORT ...
+    web: gunicorn server:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 60 --access-logfile - --error-logfile -
 
-`server:app` y no `flask_app:app`: es `server.py` el que importa los
-controladores, y eso es lo que registra las rutas. Con `flask_app:app` la app
-levanta sin ninguna ruta y todo responde 404.
+**El Procfile de Railway NO admite comentarios.** Lee cada línea que tenga dos
+puntos como la definición de un servicio, así que un `# comentario con: algo`
+revienta el deploy con *Invalid service name*. (Pasó: la primera versión de
+este archivo venía comentada y Railway intentó crear un servicio llamado
+«# seis controladores, y ESO es lo que registra las rutas».) Toda la
+explicación vive acá, que para eso está este documento.
 
-`$PORT` lo pone Railway. Fijarlo a 5000 es la forma más común de que el deploy
-quede «corriendo» pero sin responder.
+Qué significa cada parte:
+
+- **`server:app`, no `flask_app:app`.** Es `server.py` el que importa los seis
+  controladores, y eso es lo que registra las rutas. Con `flask_app:app` la
+  app levanta sin ninguna ruta y todo responde 404.
+- **`--workers 1 --threads 4`.** Un worker es un proceso Python entero y la
+  RAM es lo que cobra Railway; los hilos casi no pesan. Esta app se pasa el
+  tiempo esperando a MySQL y a Shopify, no calculando, que es justo para lo
+  que sirven los hilos. Y además el freno anti-spam del registro cuenta en
+  memoria: con un solo proceso, el límite que dice el código es el que se
+  aplica. Si algún día se siente lento con gente de verdad, subir a
+  `--workers 2 --threads 4` cuesta el doble de RAM.
+- **`$PORT` lo pone Railway.** Fijarlo a 5000 es la forma más común de que el
+  deploy quede «corriendo» pero sin responder.
+
+Si prefieres no tener Procfile, lo mismo se puede escribir en el panel:
+*Settings → Deploy → Custom Start Command*. Con una de las dos basta.
 
 ## 6. Entrar como admin la primera vez
 
@@ -140,7 +158,37 @@ encienda el SMTP.
   el QR tiene que apuntar a la URL pública con **https**.
 - Que el header no se rompa en un teléfono de verdad.
 
-## 8. Lo que queda sabido y aceptado
+## 8. Lo que va a costar
+
+Railway cobra por uso: **$20 por vCPU al mes, $10 por GB de RAM, $0,05 por GB
+de salida** y centavos por el volumen. El plan Hobby son $5 al mes que ya
+incluyen $5 de consumo; lo que pase de ahí se suma.
+
+Con dos servicios prendidos todo el día, la cuenta se reparte más o menos así:
+
+| | RAM típica | Al mes |
+|---|---|---|
+| La app (1 worker + 4 hilos) | ~0,15 GB | $1,5 – 2,5 |
+| MySQL | ~0,4 GB | $4 – 5 |
+| Salida de red | — | centavos |
+
+O sea **entre $6 y $8**, con los $5 incluidos descontados: pagarías los $5 más
+uno o tres dólares. Los límites del plan (48 vCPU, 48 GB, 5 réplicas) no tienen
+nada que ver con eso: son techos gigantes, no lo que se cobra.
+
+Dos formas de bajarlo, si molesta:
+
+- **La nube naranja de Cloudflare**, una vez que Railway emita el certificado
+  (y con el SSL en *Full (strict)*). Cachea las imágenes y el CSS, así que esos
+  bytes dejan de salir de Railway.
+- **Dormir el servicio web** cuando no hay nadie. Ahorra, pero la primera
+  visita después de un rato espera el arranque. Para un sitio que se comparte
+  por Instagram, no lo haría.
+
+MySQL es la mitad cara y no hay mucho que apretar ahí: es el precio de tener
+la base encendida.
+
+## 9. Lo que queda sabido y aceptado
 
 - **El disco es efímero**: en cada deploy se borra lo que la app haya escrito.
   Lo único que escribe es `buzon/`, y con los correos apagados no se pierde
@@ -149,7 +197,8 @@ encienda el SMTP.
 - **Sin pool de conexiones**: cada consulta abre y cierra su conexión a MySQL.
   Para el tráfico de una cafetería sobra; si alguna vez aparecen errores de
   «too many connections», eso es lo que hay que mirar.
-- **El freno anti-spam cuenta en memoria**, así que con 2 workers cada uno
-  lleva su propia cuenta. No es grave: el límite real termina siendo el doble.
+- **El freno anti-spam cuenta en memoria**, así que vale por proceso. El
+  `Procfile` arranca UN worker con cuatro hilos justamente para que el número
+  que dice el código sea el que se aplica (y para gastar la mitad de RAM).
 - **No hay respaldo automático de la base.** Vale la pena exportarla de vez en
   cuando, sobre todo después de cada evento con inscritos.
