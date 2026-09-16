@@ -113,6 +113,7 @@ CREATE TABLE productos (
     slug          VARCHAR(80)  NOT NULL,
     nombre        VARCHAR(150) NOT NULL,
     descripcion   TEXT         NULL,
+    etiqueta      VARCHAR(30)  NULL COMMENT 'Favorito, Nuevo, Verano...',
     -- El precio en Lucky Points NO se guarda: es precio_clp / 10.
     -- Guardar los dos garantiza que algún día se desincronicen.
     precio_clp    INT          NOT NULL COMMENT 'El precio principal. En pizzas, el familiar',
@@ -226,6 +227,7 @@ INSERT INTO marcas (slug, nombre, tema_css) VALUES
 INSERT INTO categorias (marca_id, slug, nombre, orden) VALUES
     (1, 'cafeteria',  'Cafetería',  1),
     (1, 'pasteleria', 'Pastelería', 2),
+    (1, 'bebidas',    'Bebidas',    3),
     (2, 'pizzas',      'Pizzas',       1),
     (2, 'pastas',      'Pastas',       2),
     (2, 'bebestibles', 'Bebestibles',  3),

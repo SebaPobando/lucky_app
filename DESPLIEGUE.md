@@ -52,6 +52,13 @@ Ese es el orden y son los únicos cuatro que hacen falta en una base nueva:
 ya están dentro del esquema; `_referencia_modelo_completo.sql` es
 documentación, no se corre.
 
+Si la base ya existe y la carta se dejó vacía a propósito, no se ejecutan los
+seed: se aplica solo la migración incremental que habilita el campo Etiqueta
+del panel, sin crear ni borrar productos:
+
+    mysql -h ... -e "source schema/producto_etiqueta.sql"
+    mysql -h ... -e "source schema/categoria_bebidas.sql"
+
 También sirve MySQL Workbench como cliente: *File → Open SQL Script*, con la
 conexión apuntando al host y puerto públicos que muestra Railway. Es la misma
 cosa, con botones.

@@ -199,9 +199,11 @@ mismo. La marca va **siempre en la URL**, y no es decoración: es lo que evita
 que una pizza de Gladiatore termine colgada de la carta de la cafetería por un
 POST mal dirigido. Son dos sociedades con RUT distinto.
 
-`/api/v1/menu` devuelve la carta con la misma forma que tenía el array escrito
-a mano. La landing la pide por `fetch` y, si falla, usa el `MENU_RESPALDO` que
-quedó en la plantilla: la carta nunca desaparece del sitio.
+`/api/v1/menu` devuelve la carta desde MySQL. La landing la pide por `fetch`:
+una lista vacía muestra explícitamente que todavía no hay productos y una caída
+de la API muestra «carta no disponible». **No hay respaldo con productos o
+precios escritos a mano**: ocultaría errores del esquema y podría publicar
+precios antiguos.
 
 ### Fase 2 — cuentas (HECHO)
 
@@ -396,8 +398,8 @@ Si la API falla, `agenda.js` **no toca nada**. Si MySQL no responde, `home()`
 pasa `agenda=[]` y la página igual se sirve.
 
 **Costo asumido:** la tarjeta `.evento` está escrita **dos veces** (el bloque
-Jinja y `tarjeta()` de `agenda.js`). Si se toca una, hay que tocar la otra.
-Mismo trato que la carta con `MENU_RESPALDO` y que el muro.
+Jinja y `tarjeta()` de `agenda.js`). Si se toca una, hay que tocar la otra,
+igual que en el muro.
 
 ### 7.6 La tienda — catálogo desde Shopify
 

@@ -8,8 +8,9 @@
    catalogo.
 
    Por que existe igual: una tienda que muestra precios de hace un mes es
-   mala; una tienda en blanco es peor. Es el mismo trato que MENU_RESPALDO
-   con la carta.
+   mala; una tienda en blanco es peor. A diferencia de la carta del local,
+   este respaldo nunca se usa para cobrar: Shopify valida precio y stock al
+   llegar al checkout.
 
    REGLA DEL PROYECTO: esto NO se duplica en MySQL. `productos` en la base es
    solo la carta del local (lo que se sirve en taza o plato). Lo que se

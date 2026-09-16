@@ -465,6 +465,16 @@
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: var(--sp-5);
   }
+  .carta__estado {
+    padding: var(--sp-6) var(--sp-5);
+    background: var(--surface-card);
+    border: var(--bw) dashed var(--border-strong);
+    border-radius: var(--r-md);
+    color: var(--text-muted);
+  }
+  .carta__estado[hidden], .carta__grid[hidden], .carta__tabs[hidden] { display: none; }
+  .carta__estado-titulo { margin: 0 0 var(--sp-2); color: var(--text-strong); font-weight: var(--fw-bold); }
+  .carta__estado-texto { margin: 0; }
   .menu-item {
     display: flex;
     flex-direction: column;
@@ -980,6 +990,10 @@
           Pizzas y Pastas
         </a>
       </div>
+      <div class="carta__estado" id="cartaEstado" role="status" hidden>
+        <p class="carta__estado-titulo" id="cartaEstadoTitulo"></p>
+        <p class="carta__estado-texto" id="cartaEstadoTexto"></p>
+      </div>
       <div class="carta__grid" id="cartaGrid"></div>
 
       <!-- ===================== PUENTE A GLADIATORE =====================
@@ -1398,9 +1412,7 @@
     if (typeof lpInitHeader === 'function') lpInitHeader();
   })();
 
-  /* ---- Copia de respaldo de la carta ----
-     La carta real vive en la base de datos y se pide a /api/v1/menu.
-     Esto es solo el plan B para cuando la API no responda. ---- */
+  /* ---- Granos de la animación de entrada ---- */
   (function () {
     var wrap = document.getElementById('beansIntro');
     if (!wrap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1426,94 +1438,39 @@
     setTimeout(function () { wrap.remove(); }, (maxEnd + 0.3) * 1000);
   })();
 
-  /* ---- Copia de respaldo de la carta ----
-     La carta real vive en la base de datos y se pide a /api/v1/menu.
-     Esto es solo el plan B para cuando la API no responda. ---- */
-  var MENU_RESPALDO = [
-    { id: 'cafe', label: 'Café', items: [
-      { name: 'Long Black', clp: 3200, desc: 'Espresso doble vertido sobre agua caliente.' },
-      { name: 'Espresso Doble', clp: 3000, desc: '36 g extraídos a 9 bar, alta concentración de sabores.' },
-      { name: 'Short Black', clp: 3200, desc: 'Espresso simple vertido sobre agua caliente.' },
-      { name: 'Filtrado', clp: 3800, desc: 'Vertido de agua sobre cama de café en filtro de papel.' },
-      { name: 'Latte', clp: 3800, desc: 'Espresso simple con leche texturizada y una sutil espuma.' },
-      { name: 'Capuccino', clp: 3800, desc: 'Espresso doble con leche y espuma en partes iguales.' },
-      { name: 'Flat White', clp: 3800, desc: 'Espresso doble con leche y espuma en partes iguales.' }
-    ]},
-    { id: 'dulces', label: 'Café dulces', items: [
-      { name: 'Mokka', clp: 4200, desc: 'Espresso doble emulsionado con chocolate, leche y espuma.' },
-      { name: 'Bombom', clp: 4200, desc: 'Espresso doble con leche condensada, leche y espuma.' },
-      { name: 'Vaniglia', clp: 4200, desc: 'Espresso doble con sirup de vainilla macerada y leche.' },
-      { name: 'Mokka Blanco', clp: 4200, desc: 'Espresso doble emulsionado con chocolate blanco y leche.' },
-      { name: 'Mokka Nutella', clp: 5500, tag: 'Favorito', desc: 'Espresso doble emulsionado con nutella y leche.' }
-    ]},
-    { id: 'choco', label: 'Chocolatozos', items: [
-      { name: 'Nutellatte', clp: 5500, desc: 'Mezcla de nutella y leche texturizada.' },
-      { name: 'Chocolate Blanco', clp: 5000, desc: 'Chocolate blanco, crema, leche condensada y leche.' },
-      { name: 'Chocolate Caliente', clp: 5000, desc: 'Chocolate de leche, crema, cacao amargo y leche.' }
-    ]},
-    { id: 'te', label: 'Té e infusiones', items: [
-      { name: 'Té Negro', clp: 3000, desc: 'Mezcla natural de té negro tradicional.' },
-      { name: 'Infusión Roibos', clp: 3000, desc: 'Infusión de hojas de rooibos.' },
-      { name: 'Té Chai', clp: 3000, desc: 'Té con canela, cardamomo, jengibre y clavo. Leche +500.' },
-      { name: 'Té Cedrón', clp: 3000, desc: 'Té de cedrón con cáscaras de naranja.' },
-      { name: 'Matcha Latte', clp: 4500, desc: 'Té matcha con leche texturizada.' },
-      { name: 'Matcha Latte Vainilla', clp: 5000, desc: 'Matcha con leche y syrup casero de vainilla.' }
-    ]},
-    { id: 'jugos', label: 'Jugos', items: [
-      { name: 'Jugo de Piña', clp: 4000, desc: 'Jugo natural de piña.' },
-      { name: 'Jugo de Mango', clp: 4000, desc: 'Jugo natural de mango.' },
-      { name: 'Jugo de Frambuesa', clp: 4000, desc: 'Jugo natural de frambuesa.' },
-      { name: 'Limonada', clp: 4000, desc: 'Limonada natural.' },
-      { name: 'Jugo de Naranja', clp: 3500, desc: 'Jugo natural de naranja.' },
-      { name: 'Agua Natural', clp: 2500, desc: 'Agua natural.' }
-    ]},
-    { id: 'verano', label: 'Carta verano', items: [
-      { name: 'Aerocano', clp: 4500, tag: 'Verano', desc: 'Espresso doble texturizado con agua y hielo.' },
-      { name: 'Filtrado Frío', clp: 4200, desc: 'Filtrado recibido sobre cama de hielo.' },
-      { name: 'Espresso Frío', clp: 3300, desc: 'Doble shot de espresso sobre cama de hielo.' },
-      { name: 'Cold Brew', clp: 4500, desc: 'Café infusionado en frío por 24 horas.' },
-      { name: 'Espresso Tonic', clp: 5500, desc: 'Espresso y agua tónica.' },
-      { name: 'Iced Vaniglia', clp: 5000, desc: 'Doble shot, leche texturizada en frío y sirup de vainilla.' },
-      { name: 'Iced Capuccino', clp: 4500, desc: 'Doble shot con leche texturizada en frío.' },
-      { name: 'Iced Latte', clp: 4500, desc: 'Un shot de espresso y leche fría.' },
-      { name: 'Iced Moka', clp: 5000, desc: 'Doble shot, leche en frío emulsionada con chocolate.' },
-      { name: 'Iced Bombón', clp: 5000, desc: 'Doble shot, leche en frío con leche condensada.' },
-      { name: 'Matcha Latte Frío', clp: 5000, desc: 'Matcha suave mezclado con leche, cremoso y equilibrado.' },
-      { name: 'Matcha Vainilla Frío', clp: 6000, desc: 'Matcha con leche fría y un toque de vainilla.' }
-    ]},
-    { id: 'sandwich', label: 'Sándwich', items: [
-      { name: 'Ave Pimentón', clp: 5500, desc: 'Ciabatta, pollo desmenuzado, lechuga y mayo de morrones.' },
-      { name: 'Croissant', clp: 5500, desc: 'Hojaldre horneado, relleno con jamón y queso.' },
-      { name: 'Tostadas Palta y Huevo', clp: 7000, desc: 'Masa madre, dos huevos, palta, sal, pimienta y oliva.' },
-      { name: 'Huevo Tocino Queso', clp: 7000, desc: 'Masa madre, huevo frito, tocino y queso mantecoso.' },
-      { name: 'Baba Ganoush', clp: 5500, desc: 'Masa madre, salteado de morrón, berenjena y tomate.' },
-      { name: 'Mechada con Queso', clp: 6000, desc: 'Masa madre, carne mechada jugosa y queso derretido.' },
-      { name: 'Caprese', clp: 8000, desc: 'Masa madre, cherry, queso cabra, albahaca y oliva.' },
-      { name: 'El Serrano', clp: 8000, desc: 'Masa madre, jamón serrano, brie, rúcula y oliva.' },
-      { name: 'Tostadas con Palta', clp: 5500, desc: 'Masa madre, palta laminada, sal, pimienta y oliva.' }
-    ]},
-    { id: 'pasteleria', label: 'Pastelería', items: [
-      { name: 'Cheesecake Matcha', clp: 5000, desc: 'Base cremosa de matcha con corazón de limón.' },
-      { name: 'Tiramisú', clp: 6000, desc: 'Bizcocho al café, crema de mascarpone y cacao.' },
-      { name: 'Tartaleta de Frambuesa', clp: 4500, desc: 'Base crujiente, crema suave y frambuesas frescas.' },
-      { name: 'Pie de Limón', clp: 3500, desc: 'Base crujiente, crema de limón y merengue ligero.' },
-      { name: 'Galletón', clp: 3000, desc: 'Oreo o limón, suave por dentro y crocante por fuera.' },
-      { name: 'Barra Proteína Chocolate', clp: 4000, desc: 'Whey, creatina, chocolate bitter, frutos secos y coco.' },
-      { name: 'Barquillos', clp: 2000, desc: 'Crujientes y rellenos de manjar cremoso.' },
-      { name: 'Barra Proteína Semillas', clp: 3000, desc: 'Almendras, maní, semillas, cranberry y chocolate.' }
-    ]},
-    { id: 'bolleria', label: 'Bollería', items: [
-      { name: 'Croissant de Nutella', clp: 5000, desc: 'Hojaldre crujiente relleno de Nutella cremosa.' },
-      { name: 'NY Roll Pistacho', clp: 5000, desc: 'Masa hojaldrada rellena de crema de pistacho.' },
-      { name: 'Rollo de Canela', clp: 4000, desc: 'Masa suave con canela y glaseado dulce.' },
-      { name: 'Media Luna', clp: 2000, desc: 'Masa hojaldrada, suave por dentro y dorada por fuera.' }
-    ]}
-  ];
-
   /* ---- Render de la carta con pestañas ---- */
+  function mostrarEstadoCarta(titulo, texto) {
+    var tabsEl = document.getElementById('cartaTabs');
+    var gridEl = document.getElementById('cartaGrid');
+    var estadoEl = document.getElementById('cartaEstado');
+
+    tabsEl.innerHTML = '';
+    gridEl.innerHTML = '';
+    tabsEl.hidden = true;
+    gridEl.hidden = true;
+    document.getElementById('cartaEstadoTitulo').textContent = titulo;
+    document.getElementById('cartaEstadoTexto').textContent = texto;
+    estadoEl.hidden = false;
+  }
+
   function montarCarta(MENU) {
     var tabsEl = document.getElementById('cartaTabs');
     var gridEl = document.getElementById('cartaGrid');
+    var estadoEl = document.getElementById('cartaEstado');
+
+    /* Una lista vacía es un estado válido de la base, no una caída. Mostrar
+       productos escritos a mano acá haría parecer que todavía se venden. */
+    if (!Array.isArray(MENU) || !MENU.length) {
+      mostrarEstadoCarta(
+        'La carta está en preparación.',
+        'Todavía no hay productos publicados. Vuelve pronto.'
+      );
+      return;
+    }
+
+    tabsEl.hidden = false;
+    gridEl.hidden = false;
+    estadoEl.hidden = true;
 
     function formatCLP(clp) { return '$' + clp.toLocaleString('es-CL'); }
 
@@ -1556,8 +1513,8 @@
   }
 
   /* ---- La carta se pide a la base de datos ----
-     Si la API falla (servidor abajo, sin red, base caída) se usa la copia
-     de arriba. La carta nunca desaparece del sitio. ---- */
+     Vacía y caída son estados distintos. Ninguno usa precios escritos a mano:
+     una carta desactualizada puede prometer productos o valores incorrectos. */
   (function () {
     fetch('/api/v1/menu?marca=lucky-point', { headers: { Accept: 'application/json' } })
       .then(function (r) {
@@ -1565,12 +1522,15 @@
         return r.json();
       })
       .then(function (datos) {
-        if (!Array.isArray(datos) || !datos.length) throw new Error('respuesta vacía');
+        if (!Array.isArray(datos)) throw new Error('respuesta inesperada');
         montarCarta(datos);
       })
       .catch(function (err) {
-        console.warn('[carta] la API no respondió, uso la copia local:', err.message);
-        montarCarta(MENU_RESPALDO);
+        console.warn('[carta] la API no respondió:', err.message);
+        mostrarEstadoCarta(
+          'No pudimos cargar la carta.',
+          'Intenta nuevamente en unos minutos.'
+        );
       });
   })();
 

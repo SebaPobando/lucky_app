@@ -39,10 +39,11 @@ INSERT INTO categorias (marca_id, slug, nombre, orden) VALUES
     (@marca, 'choco', 'Chocolatozos', 3),
     (@marca, 'te', 'Té e infusiones', 4),
     (@marca, 'jugos', 'Jugos', 5),
-    (@marca, 'verano', 'Carta verano', 6),
-    (@marca, 'sandwich', 'Sándwich', 7),
-    (@marca, 'pasteleria', 'Pastelería', 8),
-    (@marca, 'bolleria', 'Bollería', 9);
+    (@marca, 'bebidas', 'Bebidas', 6),
+    (@marca, 'verano', 'Carta verano', 7),
+    (@marca, 'sandwich', 'Sándwich', 8),
+    (@marca, 'pasteleria', 'Pastelería', 9),
+    (@marca, 'bolleria', 'Bollería', 10);
 
 -- Productos ---------------------------------------------------------------
 

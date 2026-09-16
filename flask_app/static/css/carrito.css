@@ -217,6 +217,48 @@
 
 .cart__checkout[disabled] { opacity: 0.45; cursor: not-allowed; }
 
+/* Los dos botones del pie van juntos; la nota queda debajo del par. */
+.cart__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+/* "Seguir comprando": accion secundaria, en cafe para no competir con el verde
+   de "Ir a pagar". No usa .btn porque esas clases estan definidas dentro de
+   cada plantilla (landing, producto, account) y el drawer se inyecta en todas:
+   con BEM propio se ve igual en las tres. */
+.cart__continue {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 17px 32px;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+  color: var(--lp-coffee-500);
+  background: transparent;
+  border: var(--bw-strong) solid var(--lp-coffee-500);
+  border-radius: var(--r-pill, 999px);
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.cart__continue:hover,
+.cart__continue:focus-visible {
+  color: var(--lp-cream-50);
+  background: var(--lp-coffee-500);
+  border-color: var(--lp-coffee-500);
+}
+
+.cart__continue:focus-visible {
+  outline: 2px solid var(--lp-caramel);
+  outline-offset: 2px;
+}
+
 .cart__note {
   margin: var(--sp-3) 0 0;
   font-size: var(--fs-caption);

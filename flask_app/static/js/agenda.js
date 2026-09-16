@@ -68,8 +68,8 @@
   }
 
   /* Mismo markup que el bloque Jinja de landing.html. Son dos
-     implementaciones de la misma tarjeta, igual que pasa con la carta y
-     MENU_RESPALDO: si se toca una, hay que tocar la otra. */
+     implementaciones de la misma tarjeta: si se toca una, hay que tocar la
+     otra. */
   function tarjeta(a) {
     var el = document.createElement("a");
     el.className = "evento";

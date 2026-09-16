@@ -865,8 +865,9 @@ def api_menu():
     La landing la consume acá en vez de tener el menú escrito a mano en el
     HTML: cambiar un precio pasa a ser un UPDATE, no un deploy.
 
-    Si la base no responde devolvemos 503 y el front usa la copia que quedó
-    en la plantilla. Prefiero una carta desactualizada a una página rota.
+    Si la base no responde devolvemos 503 y el front muestra un estado de error.
+    Una copia escrita a mano podría ocultar una migración pendiente y publicar
+    productos o precios que ya no existen.
     """
     marca = request.args.get("marca", "lucky-point")
     try:

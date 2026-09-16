@@ -192,7 +192,7 @@
   /* ======================= Vista: drawer ======================= */
 
   var raiz = null, panel = null, lista = null, vacio = null;
-  var totalCLPEl = null, btnPagar = null, btnVaciar = null;
+  var totalCLPEl = null, btnPagar = null, btnVaciar = null, btnSeguir = null;
   var ultimoFoco = null;
   var confirmandoVaciar = false, temporizadorVaciar = null;
 
@@ -206,6 +206,14 @@
   }
 
   function pesos(n) { return "$" + Number(n).toLocaleString("es-CL"); }
+
+  /* A donde vuelve "Seguir comprando" cuando la tienda no esta en esta pagina.
+     El nav y el pie ya traen el enlace resuelto por Flask (url_for('home')),
+     asi que lo reutilizamos en vez de sumar otra constante a config.js. */
+  function urlTienda() {
+    var a = document.querySelector('a[href$="#tienda"]');
+    return a ? a.getAttribute("href") : "/#tienda";
+  }
 
   function montar() {
     if (raiz) { return; }
@@ -236,7 +244,10 @@
               '<span class="cart__total-clp" data-lp-total-clp>$0</span>' +
             '</span>' +
           '</div>' +
-          '<button class="btn btn--primary btn--lg btn--block cart__checkout" type="button" data-lp-pagar>Ir a pagar</button>' +
+          '<div class="cart__actions">' +
+            '<button class="btn btn--primary btn--lg btn--block cart__checkout" type="button" data-lp-pagar>Ir a pagar</button>' +
+            '<button class="cart__continue" type="button" data-lp-seguir>Seguir comprando</button>' +
+          '</div>' +
           '<p class="cart__note">El despacho y el pago se completan de forma segura en Shopify.</p>' +
         '</footer>' +
       '</aside>';
@@ -248,6 +259,7 @@
     totalCLPEl = raiz.querySelector("[data-lp-total-clp]");
     btnPagar = raiz.querySelector("[data-lp-pagar]");
     btnVaciar = raiz.querySelector("[data-lp-vaciar]");
+    btnSeguir = raiz.querySelector("[data-lp-seguir]");
 
     /* Vaciar es destructivo y no tiene deshacer, asi que va en dos pasos.
        No usamos confirm() nativo: bloquea el hilo y se ve como spam del sitio. */
@@ -282,6 +294,23 @@
       if (accion === "mas") { api.fijarCantidad(variante, actual + 1); }
       else if (accion === "menos") { api.fijarCantidad(variante, actual - 1); }
       else if (accion === "quitar") { api.quitar(variante); }
+    });
+
+    /* "Seguir comprando" cierra el drawer y devuelve a la tienda. En la landing
+       la seccion esta en la misma pagina; en las demas hay que navegar. */
+    btnSeguir.addEventListener("click", function () {
+      var seccion = document.getElementById("tienda");
+      api.cerrar();
+      if (seccion) {
+        /* sin behavior explicito: respeta el scroll-behavior y el
+           scroll-padding-top del CSS, y tambien prefers-reduced-motion */
+        seccion.scrollIntoView();
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", "#tienda");
+        }
+        return;
+      }
+      window.location.href = urlTienda();
     });
 
     btnPagar.addEventListener("click", function () {
