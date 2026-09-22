@@ -604,3 +604,70 @@ credenciales de Gmail (ver arriba). Hasta entonces los correos quedan en
 `buzon/`.
 
 El detalle está en el tablero del roadmap.
+
+---
+
+## Instalable en el teléfono (PWA)
+
+Hay `manifest.webmanifest` en `static/` y las etiquetas en el `<head>` de
+`base.html`, `landing.html` y `producto.html`. Con eso la gente puede agregar
+Lucky Point a su pantalla de inicio y abrirla sin barra del navegador.
+
+**No hay service worker, y es a propósito.** Chrome dejó de exigirlo para
+instalar (versión 108 en móvil, 112 en escritorio) justamente porque la gente
+ponía service workers vacíos solo para cumplir el requisito. Lo único que lo
+sigue pidiendo es el aviso automático de instalación; desde el menú del
+navegador se instala igual.
+
+**Si algún día se agrega uno, la regla es una: red primero, y que nunca cachee
+precios ni saldo.** Un service worker sirviendo la carta desde el caché es
+exactamente la falla que el resto del proyecto evita — *«una carta en blanco es
+mejor que una carta con precios viejos en un negocio donde el precio es lo que
+cobras»*. Y es la causa clásica de «sigo viendo la versión vieja» después de
+cada deploy.
+
+### Detalles que cuestan encontrar después
+
+**Los iconos salen de `logo.jpeg`** con el script que quedó documentado abajo.
+El `maskable` va al 58% del lienzo porque Android recorta en círculo, squircle
+o gota según el lanzador, y la zona segura es solo el 80% central. Verificado:
+cero píxeles de contenido fuera del círculo.
+
+**iOS ignora el manifest para el icono** y usa `apple-touch-icon`. Por eso esa
+etiqueta está aparte.
+
+**Gladiatore no lleva manifest a propósito.** Es otra marca; ofrecer «instalar
+Lucky Point» desde la pizzería sería raro. Solo lleva su `theme-color` negro,
+porque sin él la barra de estado se quedaba con el crema de la cafetería.
+
+**`start_url` apunta a `/?origen=app`.** Ese parámetro no lo lee nadie: está
+para poder distinguir en los logs de Railway cuánta gente entra desde el icono
+instalado. El campo `id` queda fijo en `/` para que cambiar el `start_url` más
+adelante no cree una app distinta en el teléfono de quien ya la instaló.
+
+**Cuando exista la billetera, `start_url` debería pasar a `/dashboard`.** Hoy
+apunta a la portada porque el dashboard todavía muestra saldo cero, y abrir la
+app instalada en una pantalla vacía no dice nada.
+
+### Regenerar los iconos
+
+```python
+# desde lucky_app, con Pillow instalado
+from PIL import Image
+im = Image.open('flask_app/static/img/logo.jpeg').convert('RGB')
+caja = im.crop((68, 72, 453, 489))          # el contenido, sin el margen del JPEG
+
+def lienzo(lado, escala):
+    salida = Image.new('RGB', (lado, lado), (0, 0, 0))
+    objetivo = int(lado * escala)
+    prop = caja.width / caja.height
+    nw, nh = (objetivo, int(objetivo / prop)) if prop >= 1 else (int(objetivo * prop), objetivo)
+    salida.paste(caja.resize((nw, nh), Image.LANCZOS), ((lado - nw) // 2, (lado - nh) // 2))
+    return salida
+
+D = 'flask_app/static/img/pwa'
+lienzo(512, .78).save(f'{D}/icono-512.png', optimize=True)
+lienzo(192, .78).save(f'{D}/icono-192.png', optimize=True)
+lienzo(180, .78).save(f'{D}/apple-touch-icon.png', optimize=True)
+lienzo(512, .58).save(f'{D}/icono-maskable-512.png', optimize=True)   # 58%: zona segura
+```

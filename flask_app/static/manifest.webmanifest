@@ -1,0 +1,54 @@
+{
+  "name": "Lucky Point Coffee",
+  "short_name": "Lucky Point",
+  "description": "Carta, talleres y tus Lucky Points. Café de especialidad en Osorno.",
+  "lang": "es-CL",
+  "dir": "ltr",
+  "start_url": "/?origen=app",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "theme_color": "#F7F0E4",
+  "background_color": "#F7F0E4",
+  "categories": ["food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/static/img/pwa/icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/img/pwa/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/img/pwa/icono-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ver la carta",
+      "short_name": "Carta",
+      "url": "/?origen=app#carta",
+      "icons": [{ "src": "/static/img/pwa/icono-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Talleres y catas",
+      "short_name": "Talleres",
+      "url": "/actividades?origen=app",
+      "icons": [{ "src": "/static/img/pwa/icono-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mi cuenta",
+      "short_name": "Mi cuenta",
+      "url": "/dashboard?origen=app",
+      "icons": [{ "src": "/static/img/pwa/icono-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

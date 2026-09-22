@@ -3,6 +3,21 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- ── PWA: instalable en la pantalla de inicio ────────────────────────
+     Sin service worker a propósito. Chrome dejó de exigirlo para instalar
+     (108 en móvil, 112 en escritorio) justo porque la gente ponía service
+     workers vacíos solo para cumplir el requisito. Y un service worker que
+     cachee la carta serviría precios viejos, que es exactamente la falla
+     que este proyecto evita en todos lados. Si algún día se agrega, que sea
+     red-primero y que nunca toque precios ni saldo. -->
+<link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}" />
+<meta name="theme-color" content="#F7F0E4" />
+<!-- iOS ignora el manifest para el icono: usa esta etiqueta. -->
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/pwa/apple-touch-icon.png') }}" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Lucky Point" />
+<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='img/pwa/icono-192.png') }}" />
 <title>Lucky Point Coffee · Café de especialidad en Osorno</title>
   <meta name="description" content="Café de especialidad en Osorno, Chile. Revisa nuestra carta digital y compra café en grano y accesorios en la tienda online." />
 <meta name="robots" content="index, follow" />
@@ -15,11 +30,17 @@
 <meta property="og:title" content="Lucky Point Coffee · Café de especialidad en Osorno" />
   <meta property="og:description" content="Carta digital y tienda online de café en grano y accesorios de Lucky Point Coffee." />
 <meta property="og:url" content="https://www.luckypointcoffee.cl/" />
-<meta property="og:image" content="https://www.luckypointcoffee.cl/assets/images/og-cover.jpg" />
+<!-- La imagen de la vista previa se arma con url_for y no escrita a mano
+     (auditoría 2026-09-16): apuntaba a /assets/images/og-cover.jpg, que era la
+     ruta del sitio en GitHub Pages. Sirviendo desde Flask esa ruta da 404, así
+     que WhatsApp, Instagram y Facebook mostraban el enlace sin imagen. Con
+     _external=True sale la dirección absoluta que piden las redes, la del
+     dominio donde de verdad está corriendo el sitio. -->
+<meta property="og:image" content="{{ url_for('static', filename='img/og-cover.jpg', _external=True) }}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Lucky Point Coffee · Café de especialidad en Osorno" />
   <meta name="twitter:description" content="Carta digital y tienda online de café en grano y accesorios de Lucky Point Coffee." />
-<meta name="twitter:image" content="https://www.luckypointcoffee.cl/assets/images/og-cover.jpg" />
+<meta name="twitter:image" content="{{ url_for('static', filename='img/og-cover.jpg', _external=True) }}" />
 
 <!-- Datos estructurados (SEO + AEO): negocio local -->
 <script type="application/ld+json">
@@ -28,7 +49,7 @@
   "@type": "CafeOrCoffeeShop",
   "@id": "https://www.luckypointcoffee.cl/#negocio",
   "name": "Lucky Point Coffee",
-  "image": "https://www.luckypointcoffee.cl/assets/images/og-cover.jpg",
+  "image": "{{ url_for('static', filename='img/og-cover.jpg', _external=True) }}",
   "url": "https://www.luckypointcoffee.cl/",
   "telephone": "+56927212760",
   "priceRange": "$$",
