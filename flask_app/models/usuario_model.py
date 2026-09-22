@@ -139,6 +139,14 @@ class Usuario:
         COALESCE deja que los campos que llegan vacíos conserven lo que ya
         había: si el invitado tenía teléfono y ahora no lo escribe, no se
         borra.
+
+        EL WHERE ES LA SEGURIDAD, no una optimización (auditoría 2026-09-16).
+        Reclamar convierte a quien se registra en dueño de una fila que ya
+        existe, con el rol que esa fila tenga. Si el filtro vive solo en el
+        controlador, el día que alguien llame a este método desde otro lado
+        —un importador, un script, una ruta nueva— el agujero vuelve. Acá:
+        solo filas que de verdad son invitados, cliente y sin contraseña.
+        Devuelve las filas afectadas: 0 significa que no correspondía.
         """
         return connectToMySQL(DB).query_db(
             """UPDATE usuarios SET
@@ -149,7 +157,11 @@ class Usuario:
                  nickname      = COALESCE(%(nickname)s, nickname),
                  rut           = COALESCE(%(rut)s, rut),
                  telefono      = COALESCE(%(telefono)s, telefono)
-               WHERE id = %(id)s""",
+               WHERE id = %(id)s
+                 AND password_hash IS NULL
+                 AND estado = 'invitado'
+                 AND rol = 'cliente'
+                 AND deleted_at IS NULL""",
             {"hash": password_hash, "nombre": nombre, "apellido": apellido,
              "nickname": nickname, "rut": rut, "telefono": telefono,
              "id": usuario_id},

@@ -17,7 +17,31 @@ app = Flask(__name__)
 
 # La clave de sesión sale del entorno. Si queda escrita en el código, cualquiera
 # con acceso al repo puede firmar cookies de sesión y entrar como quien quiera.
-app.secret_key = os.environ.get("SECRET_KEY", "dev-solo-para-local-cambiar-en-produccion")
+#
+# EN PRODUCCIÓN, SIN CLAVE PROPIA LA APP NO ARRANCA (auditoría 2026-09-16).
+# Antes había un valor por defecto y listo: si te olvidabas de poner
+# SECRET_KEY en el panel del servidor, el sitio levantaba igual, firmando las
+# sesiones con una clave que está escrita en este archivo y publicada en el
+# repositorio. Con esa clave cualquiera se fabrica una cookie de administrador
+# —no hay que adivinar ninguna contraseña— y nada en pantalla delata que pasó.
+#
+# Un fallo ruidoso al arrancar es mucho más barato que ese silencio. En local
+# sigue habiendo valor por defecto: ahí la comodidad gana y no hay nada que
+# robar.
+CLAVE_DE_MENTIRA = "dev-solo-para-local-cambiar-en-produccion"
+_clave = os.environ.get("SECRET_KEY") or ""
+
+if os.environ.get("FLASK_ENV") == "production" and (
+        not _clave or _clave == CLAVE_DE_MENTIRA or len(_clave) < 32):
+    raise RuntimeError(
+        "Falta SECRET_KEY, o es la de ejemplo, o es muy corta. En producción "
+        "firma las sesiones y los enlaces de correo: con una clave conocida "
+        "cualquiera se fabrica una sesión de administrador. Genera una con:  "
+        'python -c "import secrets; print(secrets.token_urlsafe(48))"  y '
+        "guárdala en las variables del servicio."
+    )
+
+app.secret_key = _clave or CLAVE_DE_MENTIRA
 
 # --- Detrás del proxy de Railway (o de cualquier PaaS) ----------------------
 # Railway termina el HTTPS en su borde y le habla a la app por HTTP interno.
@@ -67,6 +91,34 @@ DB = os.environ.get("DB_NAME", "lucky_point_db")
 # en main_controller.py por un redirect a esta variable. Mientras tanto queda
 # apuntando a la raíz local.
 SITIO_PUBLICO = os.environ.get("SITIO_PUBLICO", "/")
+
+
+@app.after_request
+def cabeceras_de_seguridad(respuesta):
+    """
+    Tres cabeceras que el navegador respeta y que no cuestan nada
+    (auditoría 2026-09-16). No son un antivirus: cierran tres puertas
+    conocidas.
+
+      nosniff        — el navegador no adivina el tipo de un archivo. Sin
+                       esto, algo subido como .txt puede terminar
+                       ejecutándose como JavaScript.
+      SAMEORIGIN     — nadie puede meter el panel de admin dentro de un
+                       <iframe> en su sitio y engañar a quien hace clic
+                       (clickjacking). SAMEORIGIN y no DENY para no romper
+                       vistas previas del propio sitio.
+      Referrer-Policy— al salir a otro sitio no se le regala la URL completa
+                       de dónde venías. Importa en los enlaces del voucher,
+                       que llevan el código en la dirección.
+
+    Lo que NO hay acá es Content-Security-Policy, y es a propósito: las
+    plantillas todavía traen estilos y scripts en línea, así que una CSP
+    estricta rompería el sitio. Va cuando ese CSS salga a sus archivos.
+    """
+    respuesta.headers.setdefault("X-Content-Type-Options", "nosniff")
+    respuesta.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    respuesta.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return respuesta
 
 
 @app.context_processor

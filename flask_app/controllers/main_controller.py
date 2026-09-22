@@ -63,10 +63,50 @@ def _nickname_del_formulario(valor):
     return limpio, None
 
 
+def _sesion_vigente():
+    """
+    Relee de la base la cuenta de quien tiene la sesión abierta y devuelve la
+    fila, o None si esa sesión ya no vale.
+
+    POR QUÉ NO BASTA LA COOKIE (auditoría 2026-09-16). La cookie guarda el rol
+    y el nombre tal como estaban al iniciar sesión, y está firmada, así que no
+    se puede falsificar. Pero se queda vieja: bloquear a alguien desde
+    /admin/usuarios no lo echaba del sitio, y quitarle el rol a un admin lo
+    dejaba entrando al panel hasta que se le ocurriera cerrar sesión. Un botón
+    que dice «bloquear» tiene que bloquear ahora.
+
+    Cuesta una consulta por página protegida, por id y con índice. Si algún
+    día eso pesa, el paso siguiente es revalidar cada N segundos guardando la
+    marca de tiempo en la sesión — no volver a confiar en la cookie.
+
+    Si la base no responde, se deja pasar con lo que dice la cookie: una
+    caída de MySQL no puede cerrarle la sesión a todo el mundo, y el riesgo
+    de mostrarle su propio panel unos minutos a alguien recién bloqueado es
+    menor que el de dejar el sitio inservible.
+    """
+    guardado = session.get("usuario")
+    if not guardado:
+        return None
+    try:
+        fila = Usuario.por_id(guardado["id"])
+    except Exception as e:
+        app.logger.error("No pude revalidar la sesión: %s", e)
+        return guardado
+
+    if not fila or fila["estado"] == "bloqueado":
+        session.clear()
+        return None
+
+    # La cookie se refresca con lo que dice la base: así el nombre, el rol y
+    # el nickname que ven las plantillas están al día sin cerrar sesión.
+    session["usuario"] = Usuario.para_sesion(fila)
+    return session["usuario"]
+
+
 def requiere_sesion(vista):
     @wraps(vista)
     def envoltura(*args, **kwargs):
-        if not session.get("usuario"):
+        if not _sesion_vigente():
             flash("Inicia sesión para ver esa página.", "error")
             return redirect(url_for("login"))
         return vista(*args, **kwargs)
@@ -82,7 +122,7 @@ def requiere_admin(vista):
     """
     @wraps(vista)
     def envoltura(*args, **kwargs):
-        usuario = session.get("usuario")
+        usuario = _sesion_vigente()
         if not usuario:
             flash("Inicia sesión para ver esa página.", "error")
             return redirect(url_for("login"))
@@ -481,7 +521,20 @@ def registro():
     # Un invitado es alguien que quedó en la base sin haberse registrado
     # (se inscribió a una actividad, por ejemplo). No es una cuenta: es un
     # marcador. Registrarse con ese correo la reclama y hereda el historial.
-    if existente and not existente["password_hash"]:
+    #
+    # LAS TRES CONDICIONES IMPORTAN, y mirar solo el hash fue un agujero real
+    # (auditoría 2026-09-16): el esquema sembraba una cuenta de administrador
+    # con el hash en NULL, así que cualquiera que se registrara con ESE correo
+    # —publicado en el pie del sitio— se quedaba con la cuenta y con su rol.
+    # Un invitado nace en actividad_controller con rol='cliente' y
+    # estado='invitado'; cualquier otra cosa sin contraseña es una cuenta que
+    # no se reclama, se recupera por correo.
+    es_invitado = (existente
+                   and not existente["password_hash"]
+                   and existente["estado"] == "invitado"
+                   and existente["rol"] == "cliente")
+
+    if es_invitado:
         Usuario.reclamar(existente["id"], hashear(clave), nombre, apellido,
                          rut, datos["telefono"], nickname=nickname)
         fila = Usuario.por_id(existente["id"])

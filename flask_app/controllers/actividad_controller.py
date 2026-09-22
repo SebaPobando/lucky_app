@@ -131,6 +131,26 @@ def _url_externa(valor, que="el afiche"):
     return v, None
 
 
+def _volver_seguro(por_defecto):
+    """
+    A dónde vuelve un formulario del panel. SOLO rutas de este sitio.
+
+    El campo `volver` viaja escondido en el formulario para devolver al admin
+    a la misma pantalla y con los mismos filtros. Aceptarlo tal cual era un
+    redirect abierto (auditoría 2026-09-16): el sitio prestaba su nombre para
+    llevar a cualquier parte. El resto del proyecto ya lo hacía bien —ver
+    _destino() en muro_controller y _volver() en usuarios_controller—; estas
+    cuatro rutas se habían quedado atrás.
+
+    '//otro.sitio' se rechaza además de 'https://otro.sitio': el navegador lee
+    las dos barras como «mismo protocolo, otro dominio».
+    """
+    destino = (request.form.get("volver") or "").strip()
+    if destino.startswith("/") and not destino.startswith("//"):
+        return destino
+    return por_defecto
+
+
 def _vista(fila):
     """
     Agrega a la fila lo que la plantilla necesita y el SQL no da: las fechas
@@ -486,7 +506,7 @@ def admin_inscripcion_estado(inscripcion_id):
         abort(400)
     Actividad.cambiar_estado_inscripcion(inscripcion_id, estado)
     flash("Inscripción actualizada.", "info")
-    return redirect(request.form.get("volver") or url_for("admin_actividades"))
+    return redirect(_volver_seguro(url_for("admin_actividades")))
 
 
 # ========================================================================
@@ -657,7 +677,7 @@ def admin_inscripcion_confirmar(inscripcion_id):
         flash(f"Voucher activado para {quien}. El envío de correos todavía no "
               "está configurado, así que el mensaje quedó en la carpeta "
               "buzon/: cópiale el enlace y mándaselo tú.", "info")
-    return redirect(request.form.get("volver") or url_for("admin_actividades"))
+    return redirect(_volver_seguro(url_for("admin_actividades")))
 
 
 @app.route("/admin/inscripciones/<int:inscripcion_id>/rechazar", methods=["POST"])
@@ -675,7 +695,7 @@ def admin_inscripcion_rechazar(inscripcion_id):
     fila = Actividad.rechazar_pago(inscripcion_id, motivo)
     _correo_rechazo(fila)
     flash("Le avisamos que el comprobante no cuadró.", "info")
-    return redirect(request.form.get("volver") or url_for("admin_actividades"))
+    return redirect(_volver_seguro(url_for("admin_actividades")))
 
 
 # ------------------------------------- compartir el enlace a mano
@@ -763,4 +783,4 @@ def admin_inscripcion_reenviar(inscripcion_id):
         # el log. Decirle «listo» al admin cuando no salió sería peor.
         flash(f"No pude enviar el correo a {fila['email']}. Revisa el log; "
               "igual puedes copiar el enlace y mandárselo tú.", "error")
-    return redirect(request.form.get("volver") or url_for("admin_actividades"))
+    return redirect(_volver_seguro(url_for("admin_actividades")))

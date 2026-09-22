@@ -233,10 +233,22 @@ INSERT INTO categorias (marca_id, slug, nombre, orden) VALUES
     (2, 'bebestibles', 'Bebestibles',  3),
     (2, 'promos',      'Promos',       4);
 
--- Tu cuenta de administrador. El hash va vacío a propósito: lo llenamos cuando
--- exista el registro real (Fase 2). Por ahora la app usa sesión de demostración.
-INSERT INTO usuarios (email, nombre, apellido, rol, estado, email_verificado_at) VALUES
-    ('contacto@luckypoint.cl', 'Seba', 'Poblete', 'admin', 'activo', NOW());
+-- LA CUENTA DE ADMINISTRADOR NO SE SIEMBRA ACÁ, y es una regla de seguridad,
+-- no una molestia (auditoría 2026-09-16).
+--
+-- Antes esta línea creaba 'contacto@luckypoint.cl' con rol admin y el hash en
+-- NULL, de cuando el registro era una maqueta. Con el registro real eso quedó
+-- siendo una puerta: el formulario trata a toda cuenta sin contraseña como un
+-- «invitado» reclamable, así que cualquiera que se registrara con ese correo
+-- —que está publicado en el pie del sitio— se quedaba con la cuenta Y con su
+-- rol de administrador. El registro ya no lo permite, y acá tampoco se deja
+-- la cuenta servida.
+--
+-- El administrador se crea con contraseña, desde la máquina, una sola vez:
+--
+--     python crear_admin.py
+--
+-- y después, en la base:  UPDATE usuarios SET rol='admin' WHERE email='...';
 
 
 -- =============================================================================
