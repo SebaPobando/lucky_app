@@ -133,6 +133,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/agenda.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/muro.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cuenta-nav.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/promo.css') }}" />
 <script src="{{ url_for('static', filename='js/config.js') }}"></script>
 <script src="{{ url_for('static', filename='js/account.js') }}"></script>
 
@@ -887,6 +888,12 @@
 </style>
 </head>
 <body>
+
+{# El banner de promocion va ANTES del header a proposito: aca el header es
+   `position: sticky`, asi que la promo lo empuja hacia abajo sin taparlo y se
+   va sola con el scroll. Fijo habria que calcularle la altura y sumarsela al
+   header en cada resize. Si no hay promo vigente, el include no pinta nada. #}
+{% include '_promo.html' %}
 
 <!-- ============================ HEADER ============================ -->
 <header class="header">
@@ -1756,5 +1763,6 @@
 <script src="{{ url_for('static', filename='js/tienda-rapida.js') }}"></script>
 <script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
 <script src="{{ url_for('static', filename='js/muro.js') }}"></script>
+<script src="{{ url_for('static', filename='js/promo.js') }}"></script>
 </body>
 </html>

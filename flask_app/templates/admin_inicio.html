@@ -73,6 +73,25 @@
       {% endif %}
     </a>
 
+    <a class="panel__card" href="{{ url_for('admin_promos') }}">
+      <h2 class="panel__tit">Promos</h2>
+      <p class="panel__desc">
+        El banner de la portada, con su plazo. Se muestra una sola a la vez y
+        se retira solo cuando se cumple el tiempo.
+      </p>
+      {# Lo vigente primero: es lo que la gente está viendo ahora mismo en la
+         portada, y es el dato que hace falta antes de cargar otra. #}
+      {% if promos.vigentes %}
+      <span class="panel__dato">
+        {{ promos.vigentes }} en la portada
+      </span>
+      {% else %}
+      <span class="panel__dato">
+        {{ promos.total }} cargada{{ 's' if promos.total != 1 }}
+      </span>
+      {% endif %}
+    </a>
+
     <a class="panel__card" href="{{ url_for('admin_usuarios') }}">
       <h2 class="panel__tit">Cuentas</h2>
       <p class="panel__desc">

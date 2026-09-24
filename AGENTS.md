@@ -522,6 +522,80 @@ aceptar una URL sería un redirect abierto.
 
 ---
 
+### 7.9 Las promos de la portada
+
+El admin carga una promo en `/admin/promos` y la landing muestra un banner con
+el tiempo que le queda. Al cumplirse el plazo el banner se retira solo: nadie
+tiene que acordarse de apagarlo.
+
+**El plazo son DOS FECHAS, no una duración.** La alternativa era guardar «dura
+48 horas» y contarlas desde la publicación; suena más simple hasta la primera
+edición del texto, cuando nadie sabe si el plazo se reinicia. Los atajos del
+formulario («24 horas», «hasta el domingo») rellenan `fin_at`; lo que se
+guarda es siempre una fecha. UTC, como todo el resto.
+
+**Los segundos que quedan los calcula MySQL**, no Python ni el navegador.
+`Promo.vigente()` devuelve `segundos` ya restados contra `UTC_TIMESTAMP()`, y
+el front cuenta hacia abajo desde ese número. Contra una fecha absoluta el
+plazo dependería del reloj de cada visitante: quien lo tenga corrido ve otra
+cosa, y quien lo atrase se extiende la promo solo.
+
+En el navegador el contador se deriva de un **vencimiento local calculado una
+vez al cargar**, no de un `restan -= 1`: en segundo plano el navegador frena
+los timers y un contador que resta por tick se va quedando atrás.
+
+**El interruptor (`activa`) está separado de las fechas** y manda sobre ellas.
+Es para el caso real: el 2x1 se cae a las seis porque se acabó el café y hay
+que sacar el banner en ese momento, sin editar fechas. Reponerlo devuelve la
+promo con su plazo intacto.
+
+**El estado se deriva, no se guarda.** Programada, activa, terminada y pausada
+salen de comparar las fechas con el ahora en el mismo SELECT. Una columna
+`estado` habría que mantenerla con un cron, y el primer día que ese cron no
+corra la portada muestra una promo vencida. Mismo criterio que los cupos.
+
+**Se muestra UNA SOLA** aunque haya varias cargadas: mayor `prioridad`
+primero y, a igual prioridad, la que termina antes. Sin eso, el día que se
+deje una programada y se olvide la anterior hay dos banners peleando.
+
+**El destino del botón se valida**: tiene que empezar con `#` o `/`, y no con
+`//`. Una URL cualquiera sería un redirect abierto y un `javascript:` pegado
+ahí termina dentro de un atributo del HTML de la portada. Mismo cuidado que el
+`volver` del muro y el afiche de las actividades. Texto y destino van juntos o
+no va ninguno: medio botón no lleva a ninguna parte.
+
+**El banner va EN FLUJO, antes del `<header>`**, y no fijo: en la landing el
+header es `position: sticky`, así que la promo lo empuja hacia abajo sin
+taparlo y se va sola con el scroll. Fijo habría que calcularle la altura y
+sumársela al header en cada resize. La burbuja sí es fija, con `z-index: 80`
+— sobre el header (50) y bajo el modal de la tienda (85) y el drawer (90),
+para que nunca quede encima del botón de pagar.
+
+**Los dos elementos nacen `hidden` y los abre un script inline** que va en el
+propio partial, antes del primer pintado: quien ya cerró esta promo tiene que
+ver la burbuja y no el banner, y esa decisión vive en `localStorage`. Pintando
+el banner y escondiéndolo después se vería un salto del contenido en cada
+carga. Lo recordado es **por id de promo**: una promo nueva vuelve a mostrarse
+entera en vez de quedar silenciada por un clic de hace tres semanas.
+
+**Bajar por la página no es una decisión sobre la promo.** Si el banner se
+pierde de vista sin que nadie lo cierre, aparece la burbuja, pero eso no se
+guarda. Y el banner NO se esconde en ese caso: un elemento con `display:none`
+no vuelve a disparar el IntersectionObserver, así que esconderlo dejaría la
+burbuja pegada aunque la persona subiera de nuevo.
+
+El contador va `aria-hidden` porque cambia cada segundo; el plazo viaja en
+palabras dentro de la bajada, que es lo que sí lee un lector de pantalla.
+
+Archivos: `schema/promos.sql` · `models/promo_model.py` ·
+`controllers/promo_controller.py` · `templates/admin_promos.html`,
+`_promo.html` · `static/css/promo.css` · `static/js/promo.js`. La migración
+es incremental e idempotente:
+
+    mysql -u root -p --default-character-set=utf8mb4 -e "source schema/promos.sql"
+
+---
+
 ## 8. El header nunca cupo (leer antes de tocar el nav)
 
 El nav horizontal solo existe **sobre 1200px**, y ahí `.header__inner` es un

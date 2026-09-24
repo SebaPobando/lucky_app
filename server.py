@@ -5,6 +5,7 @@ from flask_app.controllers import actividad_controller  # noqa: F401
 from flask_app.controllers import muro_controller  # noqa: F401
 from flask_app.controllers import usuarios_controller  # noqa: F401
 from flask_app.controllers import tienda_controller  # noqa: F401
+from flask_app.controllers import promo_controller  # noqa: F401
 
 if __name__ == "__main__":
     # Esto corre SOLO cuando ejecutas `python server.py` en tu máquina. En

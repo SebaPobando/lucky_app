@@ -321,9 +321,20 @@ def home():
     from flask_app.controllers.tienda_controller import catalogo_para_plantilla
     tienda = catalogo_para_plantilla()
 
+    # La promo del banner. Viene resuelta desde el servidor y no por fetch:
+    # con un fetch la portada se pintaria primero sin banner y el banner
+    # caeria encima medio segundo despues, empujando lo que la persona ya
+    # empezo a leer. `tiempo` va porque el banner escribe el plazo en
+    # palabras para quien usa lector de pantalla. Nunca lanza.
+    from flask_app.config import tiempo
+    from flask_app.controllers.promo_controller import promo_para_plantilla
+    promo = promo_para_plantilla()
+
     from flask_app.models.muro_model import LARGO_MENSAJE, LARGO_NICKNAME
     return render_template("landing.html", agenda=agenda, muro=muro,
                            tienda=tienda,
+                           promo=promo,
+                           tiempo=tiempo,
                            muro_limite=EN_LA_LANDING,
                            largo_mensaje=LARGO_MENSAJE,
                            largo_nickname=LARGO_NICKNAME)

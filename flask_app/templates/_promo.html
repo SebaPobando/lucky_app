@@ -1,0 +1,112 @@
+{#
+  _promo.html — el banner de promoción de la portada
+
+  Va ANTES del <header> y en flujo normal, no fijo. En la landing el header es
+  `position: sticky`, así que el banner lo empuja hacia abajo sin taparlo y sin
+  pelear con ningún z-index: al hacer scroll el banner se va y el header queda
+  pegado arriba, como siempre. Un banner fijo habría obligado a calcular su
+  altura por JS y a sumarla al header en cada resize.
+
+  LOS DOS ELEMENTOS NACEN `hidden` Y LOS ABRE EL SCRIPT DE ABAJO, que es inline
+  y síncrono a propósito: quien ya cerró esta promo tiene que ver la burbuja y
+  no el banner, y esa decisión vive en el navegador. Pintando el banner y
+  escondiéndolo después se vería un salto del contenido en cada carga. Mismo
+  criterio que el catálogo de la tienda, que se inyecta resuelto en vez de
+  pedirse por fetch.
+
+  El contador cambia cada segundo, así que va `aria-hidden`: un lector de
+  pantalla anunciando los segundos es insoportable. El plazo viaja en texto
+  normal dentro de la bajada, que es lo que sí se lee.
+#}
+{% if promo %}
+<section class="promo" id="lpPromo" hidden
+         data-promo="{{ promo.id }}" data-segundos="{{ promo.segundos }}"
+         role="region" aria-label="Promoción vigente">
+  <div class="promo__interior">
+    <img class="promo__mascota"
+         src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}"
+         alt="" aria-hidden="true" />
+
+    <div class="promo__texto">
+      <span class="promo__etiqueta">Promoción</span>
+      <p class="promo__titulo">{{ promo.nombre }}</p>
+      <p class="promo__bajada">
+        {% if promo.bajada %}{{ promo.bajada }} {% endif %}
+        <span data-promo-plazo>Termina el {{ tiempo.largo(promo.fin_at) }}.</span>
+      </p>
+    </div>
+
+    <div class="promo__reloj" data-promo-reloj aria-hidden="true">
+      <span class="promo__caja" data-promo-dias hidden>
+        <b class="promo__num" data-promo-dd>00</b><i class="promo__rot">días</i>
+      </span>
+      <span class="promo__caja">
+        <b class="promo__num" data-promo-hh>00</b><i class="promo__rot">hrs</i>
+      </span>
+      <span class="promo__caja">
+        <b class="promo__num" data-promo-mm>00</b><i class="promo__rot">min</i>
+      </span>
+      <span class="promo__caja">
+        <b class="promo__num" data-promo-ss>00</b><i class="promo__rot">seg</i>
+      </span>
+    </div>
+
+    {% if promo.boton_texto and promo.boton_destino %}
+    <a class="promo__cta" href="{{ promo.boton_destino }}">{{ promo.boton_texto }}</a>
+    {% endif %}
+  </div>
+
+  <button class="promo__cerrar" type="button" data-promo-cerrar aria-label="Cerrar la promoción">
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+         stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</section>
+
+{# La burbuja es la promo en reposo: sigue disponible sin estorbar. Aparece al
+   cerrar el banner y también cuando el banner se pierde de vista por scroll,
+   pero eso último NO se recuerda — no es una decisión de la persona. #}
+<div class="promo-burbuja" id="lpPromoBurbuja" hidden>
+  <img class="promo-burbuja__mascota"
+       src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}"
+       alt="" aria-hidden="true" />
+  {# El globo y el aspa van hermanos dentro de esta caja, y no el aspa dentro
+     del globo: un <button> dentro de otro <button> es HTML invalido. Misma
+     trampa que el <button> dentro de <a> de las tarjetas de la tienda. #}
+  <div class="promo-burbuja__caja">
+    <button class="promo-burbuja__globo" type="button" data-promo-abrir>
+      <span class="promo-burbuja__etiqueta">Promoción</span>
+      <span class="promo-burbuja__titulo">{{ promo.nombre }}</span>
+      <span class="promo-burbuja__reloj" data-promo-mini aria-hidden="true">--:--:--</span>
+    </button>
+    <button class="promo-burbuja__descartar" type="button" data-promo-descartar
+            aria-label="No mostrar más esta promoción">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+           stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+/* Decide QUÉ se muestra antes del primer pintado. Todo lo demás (el contador,
+   cerrar, reabrir) vive en static/js/promo.js, que carga al final como el
+   resto. Acá solo va lo que no puede esperar sin provocar un salto visual. */
+(function () {
+  "use strict";
+  var banner = document.getElementById('lpPromo');
+  var burbuja = document.getElementById('lpPromoBurbuja');
+  if (!banner) { return; }
+  var modo = 'banner';
+  try {
+    var guardado = JSON.parse(window.localStorage.getItem('lp_promo_v1') || 'null');
+    /* La decisión se guarda POR PROMO: una promo nueva vuelve a mostrarse
+       entera, en vez de quedar silenciada por un clic de hace tres semanas. */
+    if (guardado && String(guardado.id) === banner.dataset.promo) {
+      modo = guardado.modo === 'descartada' ? 'nada' : 'burbuja';
+    }
+  } catch (e) { /* modo privado o storage bloqueado: se muestra el banner */ }
+
+  if (modo === 'banner') { banner.hidden = false; }
+  else if (modo === 'burbuja' && burbuja) { burbuja.hidden = false; }
+})();
+</script>
+{% endif %}
