@@ -603,6 +603,29 @@ es un registro, no la billetera de la Fase 3: no suma puntos todavía. Cómo
 darlo de alta en Shopify y el `SHOPIFY_WEBHOOK_SECRET` que necesita están en
 el `.env.example`.
 
+Ese panel muestra el nombre de quien compró (aunque compre sin cuenta), el
+detalle de cada ítem con cantidad y precio, y un link directo a la orden en
+el admin de Shopify. Un **segundo webhook** opcional, de tipo «Order updated»
+(`/webhooks/shopify/orders-updated`, mismo secreto), marca los pedidos que se
+reembolsan después: sin él el registro seguiría mostrando como venta normal
+algo que ya se devolvió.
+
+**Las ventas se miran por día, semana, mes o año.** Un selector arriba del
+listado reagrupa los pedidos según el corte elegido, y cada encabezado trae
+cuántos pedidos y cuánto se vendió en ese período. El corte viaja en la URL
+(`?periodo=mes`), así que se puede dejar marcado o compartir.
+
+Dos detalles de cómo se cuenta la plata, porque equivocarse ahí en silencio
+sería el peor modo de fallar de este panel. Uno: **los totales se calculan
+sobre todos los pedidos**, no sobre los que alcanzan a listarse — si un
+período tiene más pedidos de los que se muestran, el encabezado avisa
+cuántos quedaron fuera del listado, pero su total ya los incluye. Dos: **lo
+reembolsado no suma**, ni en los totales por período ni en la pastilla de
+arriba (ni en la tarjeta de `/admin`, que usa el mismo cálculo); se sigue
+contando como pedido y se avisa al lado cuántos quedaron fuera de la suma.
+Un reembolso *parcial* sí suma completo, porque Shopify avisa que hubo
+devolución pero este registro no guarda de cuánto fue.
+
 Lo único que le falta a la Fase 2 no es código: llenar el `.env` con las
 credenciales de Gmail (ver arriba). Hasta entonces los correos quedan en
 `buzon/`.
