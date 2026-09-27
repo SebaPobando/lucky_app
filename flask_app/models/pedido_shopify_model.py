@@ -100,11 +100,48 @@ class Pedido:
 
     @staticmethod
     def resumen():
-        """Para la pastilla del panel: cuántos pedidos y cuánto han sumado."""
+        """
+        Para la pastilla del panel: cuántos pedidos y cuánto han sumado.
+
+        Lo reembolsado NO suma: un pedido devuelto dejó de ser una venta, y
+        contarlo infla el total con plata que ya se fue. Se cuenta igual en
+        `total` —el pedido existió— y `reembolsados` dice cuántos quedaron
+        fuera de la suma, para que el número de abajo no parezca un error.
+
+        El reembolso PARCIAL sí suma completo: Shopify avisa que hubo una
+        devolución, pero este registro no guarda de cuánto fue (ver
+        orders/updated en tienda_controller.py). Restar el pedido entero
+        sería mentir más que dejarlo.
+        """
         filas = connectToMySQL(DB).query_db("""
-            SELECT COUNT(*) AS total, COALESCE(SUM(monto_clp), 0) AS total_clp
+            SELECT COUNT(*) AS total,
+                   COALESCE(SUM(CASE WHEN estado = 'reembolsado'
+                                     THEN 0 ELSE monto_clp END), 0) AS total_clp,
+                   COALESCE(SUM(estado = 'reembolsado'), 0) AS reembolsados
             FROM pedidos_shopify;
         """)
         fila = filas[0] if filas else {}
         return {"total": int(fila.get("total") or 0),
-                "total_clp": int(fila.get("total_clp") or 0)}
+                "total_clp": int(fila.get("total_clp") or 0),
+                "reembolsados": int(fila.get("reembolsados") or 0)}
+
+    @staticmethod
+    def para_totales():
+        """
+        Lo mínimo para sumar por período —fecha, monto y estado— de TODOS los
+        pedidos, sin los items ni el join con usuarios.
+
+        Existe separado de `recientes()` por una razón concreta: la lista que
+        se muestra viene recortada, y si la plata de cada mes saliera de esa
+        lista recortada, un mes con más pedidos de los que caben mostraría un
+        total más chico que el real. Equivocarse en la plata en silencio es
+        el peor modo de fallar que tiene este panel.
+
+        Son filas diminutas: para el volumen de una cafetería, traerlas todas
+        y sumarlas en Python sale más barato que enseñarle husos horarios a
+        MySQL (la fecha se guarda en UTC y los cortes son en hora de Chile).
+        """
+        return connectToMySQL(DB).query_db("""
+            SELECT creado_shopify_at, recibido_at, monto_clp, estado
+            FROM pedidos_shopify;
+        """) or []

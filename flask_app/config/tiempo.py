@@ -11,7 +11,7 @@
 #        formulario del admin y en lo que ve la gente.
 # ==========================================================================
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 # zoneinfo no trae las zonas horarias: las lee del sistema operativo. Linux y
@@ -129,6 +129,68 @@ def dia_relativo(fecha_utc):
     if delta == -1:
         return "Ayer"
     return f"{DIAS[d.weekday()]} {d.day} de {MESES[d.month - 1]}"
+
+
+# Los cuatro cortes con que el panel de pedidos deja mirar las ventas. El
+# orden es el que se pinta en pantalla, de más fino a más grueso.
+PERIODOS = ("dia", "semana", "mes", "anio")
+
+
+def periodo_de(fecha_utc, periodo="dia"):
+    """
+    (clave, etiqueta) del período en que cae esa fecha, en hora de Chile.
+
+    La CLAVE identifica el período sin ambigüedad —('mes', 2026, 9)— y es con
+    lo que se agrupa; la ETIQUETA es solo lo que se muestra. Van separadas a
+    propósito: agrupar por el texto se rompe solo, porque «25 de septiembre»
+    se escribe igual en 2025 que en 2026 y los pedidos de los dos años
+    terminarían sumados en la misma pila.
+
+    Una fecha ilegible cae en su propia clave y sin etiqueta, para que no se
+    mezcle con un período real.
+    """
+    d = utc_a_local(fecha_utc)
+    if not d:
+        return ("sin-fecha",), ""
+
+    f = d.date()
+    hoy = utc_a_local(ahora_utc()).date()
+
+    if periodo == "semana":
+        # La semana va de lunes a domingo, como el calendario de acá.
+        lunes = f - timedelta(days=f.weekday())
+        lunes_de_hoy = hoy - timedelta(days=hoy.weekday())
+        semanas = (lunes_de_hoy - lunes).days // 7
+        if semanas == 0:
+            etiqueta = "Esta semana"
+        elif semanas == 1:
+            etiqueta = "Semana pasada"
+        else:
+            domingo = lunes + timedelta(days=6)
+            if lunes.month == domingo.month:
+                etiqueta = (f"Semana del {lunes.day} al {domingo.day} "
+                            f"de {MESES[domingo.month - 1]}")
+            else:
+                etiqueta = (f"Semana del {lunes.day} de {MESES[lunes.month - 1]} "
+                            f"al {domingo.day} de {MESES[domingo.month - 1]}")
+        return ("semana", lunes.year, lunes.month, lunes.day), etiqueta
+
+    if periodo == "mes":
+        meses = (hoy.year - f.year) * 12 + (hoy.month - f.month)
+        if meses == 0:
+            etiqueta = "Este mes"
+        elif meses == 1:
+            etiqueta = "Mes pasado"
+        elif f.year == hoy.year:
+            etiqueta = MESES[f.month - 1]
+        else:
+            etiqueta = f"{MESES[f.month - 1]} {f.year}"
+        return ("mes", f.year, f.month), etiqueta
+
+    if periodo == "anio":
+        return ("anio", f.year), ("Este año" if f.year == hoy.year else str(f.year))
+
+    return ("dia", f.year, f.month, f.day), dia_relativo(fecha_utc)
 
 
 def fecha(fecha_utc):

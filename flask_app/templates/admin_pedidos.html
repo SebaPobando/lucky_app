@@ -24,11 +24,38 @@
   .fila__nombre { font-weight: var(--fw-bold); color: var(--lp-espresso); overflow-wrap: anywhere; }
   .fila__correo { font-size: .82rem; color: var(--text-muted); overflow-wrap: anywhere; }
   .fila__cuando { font-size: .76rem; color: var(--text-muted); margin-top: 2px; }
+  /* El selector de período. Son enlaces y no botones a propósito: el corte
+     viaja en la URL, así que se puede compartir o dejar marcado. */
+  .pedidos__tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: 0 0 var(--sp-5); }
+  .pedidos__tab {
+    font-family: var(--font-body); font-weight: var(--fw-semibold); font-size: .875rem;
+    padding: 7px 16px; border-radius: var(--r-pill); text-decoration: none;
+    border: var(--bw-strong) solid var(--border-strong); color: var(--lp-coffee-600);
+    white-space: nowrap;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+                border-color var(--dur) var(--ease);
+  }
+  .pedidos__tab:hover { background: var(--surface-sand); }
+  .pedidos__tab:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+  .pedidos__tab--activa {
+    background: var(--lp-forest); color: var(--lp-cream-50); border-color: var(--lp-forest);
+  }
+
+  .pedidos__grupo {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    justify-content: space-between; gap: var(--sp-2);
+    margin: var(--sp-6) 0 var(--sp-2); padding-bottom: 6px;
+    border-bottom: var(--bw) solid var(--divider);
+  }
+  .pedidos__grupo:first-of-type { margin-top: 0; }
   .pedidos__grupo-tit {
     font-family: var(--font-display); font-size: 1rem; color: var(--lp-espresso);
-    margin: var(--sp-5) 0 var(--sp-2); text-transform: capitalize;
+    margin: 0; text-transform: capitalize;
   }
-  .pedidos__grupo-tit:first-child { margin-top: 0; }
+  .pedidos__grupo-suma { font-size: .82rem; color: var(--text-muted); }
+  .pedidos__grupo-plata { font-weight: var(--fw-bold); color: var(--lp-espresso); }
+  .pedidos__nota { font-size: .76rem; color: var(--text-muted); }
+  .pedidos__mas { font-size: .78rem; color: var(--text-muted); margin: var(--sp-3) 0 0; }
   .fila__items { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
   .fila__monto { font-family: var(--font-display); font-size: 1.1rem; color: var(--lp-espresso); white-space: nowrap; }
   .fila__badge {
@@ -59,7 +86,11 @@
       </div>
       <div class="pedidos__dato">
         <span class="pedidos__num">${{ resumen.total_clp | miles }}</span>
-        <span class="pedidos__et">vendido en total</span>
+        <span class="pedidos__et">
+          vendido en total
+          {%- if resumen.reembolsados %}<br><span class="pedidos__nota">sin contar
+          {{ resumen.reembolsados }} reembolsado{{ 's' if resumen.reembolsados != 1 }}</span>{% endif %}
+        </span>
       </div>
     </div>
 
@@ -73,9 +104,28 @@
       </p>
       {% endif %}
 
-      {% for etiqueta, del_dia in grupos %}
-      <h2 class="pedidos__grupo-tit">{{ etiqueta }}</h2>
-      {% for p in del_dia %}
+      {% if grupos %}
+      {% set nombres = {'dia': 'Día', 'semana': 'Semana', 'mes': 'Mes', 'anio': 'Año'} %}
+      <nav class="pedidos__tabs" aria-label="Agrupar las ventas por período">
+        {% for clave in periodos %}
+        <a class="pedidos__tab{{ ' pedidos__tab--activa' if periodo == clave }}"
+           href="{{ url_for('admin_pedidos') }}?periodo={{ clave }}"
+           {% if periodo == clave %}aria-current="page"{% endif %}>{{ nombres[clave] }}</a>
+        {% endfor %}
+      </nav>
+      {% endif %}
+
+      {% for g in grupos %}
+      <div class="pedidos__grupo">
+        <h2 class="pedidos__grupo-tit">{{ g.etiqueta }}</h2>
+        <span class="pedidos__grupo-suma">
+          {{ g.total }} pedido{{ 's' if g.total != 1 }} ·
+          <span class="pedidos__grupo-plata">${{ g.total_clp | miles }}</span>
+          {%- if g.reembolsados %} <span class="pedidos__nota">({{ g.reembolsados }}
+          reembolsado{{ 's' if g.reembolsados != 1 }}, sin contar)</span>{% endif %}
+        </span>
+      </div>
+      {% for p in g.pedidos %}
       <div class="fila">
         <div class="fila__quien">
           <div class="fila__nombre">
@@ -107,6 +157,13 @@
         </div>
       </div>
       {% endfor %}
+      {% if g.de_mas %}
+      <p class="pedidos__mas">
+        +{{ g.de_mas }} pedido{{ 's' if g.de_mas != 1 }} más en este período, fuera de
+        los {{ g.pedidos | length }} más recientes que se listan. La suma de arriba
+        sí los cuenta.
+      </p>
+      {% endif %}
       {% endfor %}
     </section>
 

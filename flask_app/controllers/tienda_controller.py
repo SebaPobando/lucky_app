@@ -231,30 +231,87 @@ def webhook_shopify_orden_actualizada():
 
 # --------------------------------------------------------------- el panel
 
-def _agrupar_por_dia(pedidos):
+# Cuántos pedidos con detalle se listan. No es el universo del panel: las
+# sumas por período salen de TODOS los pedidos (ver Pedido.para_totales), así
+# que subir o bajar este número cambia cuántas filas se ven, nunca la plata.
+CUANTOS_SE_LISTAN = 300
+
+
+def _cuando(pedido):
     """
-    [{...}, {...}] -> [('Hoy', [...]), ('Ayer', [...]), ...], conservando el
-    orden en que ya vienen (más reciente primero). Agrupa por la fecha LOCAL
-    de creado_shopify_at, o recibido_at si Shopify no mandó esa fecha —
-    mismo respaldo que usa cada fila para mostrar «cuándo».
+    La fecha con que se ubica un pedido en el tiempo: la de Shopify, o la de
+    cuándo llegó el aviso si Shopify no la mandó. Mismo respaldo que usa cada
+    fila para mostrar la hora, y por eso está acá una sola vez: si la lista y
+    las sumas eligieran distinto, un pedido caería en dos períodos.
     """
+    return pedido.get("creado_shopify_at") or pedido.get("recibido_at")
+
+
+def _sumar_por_periodo(filas, periodo):
+    """
+    {clave: {total, total_clp, reembolsados}} sobre TODOS los pedidos.
+
+    Lo reembolsado no suma plata pero sí cuenta como pedido, igual que en la
+    pastilla de arriba (ver Pedido.resumen, que explica por qué).
+    """
+    sumas = {}
+    for f in filas:
+        clave, _ = tiempo.periodo_de(_cuando(f), periodo)
+        d = sumas.setdefault(clave, {"total": 0, "total_clp": 0, "reembolsados": 0})
+        d["total"] += 1
+        if f.get("estado") == "reembolsado":
+            d["reembolsados"] += 1
+        else:
+            d["total_clp"] += int(f.get("monto_clp") or 0)
+    return sumas
+
+
+def _agrupar(pedidos, totales, periodo):
+    """
+    Lo que pinta el panel: [{etiqueta, pedidos, total, total_clp,
+    reembolsados, de_mas}], en el orden en que ya vienen los pedidos (más
+    reciente primero).
+
+    `pedidos` trae el detalle que se va a mostrar y viene recortado;
+    `totales` son todos, con lo justo para sumar. La plata sale SIEMPRE de
+    `totales`: si saliera de la lista recortada, un período con más pedidos
+    de los que caben mostraría un total más chico que el real sin avisar.
+    `de_mas` es justamente cuántos quedaron sin listar en ese período.
+    """
+    sumas = _sumar_por_periodo(totales, periodo)
     grupos = []
-    etiqueta_actual = None
+    clave_actual = object()   # nada puede ser igual a esto en la primera vuelta
     for p in pedidos:
-        cuando = p.get("creado_shopify_at") or p.get("recibido_at")
-        etiqueta = tiempo.dia_relativo(cuando)
-        if etiqueta != etiqueta_actual:
-            grupos.append((etiqueta, []))
-            etiqueta_actual = etiqueta
-        grupos[-1][1].append(p)
+        clave, etiqueta = tiempo.periodo_de(_cuando(p), periodo)
+        if clave != clave_actual:
+            suma = sumas.get(clave, {"total": 0, "total_clp": 0, "reembolsados": 0})
+            grupos.append({"etiqueta": etiqueta, "pedidos": [], **suma})
+            clave_actual = clave
+        grupos[-1]["pedidos"].append(p)
+
+    for g in grupos:
+        g["de_mas"] = max(0, g["total"] - len(g["pedidos"]))
     return grupos
 
 
 @app.route("/admin/pedidos")
 @requiere_admin
 def admin_pedidos():
+    """
+    El período viaja en la URL (?periodo=mes) y no en la sesión: así el panel
+    se puede compartir o dejar marcado mostrando el mismo corte. Un valor que
+    no existe cae en «día» en vez de reventar — es un parámetro que cualquiera
+    puede escribir a mano.
+    """
+    periodo = request.args.get("periodo", "dia")
+    if periodo not in tiempo.PERIODOS:
+        periodo = "dia"
+
     return render_template("admin_pedidos.html",
-                           grupos=_agrupar_por_dia(Pedido.recientes(100)),
+                           grupos=_agrupar(Pedido.recientes(CUANTOS_SE_LISTAN),
+                                           Pedido.para_totales(), periodo),
+                           periodo=periodo,
+                           periodos=tiempo.PERIODOS,
                            resumen=Pedido.resumen(),
                            tiempo=tiempo,
                            url_pedido_shopify=shopify.url_admin_pedido)
