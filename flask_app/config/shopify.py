@@ -175,6 +175,20 @@ def verificar_firma_webhook(cuerpo_bruto, firma_recibida, cfg=None):
     return hmac.compare_digest(calculada_b64, firma_recibida)
 
 
+def url_admin_pedido(shopify_order_id):
+    """
+    El link directo a esa orden en el admin de Shopify, para no tener que
+    buscarla a mano desde /admin/pedidos.
+
+    None si no hay dominio configurado o no hay id — la plantilla decide
+    qué hacer (no mostrar el botón), nunca arma un link roto.
+    """
+    dominio = _entorno().get("dominio")
+    if not dominio or not shopify_order_id:
+        return None
+    return f"https://{dominio}/admin/orders/{shopify_order_id}"
+
+
 def configurado():
     """¿Hay dominio y token? Si no, el sitio usa el respaldo escrito a mano."""
     cfg = _entorno()

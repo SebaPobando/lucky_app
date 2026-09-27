@@ -106,6 +106,31 @@ def dia_y_mes(fecha_utc):
     return (f"{d.day:02d}", MESES[d.month - 1][:3].upper())
 
 
+def hora(fecha_utc):
+    """'19:00' — para cuando la fecha ya se muestra aparte, en el
+    encabezado de un grupo por día."""
+    d = utc_a_local(fecha_utc)
+    return f"{d:%H:%M}" if d else ""
+
+
+def dia_relativo(fecha_utc):
+    """
+    'Hoy', 'Ayer', o 'jueves 25 de septiembre' — para el encabezado de un
+    grupo de pedidos por día, sin obligar a leer la fecha completa cuando
+    es reciente.
+    """
+    d = utc_a_local(fecha_utc)
+    if not d:
+        return ""
+    hoy = utc_a_local(ahora_utc()).date()
+    delta = (d.date() - hoy).days
+    if delta == 0:
+        return "Hoy"
+    if delta == -1:
+        return "Ayer"
+    return f"{DIAS[d.weekday()]} {d.day} de {MESES[d.month - 1]}"
+
+
 def fecha(fecha_utc):
     """
     '10 de septiembre'. Sin hora: para el muro de deseos, donde importa

@@ -114,6 +114,22 @@ def _fecha_shopify(iso):
         return None
 
 
+def _nombre_shopify(orden):
+    """
+    El nombre de quien compró, aunque haya comprado sin cuenta. Prueba
+    primero el cliente, después la dirección de facturación, después la de
+    despacho — Shopify no siempre manda las tres, y el orden es el de más
+    confiable a menos confiable.
+    """
+    for bloque in (orden.get("customer") or {}, orden.get("billing_address") or {},
+                   orden.get("shipping_address") or {}):
+        nombre = " ".join(p for p in [bloque.get("first_name"), bloque.get("last_name")]
+                          if p).strip()
+        if nombre:
+            return nombre[:160]
+    return None
+
+
 @app.route("/webhooks/shopify/orders-paid", methods=["POST"])
 def webhook_shopify_orden_pagada():
     """
@@ -151,6 +167,7 @@ def webhook_shopify_orden_pagada():
         "numero_orden": (orden.get("name") or orden.get("order_number") or None),
         "usuario_id": usuario["id"] if usuario else None,
         "correo_comprador": correo or "(sin correo)",
+        "nombre_comprador": _nombre_shopify(orden),
         "monto_clp": _pesos_shopify(orden.get("total_price")
                                     or orden.get("current_total_price")),
         "moneda": (orden.get("currency") or "CLP")[:3],
@@ -164,12 +181,80 @@ def webhook_shopify_orden_pagada():
     return jsonify({"ok": True}), 200
 
 
+# ==================================================== reembolsos después
+
+# Lo único que a este registro le importa del financial_status de Shopify:
+# el resto de los valores posibles (pending, paid, voided, etc.) no cambian
+# nada acá — un pedido sigue "pagado" hasta que se demuestre lo contrario.
+_ESTADOS_FINANCIEROS = {
+    "refunded": "reembolsado",
+    "partially_refunded": "reembolso_parcial",
+}
+
+
+@app.route("/webhooks/shopify/orders-updated", methods=["POST"])
+def webhook_shopify_orden_actualizada():
+    """
+    Shopify llama acá cada vez que algo cambia en una orden — no solo
+    reembolsos: dirección, etiquetas, notas, todo dispara este mismo
+    webhook. A esta app solo le importa `financial_status`: si dice
+    "refunded" o "partially_refunded", actualiza el estado del pedido que
+    ya tenía guardado (ver Pedido.actualizar_estado). Cualquier otro
+    cambio se ignora a propósito — esto no sincroniza con Shopify, solo
+    evita que un pedido devuelto siga viéndose como venta normal.
+
+    Un pedido que no pasó antes por orders/paid no se crea acá: sin fila
+    que actualizar, no hay nada que hacer.
+    """
+    cuerpo = request.get_data()
+    firma = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not shopify.verificar_firma_webhook(cuerpo, firma):
+        app.logger.warning(
+            "Webhook de Shopify (orders/updated) con firma inválida o sin configurar.")
+        return jsonify({"error": "firma inválida"}), 401
+
+    try:
+        orden = json.loads(cuerpo)
+    except ValueError:
+        return jsonify({"error": "cuerpo ilegible"}), 400
+
+    if not orden.get("id"):
+        return jsonify({"error": "sin id de orden"}), 400
+
+    estado = _ESTADOS_FINANCIEROS.get(orden.get("financial_status"))
+    if estado:
+        Pedido.actualizar_estado(orden["id"], estado)
+
+    return jsonify({"ok": True}), 200
+
+
 # --------------------------------------------------------------- el panel
+
+def _agrupar_por_dia(pedidos):
+    """
+    [{...}, {...}] -> [('Hoy', [...]), ('Ayer', [...]), ...], conservando el
+    orden en que ya vienen (más reciente primero). Agrupa por la fecha LOCAL
+    de creado_shopify_at, o recibido_at si Shopify no mandó esa fecha —
+    mismo respaldo que usa cada fila para mostrar «cuándo».
+    """
+    grupos = []
+    etiqueta_actual = None
+    for p in pedidos:
+        cuando = p.get("creado_shopify_at") or p.get("recibido_at")
+        etiqueta = tiempo.dia_relativo(cuando)
+        if etiqueta != etiqueta_actual:
+            grupos.append((etiqueta, []))
+            etiqueta_actual = etiqueta
+        grupos[-1][1].append(p)
+    return grupos
+
 
 @app.route("/admin/pedidos")
 @requiere_admin
 def admin_pedidos():
     return render_template("admin_pedidos.html",
-                           pedidos=Pedido.recientes(100),
+                           grupos=_agrupar_por_dia(Pedido.recientes(100)),
                            resumen=Pedido.resumen(),
-                           tiempo=tiempo)
+                           tiempo=tiempo,
+                           url_pedido_shopify=shopify.url_admin_pedido)

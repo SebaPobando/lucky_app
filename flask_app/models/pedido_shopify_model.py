@@ -45,13 +45,39 @@ class Pedido:
         insertado = connectToMySQL(DB).query_db("""
             INSERT IGNORE INTO pedidos_shopify
                 (shopify_order_id, numero_orden, usuario_id, correo_comprador,
-                 monto_clp, moneda, items, creado_shopify_at)
+                 nombre_comprador, monto_clp, moneda, items, creado_shopify_at)
             VALUES
                 (%(shopify_order_id)s, %(numero_orden)s, %(usuario_id)s,
-                 %(correo_comprador)s, %(monto_clp)s, %(moneda)s,
-                 %(items)s, %(creado_shopify_at)s);
+                 %(correo_comprador)s, %(nombre_comprador)s, %(monto_clp)s,
+                 %(moneda)s, %(items)s, %(creado_shopify_at)s);
         """, dict(datos, items=json.dumps(datos.get("items") or [], ensure_ascii=False)))
         return bool(insertado)
+
+    # ------------------------------------------------------- reembolsos
+
+    @staticmethod
+    def actualizar_estado(shopify_order_id, estado):
+        """
+        Cambia el estado de un pedido YA registrado (pagado -> reembolsado
+        o reembolso_parcial), avisado por el webhook orders/updated.
+
+        Si el pedido no existe acá —una actualización de una orden que
+        nunca pasó por orders/paid, por ejemplo porque el webhook de
+        reembolsos se dio de alta después— no hace nada: no inventa una
+        fila a partir de una actualización, solo a partir de un pago
+        confirmado.
+
+        Devuelve True si encontró y actualizó el pedido, False si no (no
+        existía, o ya estaba en ese estado).
+        """
+        filas = connectToMySQL(DB).query_db("""
+            UPDATE pedidos_shopify
+               SET estado = %(estado)s,
+                   estado_actualizado_at = UTC_TIMESTAMP()
+             WHERE shopify_order_id = %(shopify_order_id)s
+               AND estado != %(estado)s;
+        """, {"shopify_order_id": shopify_order_id, "estado": estado})
+        return bool(filas)
 
     # -------------------------------------------------------------- panel
 

@@ -24,8 +24,19 @@
   .fila__nombre { font-weight: var(--fw-bold); color: var(--lp-espresso); overflow-wrap: anywhere; }
   .fila__correo { font-size: .82rem; color: var(--text-muted); overflow-wrap: anywhere; }
   .fila__cuando { font-size: .76rem; color: var(--text-muted); margin-top: 2px; }
+  .pedidos__grupo-tit {
+    font-family: var(--font-display); font-size: 1rem; color: var(--lp-espresso);
+    margin: var(--sp-5) 0 var(--sp-2); text-transform: capitalize;
+  }
+  .pedidos__grupo-tit:first-child { margin-top: 0; }
   .fila__items { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
   .fila__monto { font-family: var(--font-display); font-size: 1.1rem; color: var(--lp-espresso); white-space: nowrap; }
+  .fila__badge {
+    display: inline-block; font-size: .68rem; font-weight: var(--fw-bold);
+    text-transform: uppercase; letter-spacing: .02em; padding: 2px 7px;
+    border-radius: 999px; margin-left: 6px; vertical-align: middle;
+    background: var(--lp-gold-bg); color: #8A5E13;
+  }
 </style>
 {% endblock %}
 
@@ -53,7 +64,7 @@
     </div>
 
     <section class="promoadm__caja" style="background:var(--surface-card);border:var(--bw) solid var(--border);border-radius:var(--r-md);padding:var(--sp-5)">
-      {% if not pedidos %}
+      {% if not grupos %}
       <p style="color:var(--text-muted);margin:0">
         Todavía no ha llegado ningún pedido por acá. Si ya vendes por Shopify
         y no aparece nada, revisa que el webhook «Order payment» esté dado de
@@ -62,25 +73,40 @@
       </p>
       {% endif %}
 
-      {% for p in pedidos %}
+      {% for etiqueta, del_dia in grupos %}
+      <h2 class="pedidos__grupo-tit">{{ etiqueta }}</h2>
+      {% for p in del_dia %}
       <div class="fila">
         <div class="fila__quien">
           <div class="fila__nombre">
-            {{ p.usuario_nombre or 'Sin cuenta en el sitio' }}
+            {{ p.usuario_nombre or p.nombre_comprador or 'Sin nombre' }}
+            {% if not p.usuario_nombre %}<span style="color:var(--text-muted);font-weight:var(--fw-regular)"> · sin cuenta en el sitio</span>{% endif %}
             {% if p.numero_orden %}<span style="color:var(--text-muted);font-weight:var(--fw-regular)"> · {{ p.numero_orden }}</span>{% endif %}
+            {% if p.estado == 'reembolsado' %}<span class="fila__badge">Reembolsado</span>
+            {% elif p.estado == 'reembolso_parcial' %}<span class="fila__badge">Reembolso parcial</span>{% endif %}
           </div>
           <div class="fila__correo">{{ p.correo_comprador }}</div>
           <div class="fila__cuando">
-            {{ tiempo.largo(p.creado_shopify_at) if p.creado_shopify_at else tiempo.largo(p.recibido_at) }}
+            {{ tiempo.hora(p.creado_shopify_at) if p.creado_shopify_at else tiempo.hora(p.recibido_at) }}
           </div>
           {% if p['items'] %}
           <div class="fila__items">
-            {{ p['items'] | map(attribute='titulo') | join(', ') }}
+            {% for it in p['items'] %}{{ it.cantidad }}× {{ it.titulo }} (${{ it.clp | miles }}){% if not loop.last %}, {% endif %}{% endfor %}
           </div>
           {% endif %}
         </div>
-        <div class="fila__monto">${{ p.monto_clp | miles }}</div>
+        <div style="text-align:right">
+          <div class="fila__monto">${{ p.monto_clp | miles }}</div>
+          {% set url_shopify = url_pedido_shopify(p.shopify_order_id) %}
+          {% if url_shopify %}
+          <a href="{{ url_shopify }}" target="_blank" rel="noopener"
+             style="font-size:.76rem;color:var(--text-muted);white-space:nowrap">
+            Ver en Shopify ↗
+          </a>
+          {% endif %}
+        </div>
       </div>
+      {% endfor %}
       {% endfor %}
     </section>
 
