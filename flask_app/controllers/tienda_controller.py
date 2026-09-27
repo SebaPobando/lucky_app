@@ -15,10 +15,16 @@
 # a mano es el RESPALDO, para cuando Shopify no contesta.
 # ==========================================================================
 
-from flask import jsonify
+import json
+from datetime import datetime, timezone
+
+from flask import jsonify, render_template, request
 
 from flask_app import app
-from flask_app.config import shopify
+from flask_app.config import shopify, tiempo
+from flask_app.controllers.main_controller import requiere_admin
+from flask_app.models.pedido_shopify_model import Pedido
+from flask_app.models.usuario_model import Usuario, normalizar_email
 
 
 def catalogo_para_plantilla():
@@ -74,3 +80,96 @@ def api_tienda_estado():
     «no hay internet», que desde afuera se ven todos igual.
     """
     return jsonify(shopify.estado())
+
+
+# ============================================================== el webhook
+#
+# Cuando alguien paga en el checkout de Shopify, Shopify avisa acá con el
+# webhook «orders/paid». Esto es un REGISTRO de lo que se vendió, no una
+# billetera: no suma ni descuenta saldo de puntos (ver el encabezado de
+# pedido_shopify_model.py). Cómo darlo de alta en el admin de Shopify está
+# en el .env.example — necesita el sitio ya desplegado, con URL pública.
+
+
+def _pesos_shopify(monto):
+    """'12990.00' -> 12990. Los pedidos también se guardan en CLP enteros."""
+    try:
+        return int(round(float(monto)))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _fecha_shopify(iso):
+    """
+    '2026-09-27T10:15:00-03:00' -> datetime UTC sin tzinfo, para que calce
+    con el resto de la base (ver config/tiempo.py). None si no se pudo leer
+    — un pedido con una fecha rara igual se guarda, solo que sin ese dato.
+    """
+    if not iso:
+        return None
+    try:
+        con_zona = datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+        return con_zona.astimezone(timezone.utc).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+@app.route("/webhooks/shopify/orders-paid", methods=["POST"])
+def webhook_shopify_orden_pagada():
+    """
+    Contesta rápido y simple a propósito: Shopify espera 2xx en unos
+    segundos: si no lo recibe, reintenta con backoff durante horas y termina
+    desactivando el webhook. Nada de lo que pasa acá debería demorar ni
+    depender de que algo más responda.
+    """
+    cuerpo = request.get_data()   # crudo, ANTES de parsear: la firma es sobre esto
+    firma = request.headers.get("X-Shopify-Hmac-Sha256", "")
+
+    if not shopify.verificar_firma_webhook(cuerpo, firma):
+        app.logger.warning("Webhook de Shopify con firma inválida o sin configurar.")
+        return jsonify({"error": "firma inválida"}), 401
+
+    try:
+        orden = json.loads(cuerpo)
+    except ValueError:
+        return jsonify({"error": "cuerpo ilegible"}), 400
+
+    if not orden.get("id"):
+        return jsonify({"error": "sin id de orden"}), 400
+
+    correo = normalizar_email(orden.get("email") or orden.get("contact_email") or "")
+    usuario = Usuario.por_email(correo) if correo else None
+
+    items = [{
+        "titulo": (li.get("title") or li.get("name") or "")[:200],
+        "cantidad": li.get("quantity") or 0,
+        "clp": _pesos_shopify(li.get("price")),
+    } for li in (orden.get("line_items") or [])]
+
+    guardado = Pedido.registrar({
+        "shopify_order_id": orden["id"],
+        "numero_orden": (orden.get("name") or orden.get("order_number") or None),
+        "usuario_id": usuario["id"] if usuario else None,
+        "correo_comprador": correo or "(sin correo)",
+        "monto_clp": _pesos_shopify(orden.get("total_price")
+                                    or orden.get("current_total_price")),
+        "moneda": (orden.get("currency") or "CLP")[:3],
+        "items": items,
+        "creado_shopify_at": _fecha_shopify(orden.get("created_at")),
+    })
+    if not guardado:
+        app.logger.info("Webhook de Shopify repetido, la orden %s ya estaba.",
+                        orden["id"])
+
+    return jsonify({"ok": True}), 200
+
+
+# --------------------------------------------------------------- el panel
+
+@app.route("/admin/pedidos")
+@requiere_admin
+def admin_pedidos():
+    return render_template("admin_pedidos.html",
+                           pedidos=Pedido.recientes(100),
+                           resumen=Pedido.resumen(),
+                           tiempo=tiempo)

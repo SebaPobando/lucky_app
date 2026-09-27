@@ -25,6 +25,9 @@
 #      a mano en static/js/tienda-productos.js.
 # ==========================================================================
 
+import base64
+import hashlib
+import hmac
 import json
 import os
 import time
@@ -137,7 +140,39 @@ def _entorno():
         "coleccion": (os.environ.get("SHOPIFY_COLECCION") or "tienda-web").strip(),
         "version": (os.environ.get("SHOPIFY_API_VERSION") or VERSION_API).strip(),
         "cache": int(os.environ.get("SHOPIFY_CACHE_SEGUNDOS") or CACHE_SEGUNDOS),
+        # El secreto del webhook de pedidos. Es OTRO valor que el token de la
+        # Storefront API de arriba, y vive en una parte distinta del admin de
+        # Shopify — ver el .env.example.
+        "webhook_secret": (os.environ.get("SHOPIFY_WEBHOOK_SECRET") or "").strip(),
     }
+
+
+def verificar_firma_webhook(cuerpo_bruto, firma_recibida, cfg=None):
+    """
+    ¿Este webhook lo mandó Shopify de verdad?
+
+    Shopify firma cada webhook con HMAC-SHA256 sobre el CUERPO CRUDO de la
+    petición —antes de parsear el JSON— usando el secreto del webhook, y lo
+    manda en base64 en la cabecera `X-Shopify-Hmac-Sha256`. Sin esto,
+    cualquiera podría mandar un POST fabricado a mano a la ruta del webhook y
+    hacer aparecer pedidos que nunca existieron.
+
+    `compare_digest` en vez de `==`, por la misma razón que `csrf.valido()`:
+    una comparación normal con `==` se corta en el primer byte distinto, y
+    ese diferencial de tiempo se puede medir para adivinar la firma.
+
+    Sin secreto configurado devuelve False y no True: sin secreto no hay
+    contra qué verificar, así que un webhook sin configurar se trata como
+    NO verificado, nunca como confiable por defecto.
+    """
+    cfg = cfg or _entorno()
+    secreto = cfg.get("webhook_secret")
+    if not secreto or not firma_recibida:
+        return False
+    calculada = hmac.new(secreto.encode("utf-8"), cuerpo_bruto,
+                         hashlib.sha256).digest()
+    calculada_b64 = base64.b64encode(calculada).decode("utf-8")
+    return hmac.compare_digest(calculada_b64, firma_recibida)
 
 
 def configurado():

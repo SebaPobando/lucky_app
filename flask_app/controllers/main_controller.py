@@ -36,6 +36,9 @@ def miles(n):
     return f"{int(n):,}".replace(",", ".")
 
 
+app.template_filter("miles")(miles)
+
+
 # --- El nickname --------------------------------------------------------
 # Es con lo que se firma en el muro de deseos, y por eso es obligatorio al
 # registrarse: si no existiera, el muro terminaría firmando con el nombre

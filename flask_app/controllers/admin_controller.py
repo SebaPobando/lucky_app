@@ -127,11 +127,13 @@ def admin_inicio():
     """
     from flask_app.models.actividad_model import Actividad
     from flask_app.models.muro_model import Muro
+    from flask_app.models.pedido_shopify_model import Pedido
     from flask_app.models.promo_model import Promo
     from flask_app.models.usuario_model import Usuario
     return render_template(
         "admin_inicio.html",
         promos=Promo.resumen(),
+        pedidos=Pedido.resumen(),
         productos=len(Carta.listar_para_admin("lucky-point"))
                   + len(Carta.listar_para_admin("gladiatore")),
         publicadas=sum(1 for a in Actividad.listar_para_admin()

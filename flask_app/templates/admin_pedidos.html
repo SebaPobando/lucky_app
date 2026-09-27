@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Pedidos de la tienda · Lucky Point Coffee{% endblock %}
+{% block descripcion %}Pedidos confirmados en la tienda online.{% endblock %}
+
+{% block head_extra %}
+<style>
+  .pedidos { display: grid; gap: var(--sp-5); margin-top: var(--sp-6); }
+  .pedidos__resumen {
+    display: flex; flex-wrap: wrap; gap: var(--sp-5);
+    background: var(--surface-card); border: var(--bw) solid var(--border);
+    border-radius: var(--r-md); padding: var(--sp-5);
+  }
+  .pedidos__dato { min-width: 140px; }
+  .pedidos__num { display: block; font-family: var(--font-display); font-size: 1.6rem; color: var(--lp-espresso); }
+  .pedidos__et { font-size: .78rem; color: var(--text-muted); }
+
+  .fila {
+    display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-3);
+    justify-content: space-between;
+    padding: var(--sp-4) 0; border-bottom: var(--bw) solid var(--divider);
+  }
+  .fila:last-of-type { border-bottom: 0; }
+  .fila__quien { min-width: 0; flex: 1 1 260px; }
+  .fila__nombre { font-weight: var(--fw-bold); color: var(--lp-espresso); overflow-wrap: anywhere; }
+  .fila__correo { font-size: .82rem; color: var(--text-muted); overflow-wrap: anywhere; }
+  .fila__cuando { font-size: .76rem; color: var(--text-muted); margin-top: 2px; }
+  .fila__items { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+  .fila__monto { font-family: var(--font-display); font-size: 1.1rem; color: var(--lp-espresso); white-space: nowrap; }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<main class="section"><div class="container" style="max-width:860px">
+  <div class="auth__eyebrow">Administración</div>
+  <h1 style="margin:6px 0 0">Pedidos de la tienda</h1>
+  <p style="color:var(--text-muted);margin:var(--sp-2) 0 0;max-width:62ch">
+    Lo que Shopify confirma como pagado, con quién compró cuando tiene cuenta
+    en el sitio. Es un registro, no una billetera: <b>no suma ni descuenta
+    saldo de puntos</b> — eso todavía no existe.
+  </p>
+
+  <div class="pedidos">
+
+    <div class="pedidos__resumen">
+      <div class="pedidos__dato">
+        <span class="pedidos__num">{{ resumen.total }}</span>
+        <span class="pedidos__et">pedido{{ 's' if resumen.total != 1 }} confirmado{{ 's' if resumen.total != 1 }}</span>
+      </div>
+      <div class="pedidos__dato">
+        <span class="pedidos__num">${{ resumen.total_clp | miles }}</span>
+        <span class="pedidos__et">vendido en total</span>
+      </div>
+    </div>
+
+    <section class="promoadm__caja" style="background:var(--surface-card);border:var(--bw) solid var(--border);border-radius:var(--r-md);padding:var(--sp-5)">
+      {% if not pedidos %}
+      <p style="color:var(--text-muted);margin:0">
+        Todavía no ha llegado ningún pedido por acá. Si ya vendes por Shopify
+        y no aparece nada, revisa que el webhook «Order payment» esté dado de
+        alta en el admin de Shopify y que SHOPIFY_WEBHOOK_SECRET esté
+        configurado — ver el .env.example.
+      </p>
+      {% endif %}
+
+      {% for p in pedidos %}
+      <div class="fila">
+        <div class="fila__quien">
+          <div class="fila__nombre">
+            {{ p.usuario_nombre or 'Sin cuenta en el sitio' }}
+            {% if p.numero_orden %}<span style="color:var(--text-muted);font-weight:var(--fw-regular)"> · {{ p.numero_orden }}</span>{% endif %}
+          </div>
+          <div class="fila__correo">{{ p.correo_comprador }}</div>
+          <div class="fila__cuando">
+            {{ tiempo.largo(p.creado_shopify_at) if p.creado_shopify_at else tiempo.largo(p.recibido_at) }}
+          </div>
+          {% if p['items'] %}
+          <div class="fila__items">
+            {{ p['items'] | map(attribute='titulo') | join(', ') }}
+          </div>
+          {% endif %}
+        </div>
+        <div class="fila__monto">${{ p.monto_clp | miles }}</div>
+      </div>
+      {% endfor %}
+    </section>
+
+  </div>
+</div></main>
+{% endblock %}

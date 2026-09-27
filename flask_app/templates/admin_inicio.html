@@ -92,6 +92,17 @@
       {% endif %}
     </a>
 
+    <a class="panel__card" href="{{ url_for('admin_pedidos') }}">
+      <h2 class="panel__tit">Pedidos de la tienda</h2>
+      <p class="panel__desc">
+        Lo que Shopify confirma como pagado. Un registro, no una billetera:
+        todavía no suma saldo de puntos.
+      </p>
+      <span class="panel__dato">
+        {{ pedidos.total }} pedido{{ 's' if pedidos.total != 1 }}{% if pedidos.total %} · ${{ pedidos.total_clp | miles }}{% endif %}
+      </span>
+    </a>
+
     <a class="panel__card" href="{{ url_for('admin_usuarios') }}">
       <h2 class="panel__tit">Cuentas</h2>
       <p class="panel__desc">

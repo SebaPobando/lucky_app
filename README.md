@@ -596,8 +596,12 @@ siguen intactos en `lucky-point`.
 - [x] **Fase 6** — actividades: agenda, cupos, inscripción con y sin cuenta
 - [ ] **Fase 7** — suscripción y tarjetas físicas
 
-Fuera del roadmap, ya hechos: la tienda con carrito y checkout en Shopify, y
-el muro de deseos con moderación.
+Fuera del roadmap, ya hechos: la tienda con carrito y checkout en Shopify, el
+muro de deseos con moderación, y el registro de pedidos confirmados de
+Shopify en `/admin/pedidos` vía webhook (`/webhooks/shopify/orders-paid`) —
+es un registro, no la billetera de la Fase 3: no suma puntos todavía. Cómo
+darlo de alta en Shopify y el `SHOPIFY_WEBHOOK_SECRET` que necesita están en
+el `.env.example`.
 
 Lo único que le falta a la Fase 2 no es código: llenar el `.env` con las
 credenciales de Gmail (ver arriba). Hasta entonces los correos quedan en
