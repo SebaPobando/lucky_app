@@ -12,6 +12,12 @@
   details.cb__nuevo > summary { cursor:pointer; font-weight:var(--fw-semibold); list-style:none }
   details.cb__nuevo > summary::-webkit-details-marker { display:none }
 
+  /* OJO CON step EN LOS PRECIOS: el navegador valida contra el, y con
+     step=100 rechaza CUALQUIER precio que no sea multiplo de 100 — o sea
+     todos los que terminan en 90, que es justo como se ponen los precios
+     aca. El mensaje que sale ("ingrese un valor valido") no explica nada y
+     parece un error del sitio. step=1 acepta cualquier monto entero, que es
+     lo unico que existe en pesos. */
   .cb__campos { display:grid; gap:var(--sp-3); grid-template-columns:1fr }
   @media (min-width:760px) { .cb__campos { grid-template-columns:2fr 130px 120px } }
   .campo { display:flex; flex-direction:column; gap:4px }
@@ -125,7 +131,7 @@
           </div>
           <div class="campo">
             <label class="campo__et" for="c-precio">Precio CLP</label>
-            <input id="c-precio" name="precio_clp" type="number" min="0" step="100" value="0" />
+            <input id="c-precio" name="precio_clp" type="number" min="0" step="1" value="0" />
           </div>
           <div class="campo">
             <label class="campo__et" for="c-orden">Orden</label>
@@ -259,7 +265,7 @@
                 </div>
                 <div class="campo">
                   <label class="campo__et" for="e-pre-{{ c.id }}">Precio CLP</label>
-                  <input id="e-pre-{{ c.id }}" name="precio_clp" type="number" min="0" step="100" value="{{ c.precio_clp }}" />
+                  <input id="e-pre-{{ c.id }}" name="precio_clp" type="number" min="0" step="1" value="{{ c.precio_clp }}" />
                 </div>
                 <div class="campo">
                   <label class="campo__et" for="e-ord-{{ c.id }}">Orden</label>

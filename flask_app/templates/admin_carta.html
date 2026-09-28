@@ -227,12 +227,12 @@
         </div>
         <div class="campo">
           <label class="campo__et" for="n-precio">Precio CLP</label>
-          <input id="n-precio" name="precio_clp" type="number" min="0" step="100" value="0" />
+          <input id="n-precio" name="precio_clp" type="number" min="0" step="1" value="0" />
         </div>
         <div class="campo">
           <label class="campo__et" for="n-ind"
                  title="Segundo precio, para las pizzas individuales. Vacío si tiene un solo precio.">2º precio</label>
-          <input id="n-ind" name="precio_individual_clp" type="number" min="0" step="100" placeholder="—" />
+          <input id="n-ind" name="precio_individual_clp" type="number" min="0" step="1" placeholder="—" />
         </div>
         <div class="campo">
           <label class="campo__et" for="n-cat">Categoría</label>
@@ -305,7 +305,7 @@
         </div>
         <div class="campo">
           <label class="campo__et" for="pre-{{ p.id }}">Precio CLP</label>
-          <input id="pre-{{ p.id }}" name="precio_clp" type="number" min="0" step="100"
+          <input id="pre-{{ p.id }}" name="precio_clp" type="number" min="0" step="1"
                  value="{{ p.precio_clp }}" />
         </div>
         <div class="campo">
@@ -313,7 +313,7 @@
              de toda la cafetería. Un 0 significaría que sale gratis. #}
           <label class="campo__et" for="ind-{{ p.id }}"
                  title="Segundo precio, para las pizzas individuales. Déjalo vacío si el producto tiene un solo precio.">2º precio</label>
-          <input id="ind-{{ p.id }}" name="precio_individual_clp" type="number" min="0" step="100"
+          <input id="ind-{{ p.id }}" name="precio_individual_clp" type="number" min="0" step="1"
                  value="{{ p.precio_individual_clp if p.precio_individual_clp is not none }}"
                  placeholder="—" />
         </div>
