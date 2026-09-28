@@ -46,6 +46,13 @@
     background:var(--surface-card) }
   .cb__prod--off .cb__prod-nom { color:var(--text-muted); text-decoration:line-through }
 
+  /* HACE FALTA, no es de adorno: el navegador esconde lo que tiene el
+     atributo `hidden` con una regla propia (`display:none`), pero CUALQUIER
+     regla de autor que declare `display` le gana. Como .cb__prod declara
+     `display:flex`, el buscador marcaba las filas como hidden y seguian
+     viendose igual — parecia que el filtro no funcionaba. */
+  .cb__prod[hidden] { display:none }
+
   .cb__fila { border-bottom:var(--bw) solid var(--divider); padding:var(--sp-4) 0 }
   .cb__fila:last-of-type { border-bottom:0 }
   .cb__top { display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:baseline;
