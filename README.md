@@ -626,6 +626,26 @@ contando como pedido y se avisa al lado cuántos quedaron fuera de la suma.
 Un reembolso *parcial* sí suma completo, porque Shopify avisa que hubo
 devolución pero este registro no guarda de cuánto fue.
 
+**El dashboard vive aparte, en `/admin/ventas`.** `/admin/pedidos` es la
+bitácora —qué se vendió y a quién—; `/admin/ventas` responde la otra
+pregunta, cómo va el negocio: la evolución en el tiempo, los productos más
+vendidos, el ticket promedio y la comparación con el período anterior. Usa
+el mismo `?periodo=` que el panel, así que se salta de una página a la otra
+sin perder el corte.
+
+Los gráficos son **SVG armado en el servidor**: sin librería de gráficos y
+sin JavaScript. La geometría se calcula en el controlador y la plantilla
+solo pinta lo que recibe, así que la página funciona con el JS apagado y el
+proyecto no suma una dependencia. Cada gráfico trae además su tabla de
+números (`<details>`), porque un valor nunca debería estar disponible solo
+al pasar el mouse por encima.
+
+Dos cosas que el gráfico dice a propósito: la barra del período en curso va
+en un verde más claro, porque comparar un mes a medio andar contra meses
+cerrados es la trampa clásica de estos paneles; y los períodos sin ventas
+se dibujan en cero en vez de saltarse, para que un mal mes se vea como un
+mal mes y no como un mes que no existió.
+
 Lo único que le falta a la Fase 2 no es código: llenar el `.env` con las
 credenciales de Gmail (ver arriba). Hasta entonces los correos quedan en
 `buzon/`.

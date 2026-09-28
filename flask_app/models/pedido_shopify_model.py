@@ -126,6 +126,28 @@ class Pedido:
                 "reembolsados": int(fila.get("reembolsados") or 0)}
 
     @staticmethod
+    def para_dashboard():
+        """
+        Lo mismo que `para_totales`, mas los items de cada pedido: es lo que
+        necesita /admin/ventas para el ranking de productos.
+
+        Va aparte y no como un parametro de `para_totales` porque los items
+        son una columna JSON: traerlos cuesta bastante mas que las tres
+        columnas sueltas, y el panel de pedidos —que se abre mucho mas
+        seguido— no los necesita para sumar.
+        """
+        filas = connectToMySQL(DB).query_db("""
+            SELECT creado_shopify_at, recibido_at, monto_clp, estado, items
+            FROM pedidos_shopify;
+        """) or []
+        for f in filas:
+            try:
+                f["items"] = json.loads(f["items"]) if f.get("items") else []
+            except (TypeError, ValueError):
+                f["items"] = []
+        return filas
+
+    @staticmethod
     def para_totales():
         """
         Lo mínimo para sumar por período —fecha, monto y estado— de TODOS los

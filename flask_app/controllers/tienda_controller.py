@@ -16,7 +16,7 @@
 # ==========================================================================
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from flask import jsonify, render_template, request
 
@@ -315,3 +315,229 @@ def admin_pedidos():
                            resumen=Pedido.resumen(),
                            tiempo=tiempo,
                            url_pedido_shopify=shopify.url_admin_pedido)
+
+
+# ============================================================ /admin/ventas
+#
+# El panel de pedidos es la bitacora —que se vendio y a quien—. Esto es la
+# otra pregunta: como va el negocio. Los graficos se dibujan como SVG armado
+# en el servidor, sin libreria de graficos ni JS: la geometria se calcula aca
+# y la plantilla solo pinta lo que recibe. Asi la pagina funciona con el JS
+# apagado y no entra una dependencia nueva al proyecto.
+
+# Cuantos periodos se muestran hacia atras en cada corte. Son ventanas
+# distintas a proposito: 14 dias se leen bien, 14 anios no dicen nada.
+VENTANA = {"dia": 14, "semana": 12, "mes": 12, "anio": 5}
+
+
+def _periodos_hacia_atras(periodo, cuantos):
+    """
+    Las claves y etiquetas de los ultimos `cuantos` periodos, del mas viejo
+    al mas nuevo, terminando en el de hoy.
+
+    Se generan desde el calendario y NO desde los pedidos: un mes sin ventas
+    tiene que aparecer como una barra en cero. Si la serie saliera solo de
+    los pedidos que existen, marzo y mayo quedarian pegados y el grafico
+    diria que no hubo un abril malo, sino que abril no existio.
+    """
+    hoy = tiempo.utc_a_local(tiempo.ahora_utc()).date()
+    vistos, salida = set(), []
+    paso = {"dia": 1, "semana": 7}.get(periodo)
+
+    for i in range(cuantos * (31 if periodo == "mes" else 366 if periodo == "anio" else 1)):
+        if paso:
+            f = hoy - timedelta(days=i * paso)
+        elif periodo == "mes":
+            mes = hoy.month - i
+            anio = hoy.year + (mes - 1) // 12
+            f = date(anio, (mes - 1) % 12 + 1, 1)
+        else:
+            f = date(hoy.year - i, 1, 1)
+
+        clave, etiqueta = tiempo.periodo_de(
+            datetime(f.year, f.month, f.day, 12), periodo)
+        if clave not in vistos:
+            vistos.add(clave)
+            salida.append((clave, etiqueta, _etiqueta_corta(f, periodo)))
+            if len(salida) == cuantos:
+                break
+    return list(reversed(salida))
+
+
+def _etiqueta_corta(f, periodo):
+    """
+    La version corta que va bajo el eje: «25/9», «sep», «2025».
+
+    Existe porque la etiqueta larga («noviembre 2025», «Semana del 7 al 13 de
+    septiembre») no cabe bajo una barra y recortarla por caracteres deja
+    cosas como «noviembre 2». La larga se sigue usando en el tooltip y en la
+    tabla, donde si hay espacio.
+    """
+    if periodo == "dia" or periodo == "semana":
+        return f"{f.day}/{f.month}"
+    if periodo == "mes":
+        return tiempo.MESES[f.month - 1][:3]
+    return str(f.year)
+
+
+def _serie_de_ventas(filas, periodo):
+    """
+    [{clave, etiqueta, clp, pedidos}] para la ventana del corte elegido, del
+    periodo mas viejo al mas nuevo. Los periodos sin ventas van en cero.
+    """
+    sumas = _sumar_por_periodo(filas, periodo)
+    vacio = {"total": 0, "total_clp": 0, "reembolsados": 0}
+    return [{"clave": c, "etiqueta": e, "corta": corta,
+             "clp": sumas.get(c, vacio)["total_clp"],
+             "pedidos": sumas.get(c, vacio)["total"]}
+            for c, e, corta in _periodos_hacia_atras(periodo, VENTANA[periodo])]
+
+
+def _variacion(actual, anterior):
+    """
+    Cuanto cambio, en porcentaje, respecto del periodo anterior.
+
+    None cuando no hay con que comparar (el periodo anterior fue cero): un
+    "+100%" sobre cero no significa nada y es peor que no decir nada. La
+    plantilla muestra un guion en ese caso.
+    """
+    if not anterior:
+        return None
+    return round((actual - anterior) / anterior * 100)
+
+
+def _ranking_productos(filas, claves_ventana, periodo, tope=8):
+    """
+    Que se vendio mas dentro de la ventana, por unidades, con la plata que
+    dejo cada producto.
+
+    Solo mira los pedidos de la ventana y deja fuera los reembolsados, para
+    que cuadre con lo que dicen los graficos de al lado. Se queda con los
+    `tope` primeros: un ranking de treinta productos ya no es un grafico.
+    """
+    por_titulo = {}
+    for f in filas:
+        if f.get("estado") == "reembolsado":
+            continue
+        if tiempo.periodo_de(_cuando(f), periodo)[0] not in claves_ventana:
+            continue
+        for it in (f.get("items") or []):
+            titulo = (it.get("titulo") or "").strip() or "(sin nombre)"
+            d = por_titulo.setdefault(titulo, {"titulo": titulo, "unidades": 0, "clp": 0})
+            d["unidades"] += int(it.get("cantidad") or 0)
+            d["clp"] += int(it.get("cantidad") or 0) * int(it.get("clp") or 0)
+
+    ordenado = sorted(por_titulo.values(),
+                      key=lambda d: (-d["unidades"], -d["clp"], d["titulo"]))
+    return ordenado[:tope]
+
+
+# ------------------------------------------------- la geometria de los SVG
+#
+# Se calcula aca y no en la plantilla porque Jinja no es lugar para hacer
+# cuentas: en el servidor esto se puede leer y probar.
+
+ALTO_GRAFICO = 190          # solo el area de las barras; las etiquetas van fuera
+GRUESO_MAXIMO = 24          # una barra nunca llena su carril: el aire es del diseno
+REDONDEO = 4                # la punta redondeada; el pie queda cuadrado en la base
+SEPARACION = 2              # el aire entre barras vecinas, en color de fondo
+
+
+def _escala_limpia(maximo):
+    """
+    El techo del eje, redondeado a un numero que se pueda leer (1.000, 2.500,
+    50.000) en vez del maximo crudo. 0 cuando no hay ventas todavia.
+    """
+    if maximo <= 0:
+        return 0
+    from math import log10
+    magnitud = 10 ** int(log10(maximo))
+    # Pasos finos a proposito: con (1, 2, 5, 10) un maximo de 62.000 saltaba
+    # a un techo de 100.000 y las barras quedaban aplastadas contra el piso.
+    for paso in (1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 10):
+        techo = magnitud * paso
+        if techo >= maximo:
+            return int(techo)
+    return int(magnitud * 10)
+
+
+def _columnas(serie, ancho=640):
+    """
+    Las barras verticales del grafico de ventas en el tiempo, ya con sus
+    coordenadas. Devuelve tambien las marcas del eje y para que la plantilla
+    no calcule nada.
+    """
+    techo = _escala_limpia(max((d["clp"] for d in serie), default=0))
+    carril = ancho / len(serie) if serie else ancho
+    grueso = min(GRUESO_MAXIMO, max(6, carril - SEPARACION * 2))
+
+    barras = []
+    for i, d in enumerate(serie):
+        alto = (d["clp"] / techo * ALTO_GRAFICO) if techo else 0
+        barras.append({
+            "x": round(i * carril + (carril - grueso) / 2, 2),
+            "y": round(ALTO_GRAFICO - alto, 2),
+            "ancho": round(grueso, 2),
+            "alto": round(alto, 2),
+            "centro": round(i * carril + carril / 2, 2),
+            "etiqueta": d["etiqueta"],
+            "corta": d["corta"],
+            "clp": d["clp"],
+            "pedidos": d["pedidos"],
+            # La ultima es el periodo en curso: va destacada porque es la que
+            # se esta mirando, y ademas esta incompleta.
+            "en_curso": i == len(serie) - 1,
+        })
+
+    marcas = []
+    if techo:
+        for parte in (0, 0.5, 1):
+            marcas.append({"y": round(ALTO_GRAFICO * (1 - parte), 2),
+                           "valor": int(techo * parte)})
+    return {"barras": barras, "marcas": marcas, "techo": techo,
+            "ancho": ancho, "alto": ALTO_GRAFICO}
+
+
+def _barras_productos(productos, ancho=640):
+    """Las barras horizontales del ranking, en fraccion del mas vendido."""
+    tope = max((p["unidades"] for p in productos), default=0)
+    return [dict(p, fraccion=round(p["unidades"] / tope * 100, 2) if tope else 0)
+            for p in productos]
+
+
+@app.route("/admin/ventas")
+@requiere_admin
+def admin_ventas():
+    """
+    El dashboard. Mismo corte de tiempo que /admin/pedidos y por el mismo
+    parametro (?periodo=), asi que se puede saltar de una pagina a la otra
+    sin perder lo que se estaba mirando.
+    """
+    periodo = request.args.get("periodo", "mes")
+    if periodo not in tiempo.PERIODOS:
+        periodo = "mes"
+
+    filas = Pedido.para_dashboard()
+    serie = _serie_de_ventas(filas, periodo)
+
+    # El periodo en curso y el anterior, para los numeros de arriba.
+    actual = serie[-1] if serie else {"clp": 0, "pedidos": 0, "etiqueta": ""}
+    previo = serie[-2] if len(serie) > 1 else {"clp": 0, "pedidos": 0, "etiqueta": ""}
+    ticket = round(actual["clp"] / actual["pedidos"]) if actual["pedidos"] else 0
+    ticket_previo = round(previo["clp"] / previo["pedidos"]) if previo["pedidos"] else 0
+
+    claves_ventana = {d["clave"] for d in serie}
+    productos = _ranking_productos(filas, claves_ventana, periodo)
+
+    return render_template(
+        "admin_ventas.html",
+        periodo=periodo, periodos=tiempo.PERIODOS,
+        serie=serie, grafico=_columnas(serie),
+        productos=_barras_productos(productos),
+        actual=actual, previo=previo,
+        ticket=ticket,
+        var_clp=_variacion(actual["clp"], previo["clp"]),
+        var_pedidos=_variacion(actual["pedidos"], previo["pedidos"]),
+        var_ticket=_variacion(ticket, ticket_previo),
+        hay_datos=any(d["clp"] or d["pedidos"] for d in serie),
+    )
