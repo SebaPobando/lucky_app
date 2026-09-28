@@ -167,12 +167,93 @@ def admin_carta(marca_slug):
             grupos.append(indice[clave])
         indice[clave]["items"].append(p)
 
+    # Cuantos productos cuelgan de cada categoria: se muestra al lado del
+    # nombre para que se note cual esta vacia antes de reordenar.
+    conteo = {}
+    for prod in productos:
+        conteo[prod["categoria_id"]] = conteo.get(prod["categoria_id"], 0) + 1
+
     return render_template("admin_carta.html",
                            grupos=grupos, categorias=categorias, marca=marca,
+                           productos_por_categoria=conteo,
                            marcas=Carta.marcas_activas(),
                            total=len(productos),
                            apagados=sum(1 for p in productos if not p["disponible"]),
                            csrf_token=csrf.token())
+
+
+# =========================================================== categorías
+#
+# La carta se agrupa por categorías y hasta ahora solo se podían crear por
+# SQL: el panel las listaba pero no dejaba tocarlas. Se pueden crear,
+# renombrar y reordenar; BORRAR no, y es deliberado: una categoría con
+# productos adentro está protegida por una llave foránea, y las dos salidas
+# —bloquear o dejar los productos sin categoría— son decisiones que conviene
+# tomar mirando el caso, no con un botón que parece inofensivo.
+
+
+def _datos_categoria():
+    """
+    (datos, error) desde el formulario. Mismo contrato que
+    `_datos_del_formulario` de los productos, para que las dos rutas se lean
+    igual.
+    """
+    nombre = (request.form.get("nombre") or "").strip()
+    if not nombre:
+        return None, "La categoría necesita un nombre."
+    if len(nombre) > 100:
+        return None, "El nombre de la categoría es muy largo (máximo 100)."
+
+    try:
+        orden = int(request.form.get("orden") or 0)
+    except ValueError:
+        return None, "El orden tiene que ser un número."
+
+    return {"nombre": nombre, "orden": orden}, None
+
+
+def _categoria_de_la_marca(categoria_id, marca):
+    """404 si esa categoría no es de esta marca (ver categoria_de_marca)."""
+    categoria = Carta.categoria_de_marca(categoria_id, marca["id"])
+    if not categoria:
+        abort(404)
+    return categoria
+
+
+@app.route("/admin/carta/<marca_slug>/categorias/crear", methods=["POST"])
+@requiere_admin
+def admin_categoria_crear(marca_slug):
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    datos, error = _datos_categoria()
+    if error:
+        flash(error, "error")
+    else:
+        # Si no dicen dónde va, al final: menos sorpresas que meterla arriba
+        # y descolocar una carta que ya estaba ordenada.
+        if not request.form.get("orden"):
+            existentes = Carta.categorias_de(marca_slug)
+            datos["orden"] = max((c["orden"] for c in existentes), default=0) + 1
+        Carta.crear_categoria(marca["id"], datos["nombre"], datos["orden"])
+        flash(f"Categoría «{datos['nombre']}» creada.", "info")
+    return redirect(url_for("admin_carta", marca_slug=marca_slug))
+
+
+@app.route("/admin/carta/<marca_slug>/categorias/<int:categoria_id>",
+           methods=["POST"])
+@requiere_admin
+def admin_categoria_actualizar(marca_slug, categoria_id):
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    _categoria_de_la_marca(categoria_id, marca)
+    datos, error = _datos_categoria()
+    if error:
+        flash(error, "error")
+    else:
+        Carta.actualizar_categoria(categoria_id, marca["id"],
+                                   datos["nombre"], datos["orden"])
+        flash(f"Categoría «{datos['nombre']}» actualizada.", "info")
+    return redirect(url_for("admin_carta", marca_slug=marca_slug))
 
 
 @app.route("/admin/carta/<marca_slug>/crear", methods=["POST"])

@@ -123,28 +123,93 @@ class Carta:
             "SELECT * FROM productos WHERE id = %(id)s", {"id": producto_id})
         return filas[0] if filas else None
 
+    # Las dos tablas que llevan slug por marca. El nombre de una tabla no se
+    # puede pasar como parámetro en SQL —va interpolado—, así que la lista
+    # blanca no es adorno: es lo que impide que un día alguien meta texto de
+    # un formulario acá y quede una inyección.
+    _TABLAS_CON_SLUG = {"productos": "producto", "categorias": "categoria"}
+
     @staticmethod
-    def _slug_libre(marca_id, nombre, excluir_id=None):
+    def _slug_libre(marca_id, nombre, excluir_id=None, tabla="productos"):
         """
         Genera un slug a partir del nombre y le agrega -2, -3... si ya existe.
-        El UNIQUE de la base es (marca_id, slug), así que dos marcas pueden
-        tener 'margarita' sin chocar.
+        El UNIQUE de la base es (marca_id, slug) —en productos y en
+        categorías—, así que dos marcas pueden tener 'margarita' sin chocar.
         """
+        if tabla not in Carta._TABLAS_CON_SLUG:
+            raise ValueError(f"tabla no permitida: {tabla!r}")
+
         base = unicodedata.normalize("NFKD", nombre or "")
         base = base.encode("ascii", "ignore").decode()
-        base = re.sub(r"[^a-zA-Z0-9]+", "-", base).strip("-").lower()[:70] or "producto"
+        base = re.sub(r"[^a-zA-Z0-9]+", "-", base).strip("-").lower()[:70]
+        base = base or Carta._TABLAS_CON_SLUG[tabla]
 
         candidato, n = base, 1
         while True:
             filas = connectToMySQL(DB).query_db(
-                """SELECT id FROM productos
-                   WHERE marca_id = %(marca)s AND slug = %(slug)s
-                     AND (%(excluir)s IS NULL OR id <> %(excluir)s) LIMIT 1""",
+                f"""SELECT id FROM {tabla}
+                    WHERE marca_id = %(marca)s AND slug = %(slug)s
+                      AND (%(excluir)s IS NULL OR id <> %(excluir)s) LIMIT 1""",
                 {"marca": marca_id, "slug": candidato, "excluir": excluir_id})
             if not filas:
                 return candidato
             n += 1
             candidato = f"{base}-{n}"
+
+    # ------------------------------------------------------- categorías
+
+    @staticmethod
+    def categoria_de_marca(categoria_id, marca_id):
+        """
+        La categoría, solo si pertenece a esa marca. None si no.
+
+        Mismo motivo que el chequeo equivalente de los productos: sin esto,
+        /admin/carta/<otra-marca>/categorias/7 renombraría la categoría 7 de
+        la marca ajena desde el panel de esta.
+        """
+        filas = connectToMySQL(DB).query_db(
+            """SELECT id, slug, nombre, orden FROM categorias
+               WHERE id = %(id)s AND marca_id = %(marca)s""",
+            {"id": categoria_id, "marca": marca_id})
+        return filas[0] if filas else None
+
+    @staticmethod
+    def crear_categoria(marca_id, nombre, orden=0):
+        """
+        Devuelve el id de la categoría nueva.
+
+        El slug se calcula del nombre y nunca se pide en el formulario: es un
+        detalle técnico y dejarlo escribir a mano solo abre la puerta a dos
+        categorías con el mismo slug o a uno con espacios.
+        """
+        return connectToMySQL(DB).query_db(
+            """INSERT INTO categorias (marca_id, slug, nombre, orden)
+               VALUES (%(marca)s, %(slug)s, %(nombre)s, %(orden)s);""",
+            {"marca": marca_id, "nombre": nombre, "orden": orden,
+             "slug": Carta._slug_libre(marca_id, nombre, tabla="categorias")})
+
+    @staticmethod
+    def actualizar_categoria(categoria_id, marca_id, nombre, orden):
+        """
+        Renombra y reordena.
+
+        El slug NO se regenera al renombrar, a propósito: puede estar en la
+        URL de la carta pública o en un enlace que alguien guardó, y cambiarlo
+        por corregir una tilde rompería ese enlace sin avisar.
+        """
+        return connectToMySQL(DB).query_db(
+            """UPDATE categorias SET nombre = %(nombre)s, orden = %(orden)s
+               WHERE id = %(id)s AND marca_id = %(marca)s;""",
+            {"id": categoria_id, "marca": marca_id,
+             "nombre": nombre, "orden": orden})
+
+    @staticmethod
+    def cuantos_productos_tiene(categoria_id):
+        """Para mostrar al lado de cada categoría cuántos productos cuelgan."""
+        filas = connectToMySQL(DB).query_db(
+            """SELECT COUNT(*) AS n FROM productos
+               WHERE categoria_id = %(id)s""", {"id": categoria_id})
+        return int(filas[0]["n"]) if filas else 0
 
     @staticmethod
     def crear(datos):

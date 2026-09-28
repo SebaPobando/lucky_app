@@ -111,6 +111,17 @@
   details.adm__nuevo > summary::-webkit-details-marker { display:none }
   .peligro { color:#A33A2E; background:none; border:none; cursor:pointer;
     font:inherit; font-size:.82rem; text-decoration:underline; padding:0 }
+  /* La lista de categorias que ya existen, dentro del mismo bloque. */
+  .cats { display:grid; gap:var(--sp-3); margin-top:var(--sp-5) }
+  .cats__tit { font-size:.8rem; color:var(--text-muted); margin:0 }
+  .cats__fila { display:flex; flex-wrap:wrap; gap:var(--sp-2); align-items:flex-end }
+  /* El flex va en el .campo, NUNCA en el input: .campo es un flex en COLUMNA,
+     asi que un flex-grow sobre el input lo estira a lo ALTO, no a lo ancho. */
+  .cats__campo { flex:1 1 210px; min-width:0 }
+  .cats__campo--orden { flex:0 0 auto }
+  .cats__campo--orden input { width:88px }
+  .cats__n { font-size:.76rem; color:var(--text-muted); white-space:nowrap;
+    padding-bottom:9px }
 </style>
 {% endblock %}
 
@@ -145,6 +156,58 @@
     <a class="btn btn--outline btn--sm" href="{{ url_for('home') }}#carta">Ver la carta pública</a>
     {% endif %}
   </div>
+
+  {# ---------- Categorias ----------
+     Va ANTES del bloque de productos porque ese es el orden real de trabajo:
+     sin una categoria donde ponerlo, el formulario de producto no sirve de
+     mucho. Se abre solo cuando todavia no hay ninguna. #}
+  <details class="adm__nuevo" style="margin-bottom:var(--sp-5)"
+           {{ 'open' if not categorias }}>
+    <summary>+ Agregar una categoría</summary>
+
+    <form method="POST" class="cats__fila" style="margin-top:var(--sp-4)"
+          action="{{ url_for('admin_categoria_crear', marca_slug=marca.slug) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}" />
+      <div class="campo cats__campo">
+        <label class="campo__et" for="cat-nombre">Nombre de la categoría</label>
+        <input id="cat-nombre" name="nombre" maxlength="100" required
+               placeholder="Cafés fríos" />
+      </div>
+      <div class="campo cats__campo cats__campo--orden">
+        <label class="campo__et" for="cat-orden"
+               title="Más chico aparece antes en la carta. Vacío la deja al final.">Orden</label>
+        <input id="cat-orden" name="orden" type="number" placeholder="al final" />
+      </div>
+      <button class="btn btn--primary btn--sm" type="submit">Crear categoría</button>
+    </form>
+
+    {% if categorias %}
+    <div class="cats">
+      <p class="cats__tit">
+        Las que ya existen — cambia el nombre o el orden y guarda. El orden
+        más chico aparece antes en la carta.
+      </p>
+      {% for c in categorias %}
+      <form method="POST" class="cats__fila"
+            action="{{ url_for('admin_categoria_actualizar', marca_slug=marca.slug, categoria_id=c.id) }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token }}" />
+        <div class="campo cats__campo">
+          <label class="campo__et" for="cat-n-{{ c.id }}">Nombre</label>
+          <input id="cat-n-{{ c.id }}" name="nombre" maxlength="100" required
+                 value="{{ c.nombre }}" />
+        </div>
+        <div class="campo cats__campo cats__campo--orden">
+          <label class="campo__et" for="cat-o-{{ c.id }}">Orden</label>
+          <input id="cat-o-{{ c.id }}" name="orden" type="number" value="{{ c.orden }}" />
+        </div>
+        {% set n = productos_por_categoria.get(c.id, 0) %}
+        <span class="cats__n">{{ n }} producto{{ 's' if n != 1 }}</span>
+        <button class="btn btn--sm" type="submit">Guardar</button>
+      </form>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </details>
 
   {# ---------- Agregar ---------- #}
   <details class="adm__nuevo" style="margin-bottom:var(--sp-7)" {{ 'open' if total == 0 }}>
@@ -314,7 +377,8 @@
       {% if categorias %}
         Categorías listas: {{ categorias|map(attribute='nombre')|join(' · ') }}.
       {% else %}
-        Ojo: esta marca tampoco tiene categorías todavía.
+        Ojo: esta marca tampoco tiene categorías todavía — crea una con
+        «+ Agregar una categoría», más arriba.
       {% endif %}
     </p>
   </div>
