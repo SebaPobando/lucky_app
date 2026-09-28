@@ -35,8 +35,14 @@
   var elMini = burbuja ? burbuja.querySelector('[data-promo-mini]') : null;
   var elPlazo = banner.querySelector('[data-promo-plazo]');
 
+  /* SIN data-segundos = promo sin fecha de termino: corre hasta que la
+     apaguen. Hay que distinguirlo de un plazo vencido, porque la reaccion
+     es la contraria: una promo vencida se retira, una sin plazo se queda.
+     Antes esto no existia y el atributo siempre venia; si llegara vacio, el
+     parseInt daba NaN y el banner se escondia solo. */
+  var sinPlazo = !('segundos' in banner.dataset) || banner.dataset.segundos === '';
   var segundos = parseInt(banner.dataset.segundos, 10);
-  if (!isFinite(segundos) || segundos <= 0) { terminar(); return; }
+  if (!sinPlazo && (!isFinite(segundos) || segundos <= 0)) { terminar(); return; }
 
   var vence = Date.now() + segundos * 1000;
   var tic = null;
@@ -164,12 +170,18 @@
     vigia.observe(banner);
   }
 
-  pintar();
-  tic = window.setInterval(pintar, 1000);
+  /* El contador solo corre si hay algo que contar. Sin plazo, `vence` seria
+     NaN y pintar() escribiria basura en el reloj (o lo daria por vencido).
+     La plantilla tampoco pinta el reloj en ese caso, asi que no hay nada
+     que actualizar. */
+  if (!sinPlazo) {
+    pintar();
+    tic = window.setInterval(pintar, 1000);
 
-  /* Al volver de segundo plano el navegador pudo saltarse muchos ticks. */
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) { pintar(); }
-  });
+    /* Al volver de segundo plano el navegador pudo saltarse muchos ticks. */
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) { pintar(); }
+    });
+  }
 
 })(window, document);

@@ -32,7 +32,8 @@ _ESTADO = """
     CASE
         WHEN c.disponible = 0               THEN 'pausado'
         WHEN UTC_TIMESTAMP() < c.inicio_at  THEN 'programado'
-        WHEN UTC_TIMESTAMP() >= c.fin_at    THEN 'terminado'
+        WHEN c.fin_at IS NOT NULL
+             AND UTC_TIMESTAMP() >= c.fin_at THEN 'terminado'
         ELSE 'activo'
     END AS estado
 """
@@ -93,7 +94,8 @@ class Combo:
             WHERE m.slug = %(marca)s
               AND c.disponible = 1
               AND c.inicio_at <= UTC_TIMESTAMP()
-              AND c.fin_at    >  UTC_TIMESTAMP()
+              -- fin_at NULL = sin término: corre hasta que lo apaguen.
+              AND (c.fin_at IS NULL OR c.fin_at > UTC_TIMESTAMP())
             ORDER BY c.orden, c.nombre;
         """, {"marca": marca_slug}) or []
         return [c for c in Combo._con_items(combos) if c["items"]]
@@ -109,7 +111,7 @@ class Combo:
             FROM carta_combos c
             JOIN marcas m ON m.id = c.marca_id
             WHERE m.slug = %(marca)s
-            ORDER BY c.orden, c.fin_at DESC;
+            ORDER BY c.orden, c.fin_at IS NULL, c.fin_at DESC;
         """, {"marca": marca_slug}) or []
         return Combo._con_items(combos)
 

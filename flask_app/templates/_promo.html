@@ -20,7 +20,8 @@
 #}
 {% if promo %}
 <section class="promo" id="lpPromo" hidden
-         data-promo="{{ promo.clave or promo.id }}" data-segundos="{{ promo.segundos }}"
+         data-promo="{{ promo.clave or promo.id }}"
+         {% if promo.fin_at %}data-segundos="{{ promo.segundos }}"{% endif %}
          role="region" aria-label="Promoción vigente">
   <div class="promo__interior">
     <img class="promo__mascota"
@@ -32,10 +33,15 @@
       <p class="promo__titulo">{{ promo.nombre }}</p>
       <p class="promo__bajada">
         {% if promo.bajada %}{{ promo.bajada }} {% endif %}
+        {% if promo.fin_at %}
         <span data-promo-plazo>Termina el {{ tiempo.largo(promo.fin_at) }}.</span>
+        {% endif %}
       </p>
     </div>
 
+    {# Sin fecha de término no hay nada que contar: el combo corre
+       hasta que lo apaguen, así que el reloj no se pinta. #}
+    {% if promo.fin_at %}
     <div class="promo__reloj" data-promo-reloj aria-hidden="true">
       <span class="promo__caja" data-promo-dias hidden>
         <b class="promo__num" data-promo-dd>00</b><i class="promo__rot">días</i>
@@ -50,6 +56,7 @@
         <b class="promo__num" data-promo-ss>00</b><i class="promo__rot">seg</i>
       </span>
     </div>
+    {% endif %}
 
     {% if promo.boton_texto and promo.boton_destino %}
     <a class="promo__cta" href="{{ promo.boton_destino }}">{{ promo.boton_texto }}</a>

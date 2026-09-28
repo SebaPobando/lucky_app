@@ -56,7 +56,14 @@ CREATE TABLE IF NOT EXISTS carta_combos (
     -- dos fechas absolutas y no una duración, para que editar el texto un
     -- martes no reinicie ningún plazo.
     inicio_at     DATETIME     NOT NULL COMMENT 'UTC. Antes de esto está programado',
-    fin_at        DATETIME     NOT NULL COMMENT 'UTC. Después de esto se retira solo',
+
+    -- NULL = SIN FECHA DE TÉRMINO: corre hasta que alguien lo apague.
+    --
+    -- No se usa una fecha muy lejana (2099) para representarlo: sería mentira
+    -- en pantalla —«termina el 1 de enero de 2099»— y el contador del banner
+    -- mostraría una cuenta regresiva de setenta años. NULL dice exactamente
+    -- lo que pasa: no termina.
+    fin_at        DATETIME     NULL     COMMENT 'UTC. NULL = no termina hasta que lo apaguen',
 
     -- EL INTERRUPTOR, aparte de las fechas. Se acabó el brownie a las seis:
     -- se apaga al tiro y se repone después con el plazo original intacto.
@@ -95,6 +102,8 @@ CREATE TABLE IF NOT EXISTS carta_combos (
 
     -- Un combo que termina antes de empezar no se muestra nunca y nadie
     -- entiende por qué. Se rechaza en el controlador y otra vez acá.
+    -- Con fin_at NULL esta comprobación da UNKNOWN, y MySQL trata UNKNOWN
+    -- como aprobada: un combo sin término pasa sin necesidad de excepciones.
     CONSTRAINT chk_combo_rango  CHECK (fin_at > inicio_at),
     CONSTRAINT chk_combo_precio CHECK (precio_clp >= 0),
     CONSTRAINT chk_combo_nombre CHECK (CHAR_LENGTH(TRIM(nombre)) >= 2)
@@ -135,3 +144,31 @@ CREATE TABLE IF NOT EXISTS carta_combo_items (
 
     CONSTRAINT chk_item_cantidad CHECK (cantidad >= 1)
 ) ENGINE=InnoDB;
+
+
+-- =============================================================================
+-- PARA LAS BASES QUE YA TENÍAN LA TABLA
+--
+-- El CREATE de arriba es IF NOT EXISTS, así que en una base donde los combos
+-- ya existen no haría nada y `fin_at` seguiría siendo NOT NULL. Esto lo
+-- corrige, y se puede correr las veces que sea: si la columna ya acepta NULL,
+-- no hace nada.
+--
+-- MySQL 8 no tiene un `MODIFY ... IF`, así que la idempotencia se hace a mano
+-- mirando information_schema, igual que en las otras migraciones del proyecto.
+-- =============================================================================
+
+SET @acepta_null := (
+    SELECT IS_NULLABLE FROM information_schema.columns
+    WHERE table_schema = DATABASE()
+      AND table_name   = 'carta_combos'
+      AND column_name  = 'fin_at'
+);
+SET @sql := IF(@acepta_null = 'NO',
+    'ALTER TABLE carta_combos
+       MODIFY fin_at DATETIME NULL
+       COMMENT ''UTC. NULL = no termina hasta que lo apaguen''',
+    'DO 0');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

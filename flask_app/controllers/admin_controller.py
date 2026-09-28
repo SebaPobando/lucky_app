@@ -345,13 +345,22 @@ def _datos_combo():
     # Mismas dos fechas absolutas que el banner, y por el mismo motivo:
     # editar el texto no puede reiniciar ningún plazo (ver promos.sql).
     inicio = tiempo.local_a_utc(request.form.get("inicio"))
-    fin = tiempo.local_a_utc(request.form.get("fin"))
-    if not inicio or not fin:
-        return None, "Revisa las fechas: alguna no se entiende."
-    if fin <= inicio:
-        return None, "El combo no puede terminar antes de empezar."
-    if (fin - inicio).days > DIAS_MAX_COMBO:
-        return None, f"El plazo no puede pasar de {DIAS_MAX_COMBO} días."
+    if not inicio:
+        return None, "Revisa la fecha de inicio: no se entiende."
+
+    # Sin término: corre hasta que alguien lo apague. La fecha de fin que
+    # venga en el formulario se ignora a propósito —el campo queda
+    # deshabilitado en pantalla, pero un POST a mano podría traerla igual.
+    if request.form.get("sin_termino"):
+        fin = None
+    else:
+        fin = tiempo.local_a_utc(request.form.get("fin"))
+        if not fin:
+            return None, "Revisa la fecha de término: no se entiende."
+        if fin <= inicio:
+            return None, "El combo no puede terminar antes de empezar."
+        if (fin - inicio).days > DIAS_MAX_COMBO:
+            return None, f"El plazo no puede pasar de {DIAS_MAX_COMBO} días."
 
     try:
         orden = int(request.form.get("orden") or 0)

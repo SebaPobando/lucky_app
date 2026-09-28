@@ -130,11 +130,18 @@ class Promo:
             WHERE c.mostrar_en_banner = 1
               AND c.disponible = 1
               AND c.inicio_at <= UTC_TIMESTAMP()
-              AND c.fin_at    >  UTC_TIMESTAMP()
+              -- fin_at NULL = sin término. `segundos` sale NULL y la
+              -- plantilla, al no tener plazo, no pinta el contador (ver
+              -- _promo.html): el banner se queda hasta que lo apaguen.
+              AND (c.fin_at IS NULL OR c.fin_at > UTC_TIMESTAMP())
               AND EXISTS (SELECT 1 FROM carta_combo_items i
                           WHERE i.combo_id = c.id)
 
-            ORDER BY prioridad DESC, fin_at ASC
+            /* A igualdad de prioridad gana la que termina antes, y las
+               que no terminan nunca van al final: una promo con plazo es
+               más urgente que una permanente. `fin_at IS NULL` ordena los
+               NULL después sin depender de cómo los trate el motor. */
+            ORDER BY prioridad DESC, fin_at IS NULL, fin_at ASC
             LIMIT 1;
         """
         filas = connectToMySQL(DB).query_db(consulta)
