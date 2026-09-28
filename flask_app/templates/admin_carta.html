@@ -157,6 +157,11 @@
     {% endif %}
   </div>
 
+  <p style="margin:var(--sp-4) 0 0;font-size:.88rem">
+    ¿Quieres armar una promo con varios productos a un precio?
+    <a href="{{ url_for('admin_combos', marca_slug=marca.slug) }}">Combos de la carta</a>.
+  </p>
+
   {# ---------- Categorias ----------
      Va ANTES del bloque de productos porque ese es el orden real de trabajo:
      sin una categoria donde ponerlo, el formulario de producto no sirve de

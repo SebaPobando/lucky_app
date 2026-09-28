@@ -13,6 +13,17 @@
 #    absolutas no hay nada que interpretar. Los atajos del formulario
 #    («24 horas», «hasta el domingo») rellenan una fecha; no se guardan.
 #
+# 1b. EL BANNER PUEDE VENIR DE DOS LADOS.
+#    De esta tabla (un anuncio cualquiera: un taller, un horario especial) o
+#    de un combo de la carta marcado «mostrar en el banner». `vigente()` los
+#    une en la misma consulta y los normaliza a la misma forma.
+#
+#    Los combos NO se copian acá como filas: se leen desde carta_combos. Dos
+#    copias del nombre y las fechas es garantizar que algún día discrepen.
+#    Cuando los dos están vigentes compiten por el mismo espacio con el
+#    criterio de siempre: prioridad más alta y, a igualdad, la que termina
+#    antes.
+#
 # 2. LOS SEGUNDOS QUE QUEDAN LOS CALCULA MYSQL, NO PYTHON NI EL NAVEGADOR.
 #    `vigente()` devuelve `segundos` ya restados contra UTC_TIMESTAMP(). El
 #    navegador recibe un número y cuenta hacia abajo desde ahí.
@@ -74,14 +85,56 @@ class Promo:
         descartó las terminadas — pero el front igual se defiende de un cero.
         """
         consulta = """
-            SELECT p.id, p.nombre, p.bajada, p.boton_texto, p.boton_destino,
-                   p.fin_at,
+            SELECT p.id, CONCAT('promo-', p.id) AS clave,
+                   p.nombre, p.bajada, p.boton_texto, p.boton_destino,
+                   p.fin_at, p.prioridad,
                    TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), p.fin_at) AS segundos
             FROM promos p
             WHERE p.activa = 1
               AND p.inicio_at <= UTC_TIMESTAMP()
               AND p.fin_at    >  UTC_TIMESTAMP()
-            ORDER BY p.prioridad DESC, p.fin_at ASC
+
+            UNION ALL
+
+            /*
+               Los combos de la carta marcados «mostrar en el banner».
+               Se LEEN desde carta_combos; NO se copia una fila a `promos`.
+               Copiar nombre y fechas a otra tabla es garantizar que algún
+               día discrepen: acá la única fuente es el combo.
+
+               La bajada y el botón se arman al vuelo porque un combo no
+               tiene esos campos: lo que tiene es precio, y eso es justo lo
+               que se quiere anunciar. El botón apunta a la carta, que es
+               donde está la promo completa.
+
+               Un combo sin productos adentro queda fuera, igual que en la
+               carta: anunciar algo que no se sabe qué trae es peor que no
+               anunciarlo.
+
+               `clave` lleva el origen adelante ('promo-3' / 'combo-3') y no
+               es cosmética: el front guarda en localStorage cuál promo
+               cerró la persona, POR ID. Sin el prefijo, un banner con id 3
+               y un combo con id 3 serían el mismo para el navegador, y
+               cerrar uno silenciaría el otro sin que nadie entienda por
+               qué.
+            */
+            SELECT c.id, CONCAT('combo-', c.id) AS clave,
+                   c.nombre,
+                   CONCAT_WS(' · ', c.descripcion,
+                             CONCAT('$', FORMAT(c.precio_clp, 0, 'de_DE'))) AS bajada,
+                   'Ver en la carta' AS boton_texto,
+                   '#carta'          AS boton_destino,
+                   c.fin_at, c.prioridad,
+                   TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), c.fin_at) AS segundos
+            FROM carta_combos c
+            WHERE c.mostrar_en_banner = 1
+              AND c.disponible = 1
+              AND c.inicio_at <= UTC_TIMESTAMP()
+              AND c.fin_at    >  UTC_TIMESTAMP()
+              AND EXISTS (SELECT 1 FROM carta_combo_items i
+                          WHERE i.combo_id = c.id)
+
+            ORDER BY prioridad DESC, fin_at ASC
             LIMIT 1;
         """
         filas = connectToMySQL(DB).query_db(consulta)

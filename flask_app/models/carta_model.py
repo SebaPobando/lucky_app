@@ -82,7 +82,51 @@ class Carta:
                 "lp_ind":  (ind // CLP_POR_PUNTO) if ind is not None else None,
             })
 
-        return [c for c in categorias if c["items"]]
+        visibles = [c for c in categorias if c["items"]]
+
+        # Los combos van ADELANTE, como una sección más de la carta.
+        #
+        # Ojo con lo que esto es y lo que no: es PRESENTACIÓN. En la base no
+        # existe ninguna categoría «Promos» —los combos viven en su propia
+        # tabla y los productos siguen en sus categorías de siempre—, pero
+        # quien mira la carta ve una sección normal. Armarla acá y no en la
+        # plantilla hace que /api/v1/menu la entregue igual, sin repetir la
+        # lógica en dos lados.
+        combos = Carta._combos_como_seccion(marca_slug)
+        return ([combos] + visibles) if combos else visibles
+
+    @staticmethod
+    def _combos_como_seccion(marca_slug):
+        """
+        Los combos vigentes con la MISMA forma que un grupo de la carta, para
+        que la plantilla no tenga que distinguirlos. None si no hay ninguno.
+
+        La descripción se arma con lo que trae, usando los nombres reales de
+        los productos: si mañana se renombra el brownie, la promo se actualiza
+        sola. Ese es justamente el motivo de referenciar productos en vez de
+        copiar sus nombres dentro del combo.
+        """
+        from flask_app.models.combo_model import Combo
+
+        vigentes = Combo.vigentes_para_carta(marca_slug)
+        if not vigentes:
+            return None
+
+        items = []
+        for c in vigentes:
+            trae = ", ".join(f"{i['cantidad']}× {i['producto_nombre']}"
+                             for i in c["items"])
+            items.append({
+                "name": c["nombre"],
+                "clp": c["precio_clp"],
+                "lp": c["precio_clp"] // CLP_POR_PUNTO,
+                "desc": f"{c['descripcion']} · Incluye: {trae}"
+                        if c["descripcion"] else f"Incluye: {trae}",
+                "tag": "Promo",
+                "clp_ind": None,
+                "lp_ind": None,
+            })
+        return {"id": "promos", "label": "Promos", "items": items}
 
     @staticmethod
     def marcas_activas():

@@ -18,9 +18,10 @@
 from flask import abort, flash, jsonify, redirect, render_template, request, url_for
 
 from flask_app import app
-from flask_app.config import csrf
+from flask_app.config import csrf, tiempo
 from flask_app.controllers.main_controller import requiere_admin
 from flask_app.models.carta_model import Carta
+from flask_app.models.combo_model import Combo
 
 MARCA_POR_DEFECTO = "lucky-point"
 
@@ -313,3 +314,180 @@ def admin_carta_disponible(marca_slug, producto_id):
     nuevo = not producto["disponible"]
     Carta.cambiar_disponible(producto_id, nuevo)
     return jsonify({"id": producto_id, "disponible": nuevo})
+
+# ============================================================== combos
+#
+# Los «combos» son las promos de la CARTA: «café + algo dulce por $4.990».
+# No confundir con las promos de promo_controller, que son el banner de la
+# portada. Por qué son una tabla propia y no una categoría llamada «Promos»
+# está explicado entero en schema/carta_combos.sql; el resumen es que un
+# producto pertenece a UNA categoría, así que meter el Latte en «Promos» lo
+# sacaría de «Cafés».
+
+DIAS_MAX_COMBO = 365
+
+
+def _datos_combo():
+    """(datos, error), con el mismo contrato que las otras dos del archivo."""
+    nombre = (request.form.get("nombre") or "").strip()
+    if len(nombre) < 2:
+        return None, "El combo necesita un nombre."
+    if len(nombre) > 120:
+        return None, "El nombre del combo es muy largo (máximo 120)."
+
+    try:
+        precio = int(request.form.get("precio_clp") or 0)
+    except ValueError:
+        return None, "El precio tiene que ser un número."
+    if precio < 0:
+        return None, "El precio no puede ser negativo."
+
+    # Mismas dos fechas absolutas que el banner, y por el mismo motivo:
+    # editar el texto no puede reiniciar ningún plazo (ver promos.sql).
+    inicio = tiempo.local_a_utc(request.form.get("inicio"))
+    fin = tiempo.local_a_utc(request.form.get("fin"))
+    if not inicio or not fin:
+        return None, "Revisa las fechas: alguna no se entiende."
+    if fin <= inicio:
+        return None, "El combo no puede terminar antes de empezar."
+    if (fin - inicio).days > DIAS_MAX_COMBO:
+        return None, f"El plazo no puede pasar de {DIAS_MAX_COMBO} días."
+
+    try:
+        orden = int(request.form.get("orden") or 0)
+        prioridad = int(request.form.get("prioridad") or 0)
+    except ValueError:
+        return None, "El orden y la prioridad tienen que ser números."
+
+    return {
+        "nombre": nombre,
+        "descripcion": (request.form.get("descripcion") or "").strip()[:300] or None,
+        "precio_clp": precio,
+        "inicio_at": inicio,
+        "fin_at": fin,
+        "disponible": 1 if request.form.get("disponible") else 0,
+        "orden": orden,
+        "mostrar_en_banner": 1 if request.form.get("mostrar_en_banner") else 0,
+        "prioridad": max(-99, min(99, prioridad)),
+    }, None
+
+
+def _items_del_formulario(marca):
+    """
+    [(producto_id, cantidad)] desde el formulario, quedándose SOLO con los
+    productos que son de esta marca.
+
+    Ese filtro es el que impide armar un combo de la cafetería con una pizza
+    de la otra marca mandando un id a mano. Descarta en silencio en vez de
+    fallar: el formulario nunca ofrece esos productos, así que un id ajeno
+    solo puede venir de alguien jugando con el POST.
+    """
+    validos = {p["id"] for p in Carta.listar_para_admin(marca["slug"])}
+    items, vistos = [], set()
+    for crudo in request.form.getlist("producto_id"):
+        try:
+            pid = int(crudo)
+        except (TypeError, ValueError):
+            continue
+        if pid not in validos or pid in vistos:
+            continue
+        vistos.add(pid)
+        try:
+            cantidad = int(request.form.get(f"cantidad_{pid}") or 1)
+        except ValueError:
+            cantidad = 1
+        items.append((pid, max(1, cantidad)))
+    return items
+
+
+def _combo_de_la_marca(combo_id, marca):
+    combo = Combo.combo_de_marca(combo_id, marca["id"])
+    if not combo:
+        abort(404)
+    return combo
+
+
+@app.route("/admin/carta/<marca_slug>/combos")
+@requiere_admin
+def admin_combos(marca_slug):
+    marca = _marca_o_404(marca_slug)
+    return render_template("admin_combos.html",
+                           marca=marca,
+                           marcas=Carta.marcas_activas(),
+                           combos=Combo.listar_para_admin(marca_slug),
+                           productos=Carta.listar_para_admin(marca_slug),
+                           tiempo=tiempo,
+                           csrf_token=csrf.token())
+
+
+@app.route("/admin/carta/<marca_slug>/combos/crear", methods=["POST"])
+@requiere_admin
+def admin_combo_crear(marca_slug):
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    datos, error = _datos_combo()
+    if error:
+        flash(error, "error")
+        return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+    items = _items_del_formulario(marca)
+    if not items:
+        flash("Un combo necesita al menos un producto adentro.", "error")
+        return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+    combo_id = Combo.crear(dict(datos, marca_id=marca["id"]))
+    Combo.fijar_items(combo_id, items)
+    flash(f"Combo «{datos['nombre']}» creado.", "info")
+    return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+
+@app.route("/admin/carta/<marca_slug>/combos/<int:combo_id>", methods=["POST"])
+@requiere_admin
+def admin_combo_actualizar(marca_slug, combo_id):
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    _combo_de_la_marca(combo_id, marca)
+    datos, error = _datos_combo()
+    if error:
+        flash(error, "error")
+        return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+    items = _items_del_formulario(marca)
+    if not items:
+        flash("Un combo necesita al menos un producto adentro.", "error")
+        return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+    Combo.actualizar(combo_id, marca["id"], datos)
+    Combo.fijar_items(combo_id, items)
+    flash(f"Combo «{datos['nombre']}» actualizado.", "info")
+    return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+
+@app.route("/admin/carta/<marca_slug>/combos/<int:combo_id>/interruptor",
+           methods=["POST"])
+@requiere_admin
+def admin_combo_interruptor(marca_slug, combo_id):
+    """
+    Prender y apagar sin editar nada más: es lo que se usa cuando se acabó
+    un ingrediente a mitad de tarde. Las fechas quedan intactas, así que
+    volver a encenderlo lo repone con el plazo original.
+    """
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    combo = _combo_de_la_marca(combo_id, marca)
+    Combo.cambiar_disponible(combo_id, marca["id"], not combo["disponible"])
+    flash(f"Combo «{combo['nombre']}» "
+          f"{'apagado' if combo['disponible'] else 'encendido'}.", "info")
+    return redirect(url_for("admin_combos", marca_slug=marca_slug))
+
+
+@app.route("/admin/carta/<marca_slug>/combos/<int:combo_id>/eliminar",
+           methods=["POST"])
+@requiere_admin
+def admin_combo_eliminar(marca_slug, combo_id):
+    _protegido_csrf()
+    marca = _marca_o_404(marca_slug)
+    combo = _combo_de_la_marca(combo_id, marca)
+    Combo.eliminar(combo_id, marca["id"])
+    flash(f"Combo «{combo['nombre']}» eliminado.", "info")
+    return redirect(url_for("admin_combos", marca_slug=marca_slug))

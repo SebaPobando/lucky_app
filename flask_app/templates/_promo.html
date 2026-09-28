@@ -20,7 +20,7 @@
 #}
 {% if promo %}
 <section class="promo" id="lpPromo" hidden
-         data-promo="{{ promo.id }}" data-segundos="{{ promo.segundos }}"
+         data-promo="{{ promo.clave or promo.id }}" data-segundos="{{ promo.segundos }}"
          role="region" aria-label="Promoción vigente">
   <div class="promo__interior">
     <img class="promo__mascota"
