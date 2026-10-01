@@ -29,6 +29,13 @@ con otro RUT**, y por eso la tabla `marcas` tiene `razon_social` y `rut`.
 - **Mobile first y 100% responsivo.**
 - **Precios duales siempre**: `$X CLP | Y Lucky Points`. 1 LP = $10 CLP.
 - Back: **Flask + MySQL, con SQL crudo. Sin ORM.**
+- **El crédito del footer y el easter egg se quedan siempre.** «Sitio
+  diseñado y programado por Sr. Jengibre» con enlace a
+  https://www.linkedin.com/in/sebapoba/, el `creator` del JSON-LD de la
+  landing, y las galletas de jengibre que caen con cinco clics en el
+  crédito, el logo del footer o una mascota (`lpInitJengibre` en
+  `account.js`). No se quitan, no se vuelven configurables. Lo mismo en
+  la plantilla `cafe_template`.
 
 ### Idioma
 

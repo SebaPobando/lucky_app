@@ -124,6 +124,9 @@ function lpInitCuenta(){
     if (acctMenu && acctTrig && !acctTrig.contains(e.target) && !acctMenu.contains(e.target)) acctCerrar();
   });
 }
+/* El easter egg de Sr. Jengibre: cinco clics en el credito del footer, el
+   logo o una mascota y caen galletas. Va en TODAS las instalaciones junto
+   con el credito (ver _footer_credito.html); no se quita. */
 function lpInitJengibre(){
   var credit = document.getElementById('footerCredit');
   var logo = document.querySelector('.footer__logo');

@@ -47,6 +47,12 @@ copy .env.example .env    # y completa las credenciales
 # ("The '<' operator is reserved for future use"), así que se usa `source`,
 # que además deja que mysql lea el archivo directo y no le toque los acentos.
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/schema_mysql.sql"
+# Lo que se agregó después del esquema base (vouchers, promos, pedidos, combos):
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/evento_voucher.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/promos.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_carta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_gladiatore.sql"
 
@@ -59,7 +65,17 @@ veces:
 
 ```powershell
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/muro.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/actividad_imagen.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/producto_etiqueta.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/categoria_bebidas.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/evento_voucher.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/promos.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 ```
+
+Correr de más no rompe nada: cada una mira primero si su cambio ya está.
 
 ### Crear la primera cuenta de administrador
 
@@ -377,9 +393,76 @@ pueden quedar desincronizados.
 Quien no tenga sesión va a `/login`. Quien tenga sesión pero no sea admin recibe
 un **404, no un 403**: un 403 confirma que la página existe.
 
+### Categorías
+
+Se crean, renombran y reordenan desde el bloque **«+ Agregar una categoría»**,
+arriba del de productos en `/admin/carta/lucky-point`. Va primero porque es el orden real de
+trabajo: sin una categoría donde ponerlo, el formulario de producto no sirve.
+
+- **El slug se calcula del nombre al crearla y no cambia al renombrarla.**
+  Corregir una tilde no puede romper un enlace guardado a esa sección.
+- Sin orden, la categoría nueva va **al final**: no descoloca una carta que ya
+  estaba ordenada.
+- Al lado de cada una se ve cuántos productos tiene.
+- **No se borran desde el panel, a propósito.** Una categoría con productos la
+  protege la llave foránea, y las salidas —bloquear o dejar esos productos sin
+  categoría— se deciden mirando el caso, no con un botón que parece inofensivo.
+
+### Combos (las «promos» de la carta)
+
+`/admin/carta/lucky-point/combos`, o el enlace **Combos de la carta** en la misma página.
+Un combo es *«Café + algo dulce por $4.990»*: nombre y precio propios, y
+varios productos adentro.
+
+**No es una categoría llamada «Promos», y no puede serlo.** Un producto
+pertenece a una sola categoría (`productos.categoria_id`), así que meter el
+Latte en «Promos» lo sacaría de «Cafés». Y una categoría no tiene dónde
+guardar el precio del combo. Por eso los combos tienen tabla propia
+(`carta_combos` + `carta_combo_items`) y **referencian** productos que siguen
+en sus categorías de siempre: si mañana se renombra el brownie, el combo lo
+muestra con el nombre nuevo. En la base no se llama `promos` porque esa tabla
+ya existe y es el banner de la portada.
+
+- **En la carta pública salen primero**, como una sección «Promos», con
+  *«Incluye: 1× Latte, 2× Brownie»* armado con los nombres reales. Tienen la
+  misma forma que un producto, así que la portada y `/api/v1/menu` no tuvieron
+  que cambiar.
+- **Vigencia con dos fechas**, igual que el banner: empieza y termina, y
+  editar el texto no reinicia ningún plazo. O **«sin fecha de término»**: corre
+  hasta que lo apaguen. Eso se guarda como `fin_at` NULL y no como una fecha
+  lejana — 2099 mentiría en pantalla y el contador del banner haría una
+  cuenta regresiva de setenta años.
+- **Un interruptor** lo baja al tiro sin tocar las fechas; al volver a
+  encenderlo recupera su plazo original.
+- **No se apaga solo cuando se agota un producto.** Decisión del dueño: el
+  panel lo avisa (*«⚠ Brownie está agotado — el combo sigue visible»*) y
+  decide la persona. Que una promo desaparezca sin que nadie la tocara confunde
+  más de lo que ayuda.
+- **«Qué trae» tiene buscador**, y lo ya elegido nunca se oculta al buscar
+  otra cosa — así no se manda un combo a medias sin notarlo.
+- **No se pueden colar productos de otra marca** mandando un id a mano por
+  POST: se descartan, y un combo sin productos válidos no se guarda.
+
+**Orden y prioridad no son lo mismo.** *Orden* es la posición del combo dentro
+de la sección «Promos». *Prioridad* solo importa si está marcado **«Mostrar en
+el banner de la portada»**.
+
+**El banner lee el combo; no lo copia.** Marcado, `Promo.vigente()` lo trae
+desde `carta_combos` en la misma consulta que los banners normales — copiar
+nombre y fechas a `promos` sería garantizar que algún día discrepen. Si hay
+varios vigentes gana la prioridad más alta; a igualdad, el que termina antes,
+y los sin término van al final. La clave que guarda el navegador al cerrar el
+banner lleva el origen (`promo-3` / `combo-3`): sin eso, cerrar el banner 3
+silenciaría también el combo 3. Un combo sin fecha sale en el banner **sin
+contador**.
+
+Necesita la migración `schema/carta_combos.sql`. En una base donde las tablas
+ya existían, el `ALTER` del final vuelve `fin_at` opcional; se puede correr
+las veces que sea.
+
 Lo que **no** tiene todavía, por decisión explícita: reordenar arrastrando, subir
-imágenes (el campo de imagen es una URL por ahora), buscador, paginación, CRUD de
-categorías, editor enriquecido, historial y deshacer.
+imágenes (el campo de imagen es una URL por ahora), paginación, borrar
+categorías desde el panel, editor enriquecido, historial y deshacer.
 
 ---
 
