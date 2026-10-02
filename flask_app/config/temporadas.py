@@ -16,6 +16,11 @@
 # La fecha es la de Chile (config/tiempo.py), no la del servidor: Railway
 # corre en UTC y el 31 a las 21:00 de acá allá ya es 1 de noviembre.
 #
+# Una temporada también puede cambiar COLORES: las variables CSS de
+# `colores` se pisan en las páginas públicas (portada, tienda, cuenta...)
+# mientras dure. El panel de admin no cambia: es una herramienta de
+# trabajo, no una vitrina. Ver templates/_temporada.html.
+#
 # Para probar o apagarla sin esperar a la fecha, en el .env:
 #     TEMPORADA=halloween   fuerza esa temporada
 #     TEMPORADA=no          apaga todas
@@ -35,6 +40,30 @@ TEMPORADAS = [
         "desde": (10, 1),     # (mes, día), los dos incluidos
         "hasta": (10, 31),
         "carpeta": "img/mascotas/halloween",
+        # Morado noche en vez del verde, naranjo calabaza en vez del dorado
+        # y una crema un poco más tostada. El texto y las tarjetas no
+        # cambian: sigue viéndose Lucky Point, en versión Halloween.
+        "colores": {
+            "--lp-cream-50": "#FBF3E6",
+            "--lp-cream-100": "#F4E7D2",
+            "--lp-cream-200": "#EEDDC3",
+            "--lp-cream-300": "#E2CBA8",
+            "--lp-forest-900": "#1E1428",
+            "--lp-forest": "#2E1F3B",
+            "--lp-forest-600": "#45305A",
+            "--lp-forest-300": "#9C88B0",
+            "--lp-gold": "#D9651F",
+            "--lp-gold-soft": "#F2A65A",
+            "--lp-gold-bg": "#FBE0C6",
+            # Los alias se repiten a propósito: así gana igual aunque una
+            # página los haya fijado con un valor y no con var().
+            "--surface-page": "#F4E7D2",
+            "--surface-forest": "#2E1F3B",
+            "--accent": "#2E1F3B",
+            "--accent-hover": "#45305A",
+            "--points": "#D9651F",
+            "--points-bg": "#FBE0C6",
+        },
         # Un disfraz distinto en cada sección de la portada.
         "por_lugar": {
             "hero": "calabaza.png",

@@ -154,4 +154,5 @@ def inyectar_globales():
         # {{ mascota('archivo.png', 'lugar') }}: la mascota de hoy, que en
         # temporada (Halloween...) cambia sola. Ver config/temporadas.py.
         "mascota": temporadas.mascota,
+        "temporada": temporadas.actual,
     }
