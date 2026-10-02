@@ -34,6 +34,23 @@
      en la barra la empujaba a partirse en dos líneas. Así la barra queda fija
      y este panel crece lo que haga falta. #}
   <div class="panel">
+    {% if ruleta %}
+    <a class="panel__card" href="{{ url_for('admin_ruleta') }}">
+      <h2 class="panel__tit">Ruleta</h2>
+      <p class="panel__desc">
+        Habilitar un giro para quien compró sobre el monto, los premios de
+        cada gajo y quién ganó qué.
+      </p>
+      {% if not ruleta.gajos %}
+      <span class="panel__dato">Sin premios todavía</span>
+      {% elif ruleta.por_entregar %}
+      <span class="panel__dato">{{ ruleta.por_entregar }} premio{{ 's' if ruleta.por_entregar != 1 }} sin marcar entregado</span>
+      {% else %}
+      <span class="panel__dato">{{ ruleta.gajos }} gajos</span>
+      {% endif %}
+    </a>
+    {% endif %}
+
     <a class="panel__card" href="{{ url_for('admin_carta_inicio') }}">
       <h2 class="panel__tit">Carta</h2>
       <p class="panel__desc">

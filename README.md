@@ -53,6 +53,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/promos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_carta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_gladiatore.sql"
 
@@ -73,6 +74,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/promos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
 ```
 
 Correr de más no rompe nada: cada una mira primero si su cambio ya está.
@@ -463,6 +465,50 @@ las veces que sea.
 Lo que **no** tiene todavía, por decisión explícita: reordenar arrastrando, subir
 imágenes (el campo de imagen es una URL por ahora), paginación, borrar
 categorías desde el panel, editor enriquecido, historial y deshacer.
+
+## La ruleta de premios
+
+Reemplaza a la ruleta de madera del mesón: quien compra sobre $40.000 **en
+el local** gira y se lleva lo que salga. Mismo dibujo que la física —12
+gajos negro, blanco y verde menta, el trébol y la taza arriba, el sello de
+Lucky Point en el pie— y los premios los escribe el admin. Se instala con
+`schema/ruleta.sql`.
+
+### Cómo se usa en la caja
+
+1. El cliente paga sobre $40.000 (el monto se cambia en el panel).
+2. **Panel → Ruleta → Habilitar giro.** La referencia es opcional (boleta,
+   monto, nombre).
+3. Aparece un **QR**: el cliente lo escanea y gira desde su celular. O se
+   toca «Girar en este dispositivo» y gira en la tablet de la caja.
+4. La ruleta frena, muestra el premio con su código y queda en el
+   historial. Al dárselo, «Marcar entregado».
+
+No hay `/ruleta` pública ni botón en la portada: **cada giro lo habilita
+alguien del local**, porque la app no ve la boleta. Sirve una sola vez y
+vence a los 30 minutos si no se usa (configurable); también se anula.
+
+### Los premios
+
+Uno por gajo, entre 4 y 24 gajos. **Todos los gajos tienen la misma
+probabilidad**: con 12, cada uno sale 1 de cada 12 veces. Para que un premio
+salga más seguido se pone en más gajos; el panel muestra el % real de cada
+premio. Nace sin premios: mientras falten, no se pueden habilitar giros.
+
+### Por qué no se puede hacer trampa
+
+- **El premio lo sortea el servidor** (`secrets.randbelow`), no la animación.
+  El navegador recibe el resultado y anima la rueda hasta ese gajo. Probado
+  con 1.932 giros: chi² = 9,9, lejos del 19,7 que delataría un gajo
+  favorecido.
+- **Girar dos veces devuelve lo mismo**: recargar o tocar dos veces no
+  vuelve a sortear (transacción con `FOR UPDATE` sobre el giro).
+- Cada giro guarda una **foto de la ruleta** como estaba al girar: si
+  después cambian los premios, el historial sigue diciendo la verdad.
+
+Las mascotas de arriba son `lucky.png` y `point.png` recortadas y pintadas
+con el verde de la ruleta (`ruleta-trebol.png`, `ruleta-taza.png`). Los
+colores están en `COLORES`, en `flask_app/models/ruleta_model.py`.
 
 ---
 

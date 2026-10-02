@@ -131,8 +131,16 @@ def admin_inicio():
     from flask_app.models.pedido_shopify_model import Pedido
     from flask_app.models.promo_model import Promo
     from flask_app.models.usuario_model import Usuario
+    # La ruleta puede no estar instalada todavía (falta schema/ruleta.sql):
+    # el panel no se cae por eso, la tarjeta simplemente no sale.
+    try:
+        from flask_app.models.ruleta_model import Ruleta
+        ruleta = Ruleta.resumen()
+    except Exception:
+        ruleta = None
     return render_template(
         "admin_inicio.html",
+        ruleta=ruleta,
         promos=Promo.resumen(),
         pedidos=Pedido.resumen(),
         productos=len(Carta.listar_para_admin("lucky-point"))
