@@ -800,6 +800,12 @@
   .map-compact__meta { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
   .map-compact__rating { color: var(--lp-gold); font-weight: var(--fw-bold); }
   .map-compact__rating-count { color: var(--text-muted); font-weight: var(--fw-regular); }
+  a.map-compact__rating { text-decoration: none; align-self: flex-start; }
+  a.map-compact__rating:hover .map-compact__rating-count { text-decoration: underline; }
+  .map-compact__acciones { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .map-compact__resena { display: inline-flex; align-items: center; gap: 8px; }
+  .map-compact__resena svg { color: var(--lp-gold); flex: none; }
+  .map-compact__invita { margin: 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
   .map-compact__frame { display: block; position: relative; aspect-ratio: 16 / 9; background: var(--surface-sand); }
   .map-compact__frame iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }
 
@@ -1394,11 +1400,28 @@
       <div class="map-compact">
         <div class="map-compact__info">
           <h3 class="map-compact__title">Bernardo O'Higgins 969, Osorno</h3>
+          {#
+            Reseñas de Google. Escribirla pasa en Google (con la cuenta de la
+            persona): no hay API para publicar una reseña desde otro sitio,
+            y es mejor así — una reseña que no pasa por Google no cuenta en
+            Maps. Lo que hace el botón es abrir directo el formulario de
+            reseña de Lucky Point, sin que la persona tenga que buscarlo.
+
+            El Place ID se sacó de la ficha de Google Maps del local
+            (2026-10-02). La nota y el total se escriben a mano: leerlos en
+            vivo pide una clave de Google Cloud con cobro. Si se desfasan,
+            se actualizan acá.
+          #}
+          {% set place_id = 'ChIJFVuuJAA1FpYRottfupYpPSE' %}
           <div class="map-compact__meta">
-            <span class="map-compact__rating">★ 4,8 <span class="map-compact__rating-count">(135 reseñas de Google)</span></span>
+            <a class="map-compact__rating" href="https://search.google.com/local/reviews?placeid={{ place_id }}" target="_blank" rel="noopener">★ 4,9 <span class="map-compact__rating-count">(144 reseñas en Google)</span></a>
             <span class="map-compact__hours">Lun–Sáb · 8:30–20:00 · Dom · 9:30–14:00</span>
           </div>
-          <a class="btn btn--dark btn--sm" href="https://www.google.com/maps/dir/?api=1&destination=Bernardo+O%27Higgins+969%2C+Osorno%2C+Chile" target="_blank" rel="noopener">Cómo llegar</a>
+          <div class="map-compact__acciones">
+            <a class="btn btn--dark btn--sm" href="https://www.google.com/maps/dir/?api=1&destination=Bernardo+O%27Higgins+969%2C+Osorno%2C+Chile" target="_blank" rel="noopener">Cómo llegar</a>
+            <a class="btn btn--outline btn--sm map-compact__resena" href="https://search.google.com/local/writereview?placeid={{ place_id }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>Dejar una reseña</a>
+          </div>
+          <p class="map-compact__invita">¿Ya nos visitaste? Tu reseña en Google nos ayuda a que más gente encuentre Lucky Point.</p>
         </div>
         <a class="map-compact__frame" href="https://www.google.com/maps/search/?api=1&query=Bernardo+O%27Higgins+969+Osorno+Chile" target="_blank" rel="noopener" aria-label="Abrir ubicación en Google Maps">
           <iframe src="https://www.google.com/maps?q=Bernardo+O%27Higgins+969,+Osorno,+Chile&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Ubicación Lucky Point Coffee"></iframe>
