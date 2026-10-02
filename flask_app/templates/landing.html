@@ -1111,8 +1111,18 @@
             del primer producto de la colección va primero—, así que se cambia
             desde Shopify: sube un café al principio y el café encabeza.
           #}
+          {#
+            Los DESTACADOS van primero de todo, en el orden que les puso el
+            admin, sin importar su categoría: es lo primero que se ve al
+            entrar a «Todos». Después, el resto agrupado como siempre. Como
+            las pastillas filtran escondiendo tarjetas, al entrar a «Café» el
+            destacado también queda arriba de su grupo.
+          #}
+          {% set orden_tienda = namespace(lista=(tienda | selectattr('destacado') | sort(attribute='destacado.orden') | list)) %}
           {% for c in categorias %}
-          {% for p in tienda | selectattr('categoria', 'equalto', c) %}
+          {% set orden_tienda.lista = orden_tienda.lista + (tienda | selectattr('categoria', 'equalto', c) | rejectattr('destacado') | list) %}
+          {% endfor %}
+          {% for p in orden_tienda.lista %}
           <article class="product product--interactive{{ ' product--agotado' if p.agotado }}{{ (' product--destacado product--d-' ~ p.destacado.color) if p.destacado }}"
                    data-categoria="{{ p.categoria }}"{% if p.destacado %} data-especial="1"{% endif %}>
             {% if p.destacado %}<span class="product__cinta">{{ p.destacado.cinta }}</span>{% endif %}
@@ -1148,7 +1158,6 @@
               </div>
             </div>
           </article>
-          {% endfor %}
           {% endfor %}
         {% else %}
         <article class="product product--interactive">

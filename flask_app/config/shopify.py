@@ -337,7 +337,7 @@ def _opcion_unica_es_molienda(variantes, nombre):
     return reconocidos >= 2
 
 
-def _categoria(producto, hay_molienda):
+def _categoria(producto, hay_molienda, hay_ficha=False):
     """
     La categoría con la que el producto entra a una pastilla de la tienda.
 
@@ -346,11 +346,17 @@ def _categoria(producto, hay_molienda):
     día que la tienda venda tazas, prensas o un libro, el campo de Shopify
     los separa sin tocar código, que es justo lo que la deducción no puede
     hacer (para ella todo lo que no tiene molienda es un accesorio).
+
+    Al deducir, un producto con ficha técnica (notas, origen, proceso...)
+    es café aunque se venda en una sola versión: una edición limitada que
+    sale solo en grano no tiene opción de molienda, pero unos filtros
+    tampoco tienen notas de cata. Sin esto el micro lote caía entre los
+    accesorios.
     """
     escrita = (producto.get("productType") or "").strip()
     if escrita:
         return escrita
-    return CATEGORIA_CAFE if hay_molienda else CATEGORIA_OTROS
+    return CATEGORIA_CAFE if (hay_molienda or hay_ficha) else CATEGORIA_OTROS
 
 
 def _es_variante_unica(variantes):
@@ -403,7 +409,7 @@ def normalizar(producto):
         v = variantes[0]
         base.update({
             "type": "acc",
-            "categoria": _categoria(producto, hay_molienda=False),
+            "categoria": _categoria(producto, hay_molienda=False, hay_ficha=bool(ficha)),
             "clp": _pesos((v.get("price") or {}).get("amount")),
             "variant": _id_numerico(v.get("id")),
             "disponible": bool(v.get("availableForSale")),
@@ -450,7 +456,7 @@ def normalizar(producto):
 
     base.update({
         "type": "cafe",
-        "categoria": _categoria(producto, hay_molienda=bool(n_molienda)),
+        "categoria": _categoria(producto, hay_molienda=bool(n_molienda), hay_ficha=bool(ficha)),
         "sizes": sizes,
         # El orden de los tamaños va como LISTA aparte y no se deduce de las
         # claves de `sizes`. Que un objeto JSON conserve el orden funciona en

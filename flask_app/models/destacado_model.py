@@ -7,7 +7,8 @@
 #
 # Lo que hace un destacado en la tienda:
 #   1. su tarjeta lleva un borde y una cinta del color elegido;
-#   2. dentro de su categoría (Café, por ejemplo) va PRIMERO;
+#   2. va PRIMERO en «Todos» (la landing los pone delante de todo) y
+#      dentro de su categoría (Café, por ejemplo);
 #   3. aparece en la pastilla «Especiales», que junta todos los destacados.
 # ==========================================================================
 
