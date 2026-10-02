@@ -27,7 +27,7 @@
          role="region" aria-label="Promoción vigente">
   <div class="promo__interior">
     <img class="promo__mascota"
-         src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}"
+         src="{{ mascota('lucky-sirviendo.png', 'promo') }}"
          alt="" aria-hidden="true" />
 
     <div class="promo__texto">
@@ -76,7 +76,7 @@
    Nada de esto se recuerda: en la próxima visita vuelve el banner. #}
 <div class="promo-burbuja" id="lpPromoBurbuja" hidden>
   <img class="promo-burbuja__mascota"
-       src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}"
+       src="{{ mascota('point-mano.png', 'promo-burbuja') }}"
        alt="" aria-hidden="true" />
   {# El globo y el aspa van hermanos dentro de esta caja, y no el aspa dentro
      del globo: un <button> dentro de otro <button> es HTML invalido. Misma

@@ -139,7 +139,7 @@ def cabeceras_de_seguridad(respuesta):
 def inyectar_globales():
     """Disponibles en todas las plantillas sin pasarlas en cada render."""
     from flask import session
-    from flask_app.config import csrf
+    from flask_app.config import csrf, temporadas
     return {
         "sitio_publico": SITIO_PUBLICO,
         "usuario": session.get("usuario"),
@@ -151,4 +151,7 @@ def inyectar_globales():
         # Nombre distinto a csrf_token a propósito: las vistas que ya pasan
         # csrf_token=csrf.token() como string siguen funcionando igual.
         "csrf_actual": csrf.token,
+        # {{ mascota('archivo.png', 'lugar') }}: la mascota de hoy, que en
+        # temporada (Halloween...) cambia sola. Ver config/temporadas.py.
+        "mascota": temporadas.mascota,
     }

@@ -14,7 +14,7 @@
 
 {% if estado == "listo" %}
   <div class="success-state">
-    <img src="{{ url_for('static', filename='img/mascotas/cheers.png') }}" alt="" aria-hidden="true" />
+    <img src="{{ mascota('cheers.png') }}" alt="" aria-hidden="true" />
     <h2>¡Tu correo quedó verificado!</h2>
     <p style="color:var(--text-muted)">
       Listo. Ya podemos avisarte de tus compras y de los talleres a los que te inscribas.
@@ -26,7 +26,7 @@
 
 {% elif estado == "ya_estaba" %}
   <div class="success-state">
-    <img src="{{ url_for('static', filename='img/mascotas/point.png') }}" alt="" aria-hidden="true" />
+    <img src="{{ mascota('point.png') }}" alt="" aria-hidden="true" />
     <h2>Ya estaba verificado</h2>
     <p style="color:var(--text-muted)">No tenías que hacer nada más. Todo en orden.</p>
     <a class="btn btn--primary" href="{{ url_for('dashboard') if usuario else url_for('login') }}">
@@ -36,7 +36,7 @@
 
 {% elif estado == "expirado" %}
   <div class="success-state">
-    <img src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+    <img src="{{ mascota('estamos-en-eso.png') }}" alt="" aria-hidden="true" />
     <h2>El enlace venció</h2>
     <p style="color:var(--text-muted)">
       Los enlaces de verificación duran 48 horas. Entra a tu cuenta y pide uno nuevo:
@@ -49,7 +49,7 @@
 
 {% else %}
   <div class="success-state">
-    <img src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+    <img src="{{ mascota('estamos-en-eso.png') }}" alt="" aria-hidden="true" />
     <h2>Este enlace no es válido</h2>
     <p style="color:var(--text-muted)">
       Puede que se haya cortado al copiarlo, o que corresponda a otro correo.

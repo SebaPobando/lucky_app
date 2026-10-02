@@ -943,7 +943,7 @@
       </div>
       </div>
     </div>
-    <img class="mascot mascot--hero" src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}" alt="" aria-hidden="true" />
+    <img class="mascot mascot--hero" src="{{ mascota('lucky-sirviendo.png', 'hero') }}" alt="" aria-hidden="true" />
   </section>
 
   <!-- ============================ NOSOTROS ============================ -->
@@ -965,7 +965,7 @@
         <div style="position:absolute;inset:0;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lg)">
           <img class="about__photo" src="{{ url_for('static', filename='img/equipo-lucky-point.jpg') }}" alt="Equipo de Lucky Point Coffee" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
         </div>
-        <img class="mascot mascot--about" src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+        <img class="mascot mascot--about" src="{{ mascota('point-mano.png', 'about') }}" alt="" aria-hidden="true" />
       </div>
       <div class="about__media-actions">
         <a class="btn btn--gold btn--sm" href="#carta">Ver la carta</a>
@@ -1017,7 +1017,7 @@
       <div class="carta__heading">
         <span class="section__eyebrow">Carta digital</span>
         <h2 class="section__title">Nuestra carta</h2>
-        <img class="mascot mascot--carta" src="{{ url_for('static', filename='img/mascotas/lucky-tomando.png') }}" alt="" aria-hidden="true" />
+        <img class="mascot mascot--carta" src="{{ mascota('lucky-tomando.png', 'carta') }}" alt="" aria-hidden="true" />
       </div>
       <p style="color: var(--text-muted); max-width: 52ch; margin-top: calc(var(--sp-5) * -1 + var(--sp-2));">Todos los precios están expresados en pesos chilenos.</p>
 
@@ -1063,7 +1063,7 @@
     <div class="container">
       <span class="section__eyebrow">Tienda online</span>
       <h2 class="section__title">Llévate Lucky Point a casa</h2>
-      <img class="mascot mascot--tienda" src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+      <img class="mascot mascot--tienda" src="{{ mascota('point-mano.png', 'tienda') }}" alt="" aria-hidden="true" />
 
       {#
         Las tarjetas salen del catálogo de Shopify (config/shopify.py). Precio
@@ -1238,7 +1238,7 @@
     <div class="container">
       <span class="section__eyebrow">Agenda</span>
       <h2 class="section__title">Talleres y catas</h2>
-      <img class="mascot mascot--talleres" src="{{ url_for('static', filename='img/mascotas/lucky-sirviendo.png') }}" alt="" aria-hidden="true" />
+      <img class="mascot mascot--talleres" src="{{ mascota('lucky-sirviendo.png', 'talleres') }}" alt="" aria-hidden="true" />
 
       <div class="agenda agenda--landing" data-agenda {% if not agenda %}hidden{% endif %}>
         {% for a in agenda %}
@@ -1272,7 +1272,7 @@
       </div>
 
       <div class="sin-nada" data-agenda-vacio {% if agenda %}hidden{% endif %}>
-        <img src="{{ url_for('static', filename='img/mascotas/estamos-en-eso.png') }}" alt="" aria-hidden="true" />
+        <img src="{{ mascota('estamos-en-eso.png', 'agenda') }}" alt="" aria-hidden="true" />
         <p style="margin:0 0 var(--sp-2)"><b>Todavía no hay actividades publicadas.</b></p>
         <p style="margin:0;font-size:.88rem">Estamos preparando las próximas catas y talleres. Vuelve pronto.</p>
       </div>
@@ -1350,7 +1350,7 @@
       </div>
 
       <div class="muro__vacio" data-muro-vacio {% if muro %}hidden{% endif %}>
-        <img src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}" alt="" aria-hidden="true" />
+        <img src="{{ mascota('point-mano.png', 'muro') }}" alt="" aria-hidden="true" />
         <p style="margin:0 0 var(--sp-2)"><b>El muro está esperando el primero.</b></p>
         <p style="margin:0;font-size:.88rem">Deja tu deseo y lo publicamos apenas lo revisemos.</p>
       </div>
@@ -1369,7 +1369,7 @@
         <span class="section__eyebrow loyalty__rule-eyebrow">Compra tus Lucky Points</span>
         <div class="loyalty__rule-big">Recarga tus Lucky Points</div>
         <p class="loyalty__rule-text">Recarga tus Lucky Points por adelantado: mientras más recargas, más rinden gracias al bono por volumen. Sin tarjetas ni complicaciones, y no vencen.</p>
-        <img class="mascot mascot--puntos" src="{{ url_for('static', filename='img/mascotas/cheers.png') }}" alt="" aria-hidden="true" />
+        <img class="mascot mascot--puntos" src="{{ mascota('cheers.png', 'puntos') }}" alt="" aria-hidden="true" />
       </div>
 
       <div class="loyalty__steps">

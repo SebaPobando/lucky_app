@@ -46,7 +46,7 @@
 <div id="dashContent" class="dash">
 <div style="display:flex;flex-direction:column;gap:var(--sp-6)">
 <div class="balance-card">
-<img class="balance-card__mascot" src="{{ url_for('static', filename='img/mascotas/full.png') }}" alt="" aria-hidden="true" />
+<img class="balance-card__mascot" src="{{ mascota('full.png') }}" alt="" aria-hidden="true" />
 <div class="balance-card__eyebrow">Tu saldo<span class="balance-card__pronto">Próximamente</span></div>
 <div class="balance-card__amount"><span class="balance-card__star">★</span><span id="dashPoints">{{ saldo.total_fmt }}</span></div>
 <div class="balance-card__equiv" id="dashEquiv">
