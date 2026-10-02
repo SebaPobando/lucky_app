@@ -94,6 +94,10 @@
     .header, .footer, .pasos, .ins__volver, .estado { display:none !important }
     .ticket { box-shadow:none; border-color:#000 }
   }
+  .agendar { margin-top: var(--sp-5); text-align: center; }
+  .agendar__tit { margin: 0 0 var(--sp-3); font-weight: var(--fw-bold); color: var(--text-strong); }
+  .agendar__botones { display: flex; flex-wrap: wrap; gap: var(--sp-2); justify-content: center; }
+  .agendar__botones .btn { display: inline-flex; align-items: center; gap: 8px; }
 </style>
 {% endblock %}
 
@@ -148,6 +152,25 @@
     </div>
     {% endif %}
   </div>
+
+  {# Agendarlo: Google Calendar con un toque, y el .ics para el calendario
+     del iPhone u Outlook. Solo con el voucher activo y el taller por venir. #}
+  {% if i.calendario %}
+  <div class="agendar">
+    <p class="agendar__tit">Agrégalo a tu calendario</p>
+    <div class="agendar__botones">
+      <a class="btn btn--primary" href="{{ url_for('inscripcion_calendario', codigo=i.voucher_codigo) }}"
+         target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v4M10 16h4"/></svg>
+        Google Calendar
+      </a>
+      <a class="btn btn--outline" href="{{ url_for('inscripcion_calendario_ics', codigo=i.voucher_codigo) }}">
+        iPhone u Outlook
+      </a>
+    </div>
+  </div>
+  {% endif %}
 
   {# ----------------------------------------------------------------------
      Lo que falta. Solo aparece mientras haya algo que hacer: con el voucher

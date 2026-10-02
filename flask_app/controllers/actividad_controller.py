@@ -15,11 +15,11 @@
 import re
 from urllib.parse import quote
 
-from flask import (abort, flash, jsonify, redirect, render_template, request,
+from flask import (Response, abort, flash, jsonify, redirect, render_template, request,
                    session, url_for)
 
 from flask_app import app
-from flask_app.config import correo, csrf, qr, tiempo
+from flask_app.config import calendario, correo, csrf, qr, tiempo
 from flask_app.controllers.main_controller import (_bloqueado_registro,
                                                    _sumar_registro,
                                                    _url_absoluta,
@@ -549,7 +549,75 @@ def _vista_inscripcion(fila):
     # pagues» sería una entrada falsa esperando a que alguien la muestre.
     d["url"] = _url_absoluta("inscripcion", codigo=d["voucher_codigo"])
     d["qr"] = qr.svg(d["url"]) if (d["activo"] or d["usado"]) else None
+
+    # «Agregar a mi calendario»: solo con el voucher activo y el evento por
+    # venir. Agendar algo que todavía puede vencer, o que ya pasó, confunde.
+    d["calendario"] = d["activo"] and not d["ya_paso"]
+    d["calendario_url"] = _url_absoluta("inscripcion_calendario", codigo=d["voucher_codigo"])
     return d
+
+
+# --------------------------------------------- llevarlo al calendario
+
+def _evento_calendario(d):
+    """Los datos del taller tal como quedan en el calendario de la persona."""
+    detalle = f"Tu voucher (muéstralo al llegar): {d['url']}"
+    if d.get("descripcion"):
+        descripcion = d["descripcion"].strip()
+        if len(descripcion) > 600:
+            descripcion = descripcion[:600].rsplit(" ", 1)[0] + "…"
+        detalle = f"{descripcion}\n\n{detalle}"
+    return {
+        "titulo": f"{d['actividad']} · Lucky Point Coffee",
+        "inicio": d["inicio_at"],
+        "fin": d.get("fin_at"),
+        "detalle": detalle,
+        "lugar": d.get("lugar") or "Lucky Point Coffee, Bernardo O'Higgins 969, Osorno",
+    }
+
+
+def _inscripcion_para_calendario(codigo):
+    """La vista de la inscripción si se puede agendar; si no, None."""
+    fila = Actividad.por_codigo(codigo)
+    if not fila:
+        abort(404)
+    d = _vista_inscripcion(fila)
+    return d if d["calendario"] else None
+
+
+@app.route("/inscripcion/<codigo>/calendario")
+def inscripcion_calendario(codigo):
+    """
+    Lleva a Google Calendar con el taller ya escrito.
+
+    Es una dirección propia que redirige, y no el enlace de Google directo,
+    por dos razones: en un WhatsApp se lee corto y limpio, y si el admin
+    cambia la hora del taller, el enlace que ya se mandó lleva a la hora
+    nueva. Sin voucher activo (o con el evento ya pasado) vuelve a la
+    página de la inscripción, que explica en qué va.
+    """
+    d = _inscripcion_para_calendario(codigo)
+    if not d:
+        return redirect(url_for("inscripcion", codigo=codigo))
+    e = _evento_calendario(d)
+    return redirect(calendario.google_url(e["titulo"], e["inicio"], e["fin"],
+                                          e["detalle"], e["lugar"]))
+
+
+@app.route("/inscripcion/<codigo>/calendario.ics")
+def inscripcion_calendario_ics(codigo):
+    """El mismo evento como .ics, para el iPhone, Outlook y el resto."""
+    d = _inscripcion_para_calendario(codigo)
+    if not d:
+        return redirect(url_for("inscripcion", codigo=codigo))
+    e = _evento_calendario(d)
+    texto = calendario.ics(f"{d['voucher_codigo']}@{request.host}", e["titulo"],
+                           e["inicio"], e["fin"], e["detalle"], e["lugar"],
+                           url=d["url"])
+    return Response(texto, mimetype="text/calendar", headers={
+        "Content-Disposition": f'attachment; filename="taller-{d["voucher_codigo"]}.ics"',
+        "Cache-Control": "no-store",
+    })
 
 
 @app.route("/inscripcion/<codigo>")
@@ -632,6 +700,7 @@ def _correo_voucher(fila):
         f"Código: {d['voucher_codigo']}\n"
         f"Cuándo: {d['cuando']}\n"
         + (f"Dónde: {d['lugar']}\n" if d.get("lugar") else "")
+        + (f"\nAgrégalo a tu calendario:\n{d['calendario_url']}\n" if d["calendario"] else "")
         + "\n¡Nos vemos!\n"
     )
     return correo.enviar(d["email"],
@@ -746,6 +815,12 @@ def _vista_inscrito(fila, actividad):
     if d["estado"] in ("pagada", "asistio"):
         mensaje = (f"{saludo}este es tu voucher para «{actividad['nombre']}», "
                    f"{actividad['cuando']}. Muéstralo al llegar: {d['url']}")
+        # El enlace al calendario va solo con el voucher activo y el taller
+        # por venir: es el mismo criterio del botón del voucher.
+        if d["estado"] == "pagada" and not actividad.get("ya_paso"):
+            d["calendario_url"] = _url_absoluta("inscripcion_calendario",
+                                                codigo=d["voucher_codigo"])
+            mensaje += f"\n\nAgrégalo a tu calendario: {d['calendario_url']}"
     else:
         mensaje = (f"{saludo}acá puedes ver tu inscripción a «{actividad['nombre']}» "
                    f"y subir tu comprobante: {d['url']}")
