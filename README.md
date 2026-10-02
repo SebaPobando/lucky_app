@@ -55,6 +55,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopi
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/vales.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/tienda_destacados.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_carta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_gladiatore.sql"
 
@@ -77,6 +78,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopi
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/vales.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/tienda_destacados.sql"
 ```
 
 Correr de más no rompe nada: cada una mira primero si su cambio ya está.
@@ -511,6 +513,25 @@ premio. Nace sin premios: mientras falten, no se pueden habilitar giros.
 Las mascotas de arriba son `lucky.png` y `point.png` recortadas y pintadas
 con el verde de la ruleta (`ruleta-trebol.png`, `ruleta-taza.png`). Los
 colores están en `COLORES`, en `flask_app/models/ruleta_model.py`.
+
+## Destacados de la tienda
+
+Para los micro lotes y las ediciones especiales («El Oso», «La Geisha»). En
+**Panel → Tienda: destacados** aparecen los productos que hoy trae Shopify;
+en cada uno se marca «Destacar» y se elige el **color** (dorado, verde,
+verde y dorado, rojo o negro), el texto de la **cinta** («Micro lote»,
+«Edición especial») y el **orden** entre los destacados. La miniatura de
+cada fila muestra cómo queda la tarjeta mientras se elige.
+
+En la tienda, un destacado sale con su borde y su cinta, va **primero en su
+categoría** (en «Café», antes que los cafés de siempre) y aparece en la
+pastilla **«Especiales»**, segunda después de «Todos», que solo existe
+mientras haya algún destacado. El orden de las categorías lo sigue mandando
+la colección de Shopify.
+
+Precios, fotos y stock siguen saliendo de Shopify; `schema/tienda_destacados.sql`
+guarda solo cómo mostrar cada producto, por su handle. Si un destacado deja
+de venir en el catálogo, el panel lo muestra en «Ya no están en la tienda».
 
 ## Vales de regalo y gift cards
 

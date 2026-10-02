@@ -130,6 +130,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/carrito.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tienda-rapida.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/destacados.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/agenda.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/muro.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cuenta-nav.css') }}" />
@@ -1081,9 +1082,15 @@
       #}
       {% if tienda %}
       {% set categorias = tienda | map(attribute='categoria') | unique | list %}
-      {% if categorias | length > 1 %}
+      {# Los destacados del panel (Admin → Tienda) tienen su propia pastilla,
+         segunda, después de «Todos»: es lo que el local quiere que se vea. #}
+      {% set especiales = tienda | selectattr('destacado') | list %}
+      {% if categorias | length > 1 or especiales %}
       <div class="shop__tabs" id="shopTabs" role="group" aria-label="Filtrar la tienda por categoría">
         <button class="shop__tab shop__tab--active" type="button" data-cat="" aria-pressed="true">Todos</button>
+        {% if especiales %}
+        <button class="shop__tab shop__tab--especiales" type="button" data-cat="__especiales" aria-pressed="false">{{ nombre_especiales }}</button>
+        {% endif %}
         {% for c in categorias %}
         <button class="shop__tab" type="button" data-cat="{{ c }}" aria-pressed="false">{{ c }}</button>
         {% endfor %}
@@ -1106,8 +1113,9 @@
           #}
           {% for c in categorias %}
           {% for p in tienda | selectattr('categoria', 'equalto', c) %}
-          <article class="product product--interactive{{ ' product--agotado' if p.agotado }}"
-                   data-categoria="{{ p.categoria }}">
+          <article class="product product--interactive{{ ' product--agotado' if p.agotado }}{{ (' product--destacado product--d-' ~ p.destacado.color) if p.destacado }}"
+                   data-categoria="{{ p.categoria }}"{% if p.destacado %} data-especial="1"{% endif %}>
+            {% if p.destacado %}<span class="product__cinta">{{ p.destacado.cinta }}</span>{% endif %}
             {% if p.imagen %}
             <div class="product__media">
               <img class="product__image" src="{{ p.imagen }}"
@@ -1754,7 +1762,9 @@
       tarjetas.forEach(function (t) {
         // cat === '' es «Todos». `hidden` y no una clase: el estado queda en
         // el DOM y el lector de pantalla se salta la tarjeta oculta.
-        t.hidden = !!cat && t.dataset.categoria !== cat;
+        // «__especiales» es la pastilla de los destacados del panel.
+        t.hidden = cat === '__especiales' ? !t.dataset.especial
+                                          : (!!cat && t.dataset.categoria !== cat);
       });
     });
   })();

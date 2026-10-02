@@ -382,8 +382,10 @@ def home():
     promo = promo_para_plantilla()
 
     from flask_app.models.muro_model import LARGO_MENSAJE, LARGO_NICKNAME
+    from flask_app.models.destacado_model import NOMBRE_PESTANA
     return render_template("landing.html", agenda=agenda, muro=muro,
                            tienda=tienda,
+                           nombre_especiales=NOMBRE_PESTANA,
                            promo=promo,
                            tiempo=tiempo,
                            muro_limite=EN_LA_LANDING,

@@ -153,9 +153,15 @@ def admin_inicio():
     from flask_app.models.pedido_shopify_model import Pedido
     from flask_app.models.promo_model import Promo
     from flask_app.models.usuario_model import Usuario
+    try:
+        from flask_app.models.destacado_model import Destacado
+        destacados = len(Destacado.todos())
+    except Exception:
+        destacados = None
     return render_template(
         "admin_inicio.html",
         es_admin=True,
+        destacados=destacados,
         vales=vales,
         ruleta=ruleta,
         promos=Promo.resumen(),

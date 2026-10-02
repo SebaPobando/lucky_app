@@ -40,10 +40,15 @@ def catalogo_para_plantilla():
     delante.
     """
     try:
-        return shopify.catalogo()
+        catalogo = shopify.catalogo()
     except Exception as e:      # pragma: no cover  (shopify.catalogo ya atrapa)
         app.logger.error("No se pudo leer el catálogo de Shopify: %s", e)
         return None
+    # Los destacados del panel (borde de color, cinta, primeros en su
+    # categoría). aplicar() devuelve copias y nunca lanza: sin la tabla o
+    # sin base, la tienda sale igual, sin destacados.
+    from flask_app.models.destacado_model import aplicar
+    return aplicar(catalogo)
 
 
 @app.route("/api/v1/tienda")
@@ -541,3 +546,95 @@ def admin_ventas():
         var_ticket=_variacion(ticket, ticket_previo),
         hay_datos=any(d["clp"] or d["pedidos"] for d in serie),
     )
+
+
+# ---------------------------------------------------------------------------
+# Destacados de la tienda: el admin elige qué productos de Shopify resaltar,
+# con qué color y qué cinta. Ver models/destacado_model.py.
+# ---------------------------------------------------------------------------
+
+def _protegido_csrf():
+    from flask_app.config import csrf
+    if not csrf.valido(request.form.get("csrf")):
+        abort(400, "Token de seguridad inválido. Recarga la página.")
+
+
+@app.route("/admin/tienda")
+@requiere_admin
+def admin_tienda():
+    from flask_app.config import csrf
+    from flask_app.models.destacado_model import (COLOR_POR_DEFECTO, COLORES,
+                                                  CINTA_POR_DEFECTO, LARGO_CINTA,
+                                                  NOMBRE_PESTANA, Destacado)
+    try:
+        destacados = Destacado.todos()
+    except Exception as e:
+        app.logger.error("tienda_destacados no responde: %s", e)
+        from flask import flash, redirect, url_for
+        flash("Falta la tabla de destacados: corre schema/tienda_destacados.sql (ver README).", "error")
+        return redirect(url_for("admin_inicio"))
+
+    catalogo = None
+    try:
+        catalogo = shopify.catalogo()
+    except Exception as e:      # pragma: no cover
+        app.logger.error("No se pudo leer el catálogo de Shopify: %s", e)
+
+    productos = []
+    for i, p in enumerate(catalogo or []):
+        d = destacados.get(p["id"])
+        productos.append({
+            "handle": p["id"], "nombre": p["name"], "imagen": p.get("imagen"),
+            "categoria": p.get("categoria"), "agotado": p.get("agotado"),
+            "destacado": bool(d),
+            "color": d["color"] if d else COLOR_POR_DEFECTO,
+            "cinta": d["cinta"] if d else CINTA_POR_DEFECTO,
+            "orden": d["orden"] if d else 0,
+        })
+    # Destacados cuyo producto ya no viene en el catálogo (lo sacaron de la
+    # colección o le cambiaron el handle en Shopify). Se muestran para que
+    # el admin sepa que existen y los pueda quitar.
+    en_catalogo = {p["handle"] for p in productos}
+    huerfanos = [d for h, d in destacados.items() if catalogo is not None and h not in en_catalogo]
+
+    return render_template(
+        "admin_tienda.html", productos=productos, huerfanos=huerfanos,
+        sin_catalogo=catalogo is None, colores=COLORES, largo_cinta=LARGO_CINTA,
+        nombre_especiales=NOMBRE_PESTANA, total=len(destacados),
+        csrf_token=csrf.token())
+
+
+@app.route("/admin/tienda", methods=["POST"])
+@requiere_admin
+def admin_tienda_guardar():
+    from flask import flash, redirect, url_for
+    from flask_app.models.destacado_model import (COLOR_POR_DEFECTO, COLORES,
+                                                  CINTA_POR_DEFECTO, LARGO_CINTA,
+                                                  Destacado)
+    _protegido_csrf()
+    f = request.form
+    # Solo se aceptan handles que existen: los del catálogo de ahora y los
+    # que ya estaban destacados. Un handle inventado por POST no entra.
+    try:
+        catalogo = shopify.catalogo() or []
+    except Exception:
+        catalogo = []
+    validos = {p["id"] for p in catalogo} | set(Destacado.todos())
+
+    elegidos = []
+    for h in dict.fromkeys(f.getlist("destacar")):
+        if h not in validos:
+            continue
+        color = f.get(f"color__{h}")
+        cinta = " ".join((f.get(f"cinta__{h}") or "").split())[:LARGO_CINTA]
+        try:
+            orden = max(0, min(999, int(f.get(f"orden__{h}") or 0)))
+        except ValueError:
+            orden = 0
+        elegidos.append({"handle": h,
+                         "color": color if color in COLORES else COLOR_POR_DEFECTO,
+                         "cinta": cinta or CINTA_POR_DEFECTO, "orden": orden})
+    Destacado.guardar(elegidos)
+    flash(f"Tienda guardada: {len(elegidos)} producto{'s' if len(elegidos) != 1 else ''} "
+          f"destacado{'s' if len(elegidos) != 1 else ''}.", "success")
+    return redirect(url_for("admin_tienda"))
