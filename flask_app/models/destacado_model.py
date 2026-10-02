@@ -24,6 +24,12 @@ COLORES = {
     "verde_dorado": "Verde y dorado",
     "rojo":         "Rojo",
     "negro":        "Negro",
+    "cafe":         "Café",
+    "terracota":    "Terracota",
+    "vino":         "Vino",
+    "azul":         "Azul",
+    "plata":        "Plata",
+    "rosa":         "Rosa",
 }
 COLOR_POR_DEFECTO = "dorado"
 CINTA_POR_DEFECTO = "Edición especial"

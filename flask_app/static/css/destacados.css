@@ -23,14 +23,30 @@
 }
 .product.product--destacado:hover { box-shadow: 0 0 0 5px var(--d-brillo), var(--shadow-lg); }
 
-.product--d-dorado { --d-borde: #C9A24A; --d-brillo: rgba(201, 162, 74, .35);
+/* Cada color pisa las variables con DOS clases (.product.product--d-x),
+   igual que la regla de arriba, y va DESPUÉS: a igual especificidad gana
+   la última. Con una sola clase perdían contra .product.product--destacado
+   y todo salía dorado, eligiera el admin el color que eligiera. */
+.product.product--d-dorado { --d-borde: #C9A24A; --d-brillo: rgba(201, 162, 74, .35);
   --d-cinta-fondo: #C9A24A; --d-cinta-texto: #2A1C12; }
-.product--d-verde { --d-borde: #20392B; --d-brillo: rgba(32, 57, 43, .22);
+.product.product--d-verde { --d-borde: #20392B; --d-brillo: rgba(32, 57, 43, .22);
   --d-cinta-fondo: #20392B; --d-cinta-texto: #FFFFFF; }
-.product--d-rojo { --d-borde: #A3271F; --d-brillo: rgba(163, 39, 31, .22);
+.product.product--d-rojo { --d-borde: #A3271F; --d-brillo: rgba(163, 39, 31, .22);
   --d-cinta-fondo: #A3271F; --d-cinta-texto: #FFFFFF; }
-.product--d-negro { --d-borde: #141414; --d-brillo: rgba(20, 20, 20, .18);
+.product.product--d-negro { --d-borde: #141414; --d-brillo: rgba(20, 20, 20, .18);
   --d-cinta-fondo: #141414; --d-cinta-texto: #E9C77E; }
+.product.product--d-cafe { --d-borde: #5A3A22; --d-brillo: rgba(90, 58, 34, .24);
+  --d-cinta-fondo: #5A3A22; --d-cinta-texto: #F3E3C3; }
+.product.product--d-terracota { --d-borde: #B5592E; --d-brillo: rgba(181, 89, 46, .24);
+  --d-cinta-fondo: #B5592E; --d-cinta-texto: #FFFFFF; }
+.product.product--d-vino { --d-borde: #6B1E33; --d-brillo: rgba(107, 30, 51, .22);
+  --d-cinta-fondo: #6B1E33; --d-cinta-texto: #F3D9A4; }
+.product.product--d-azul { --d-borde: #1F3A5F; --d-brillo: rgba(31, 58, 95, .22);
+  --d-cinta-fondo: #1F3A5F; --d-cinta-texto: #FFFFFF; }
+.product.product--d-plata { --d-borde: #8E979F; --d-brillo: rgba(142, 151, 159, .30);
+  --d-cinta-fondo: #C9CED3; --d-cinta-texto: #22272B; }
+.product.product--d-rosa { --d-borde: #C76B8A; --d-brillo: rgba(199, 107, 138, .26);
+  --d-cinta-fondo: #C76B8A; --d-cinta-texto: #FFFFFF; }
 
 /* Verde y dorado: el borde es un degradado. Un border no admite degradados
    con esquinas redondeadas, así que se dibuja con dos fondos: el de la

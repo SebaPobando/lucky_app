@@ -69,6 +69,12 @@
   details.editar[open] > summary::before { content: "▾ "; }
   details.editar > div { margin-top: var(--sp-3); }
 </style>
+<style>
+  .promoadm__cerrada { margin: 0 0 var(--sp-4); padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md);
+    background: var(--lp-gold-bg); color: #7A5310; font-size: .88rem; line-height: 1.5;
+    display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-3); align-items: center; }
+  .promoadm__cerrada[hidden] { display: none; }
+</style>
 {% endblock %}
 
 {% block contenido %}
@@ -157,6 +163,16 @@
     <section class="promoadm__caja">
       <h2 class="promoadm__tit">Cargadas</h2>
 
+      {# Cerrar el banner (o su burbuja) se recuerda EN EL NAVEGADOR, por
+         promo. Quien probó la portada y lo cerró deja de verlo y cree que
+         no sale. Este aviso aparece solo si este navegador tiene una promo
+         cerrada, y la vuelve a abrir. #}
+      <p class="promoadm__cerrada" id="promoCerrada" hidden>
+        En este navegador cerraste el banner, por eso no lo ves en la portada
+        (la gente que no lo cerró sí lo ve).
+        <button class="btn btn--outline btn--sm" type="button" id="promoReabrir">Volver a mostrármelo</button>
+      </p>
+
       {% if not promos %}
       <p style="color:var(--text-muted);margin:0">
         Todavía no hay ninguna. La portada se ve igual que siempre.
@@ -243,6 +259,21 @@
 
 {% block page_js %}
 <script>
+(function () {
+  "use strict";
+  var CLAVE = 'lp_promo_v1';
+  var aviso = document.getElementById('promoCerrada');
+  var boton = document.getElementById('promoReabrir');
+  try {
+    if (!window.localStorage.getItem(CLAVE)) { return; }
+  } catch (e) { return; }
+  aviso.hidden = false;
+  boton.addEventListener('click', function () {
+    try { window.localStorage.removeItem(CLAVE); } catch (e) { /* nada que hacer */ }
+    aviso.textContent = 'Listo: al abrir la portada en este navegador vuelve a salir el banner.';
+  });
+})();
+
 /* Los atajos solo rellenan el campo de término: se calculan desde lo que diga
    «Empieza», no desde el reloj, para que mover el inicio arrastre el fin. */
 (function () {
