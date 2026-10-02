@@ -6,13 +6,11 @@
 # persona con su propia cuenta, y esto es lo que hace el admin con las de
 # los demás.
 #
-# Qué se puede hacer hoy: mirar quién hay y bloquear o desbloquear.
+# Qué se puede hacer hoy: mirar quién hay, bloquear o desbloquear, y hacer
+# barista a una cuenta (o devolverla a cliente). El barista entra a lo que
+# se usa en la barra —vales y ruleta— y a nada más.
 #
 # Qué NO se puede, y es a propósito:
-#
-#   - Crear cuentas de barista. El rol existe en el esquema, pero mientras
-#     no exista el canje en mesón (Fase 4) un barista no puede hacer nada
-#     que un cliente no pueda. Se agrega cuando haya algo que hacer con él.
 #
 #   - Borrar. La columna `deleted_at` está lista para el borrado lógico,
 #     pero borrar de verdad se lleva por delante los mensajes del muro (la
@@ -21,8 +19,8 @@
 #     prepago es destruir un pasivo contable: plata que esa persona pagó.
 #     Bloquear cubre lo que hace falta hoy.
 #
-#   - Cambiar roles. Sin esto, el panel no puede dejar el sistema sin
-#     administradores.
+#   - Dar o quitar el rol de admin. Solo cliente ↔ barista. Así el panel
+#     no puede dejar el sistema sin administradores, ni crear uno nuevo.
 # ==========================================================================
 
 from flask import (abort, flash, redirect, render_template, request, session,
@@ -134,6 +132,24 @@ def admin_usuarios_desbloquear(usuario_id):
         flash(f"{objetivo['email']} vuelve a tener acceso.", "info")
     else:
         flash("Esa cuenta no estaba bloqueada.", "info")
+    return redirect(_volver())
+
+
+@app.route("/admin/usuarios/<int:usuario_id>/rol", methods=["POST"])
+@requiere_admin
+def admin_usuarios_rol(usuario_id):
+    _protegido_csrf()
+    rol = request.form.get("nuevo_rol")
+    if rol not in ("cliente", "barista"):
+        abort(400)
+    objetivo = _objetivo(usuario_id)
+    if Usuario.cambiar_rol_personal(usuario_id, rol):
+        flash(f"{objetivo['email']} ahora es barista: entra al panel de la barra "
+              "(vales y ruleta) con su misma cuenta." if rol == "barista"
+              else f"{objetivo['email']} vuelve a ser cliente.", "info")
+    else:
+        flash("No se pudo cambiar el rol: solo cuentas activas, y nunca la de "
+              "un administrador.", "error")
     return redirect(_volver())
 
 

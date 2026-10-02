@@ -54,6 +54,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopi
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/vales.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_carta.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/seed_gladiatore.sql"
 
@@ -75,6 +76,7 @@ mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopi
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/pedidos_shopify_detalle.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/carta_combos.sql"
 mysql -u root -p --default-character-set=utf8mb4 -e "source schema/ruleta.sql"
+mysql -u root -p --default-character-set=utf8mb4 -e "source schema/vales.sql"
 ```
 
 Correr de más no rompe nada: cada una mira primero si su cambio ya está.
@@ -509,6 +511,42 @@ premio. Nace sin premios: mientras falten, no se pueden habilitar giros.
 Las mascotas de arriba son `lucky.png` y `point.png` recortadas y pintadas
 con el verde de la ruleta (`ruleta-trebol.png`, `ruleta-taza.png`). Los
 colores están en `COLORES`, en `flask_app/models/ruleta_model.py`.
+
+## Vales de regalo y gift cards
+
+Una tarjeta con QR que se canjea **una vez, completa**, en la barra. Se
+instala con `schema/vales.sql`.
+
+| | **Vale de regalo** | **Gift card** |
+|---|---|---|
+| Quién lo origina | Lucky: un evento, una cortesía | Un cliente que la compra en caja |
+| Se cobra | No | Sí: se anota cuánto pagó |
+| Vence | Si quien lo emite elige una fecha | **Nunca**: está pagada |
+
+Lo que cubre lo escribe quien lo emite, en texto libre («1 café de la
+carta», «1 Latte + 1 brownie», «$10.000 en consumo»). Sin saldo parcial.
+
+- **Emitir:** Panel → Vales. Al emitir se abre la página del vale con
+  **«Enviar por WhatsApp»**: el mensaje lleva el enlace a esa página, que
+  muestra el QR. Para un evento, «Emitir varios» crea hasta 200 vales y
+  abre una hoja para imprimir y recortar.
+- **Canjear:** quien atiende escanea el QR con la cámara de su celular. Solo
+  si tiene sesión de admin o barista aparece **«Canjear vale»**; escanear no
+  canjea, hay que tocar el botón. Un cliente que abre su enlace ve su vale
+  y nada más. Un vale se canjea una sola vez, aunque dos lo escaneen a la
+  vez.
+- **Todos los vales**, de los dos tipos, quedan en la lista del panel con su
+  estado, quién lo emitió y quién lo canjeó. El admin ve lo vendido en gift
+  cards y puede anular un vale o revertir un canje hecho por error.
+
+## El rol barista
+
+En **Panel → Cuentas**, el admin toca «Hacer barista» en una cuenta activa
+(la persona se registra primero en el sitio). El barista ve un panel
+reducido —**Vales** y **Ruleta**— y nada más: lo demás le responde 404. En
+la ruleta habilita giros y marca premios entregados; los premios los edita
+el admin. Quitarle el rol surte efecto al tiro. Desde el panel no se crea
+ni se quita un admin.
 
 ---
 

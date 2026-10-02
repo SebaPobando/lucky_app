@@ -71,7 +71,7 @@
 
 {% block contenido %}
 <main class="section"><div class="container rul">
-  <div class="auth__eyebrow">Administración</div>
+  <div class="auth__eyebrow">{{ 'Administración' if es_admin else 'Barra' }}</div>
   <h1 style="margin:6px 0 0">Ruleta</h1>
   <p style="color:var(--text-muted);margin:var(--sp-2) 0 0;max-width:62ch">
     Por compras sobre ${{ cfg.monto_minimo | miles }} en el local. Cada giro lo
@@ -103,10 +103,11 @@
       <button class="btn btn--primary" type="submit">Habilitar giro</button>
     </form>
     {% else %}
-    <p class="caja__txt" style="margin:0">Primero escribe los premios de la ruleta, acá abajo. Mientras falten no se pueden habilitar giros.</p>
+    <p class="caja__txt" style="margin:0">{{ 'Primero escribe los premios de la ruleta, acá abajo.' if es_admin else 'Falta que el administrador escriba los premios.' }} Mientras falten no se pueden habilitar giros.</p>
     {% endif %}
   </section>
 
+  {% if es_admin %}
   <section class="caja" id="premios">
     <h2 class="caja__tit">Premios</h2>
     <p class="caja__txt">
@@ -164,6 +165,25 @@
     </div>
   </section>
 
+  {% else %}
+  {# El barista ve qué premios hay y cuánto sale cada uno, pero no los edita. #}
+  <section class="caja" id="premios">
+    <h2 class="caja__tit">Premios</h2>
+    {% if probabilidades %}
+    <table class="prob" style="margin-top:0">
+      <thead><tr><th>Premio</th><th class="num">Gajos</th><th class="num">Probabilidad</th></tr></thead>
+      <tbody>
+        {% for p in probabilidades %}
+        <tr><td>{{ p.premio }}</td><td class="num">{{ p.gajos }} de {{ rueda.n }}</td><td class="num">{{ p.pct }}%</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="caja__txt" style="margin:0">El administrador todavía no escribe los premios.</p>
+    {% endif %}
+  </section>
+  {% endif %}
+
   <section class="caja" id="historial">
     <h2 class="caja__tit">Últimos giros</h2>
     {% if not historial %}
@@ -186,10 +206,12 @@
       <div class="giro__acciones">
         {% if h.estado == 'pendiente' %}
         <a class="lnk" href="{{ url_for('admin_ruleta', nuevo=h.codigo) }}#nuevo">Ver QR</a>
+        {% if es_admin %}
         <form method="POST" action="{{ url_for('admin_ruleta_anular', giro_id=h.id) }}">
           <input type="hidden" name="csrf" value="{{ csrf_token }}" />
           <button class="lnk" type="submit">Anular</button>
         </form>
+        {% endif %}
         {% elif h.estado == 'girado' %}
         <form method="POST" action="{{ url_for('admin_ruleta_entregado', giro_id=h.id) }}">
           <input type="hidden" name="csrf" value="{{ csrf_token }}" />
@@ -206,6 +228,7 @@
     {% endfor %}
   </section>
 
+  {% if es_admin %}
   <section class="caja" id="config">
     <h2 class="caja__tit">Configuración</h2>
     <form method="POST" action="{{ url_for('admin_ruleta_config') }}">
@@ -224,10 +247,12 @@
       <button class="btn btn--outline" type="submit">Guardar</button>
     </form>
   </section>
+  {% endif %}
 </div></main>
 {% endblock %}
 
 {% block page_js %}
+{% if es_admin %}
 <script>
 /* Agregar y quitar gajos sin recargar. Sin JavaScript igual se pueden
    editar los que hay; agregar o quitar es lo único que necesita esto. */
@@ -274,4 +299,5 @@
   renumerar();
 })();
 </script>
+{% endif %}
 {% endblock %}

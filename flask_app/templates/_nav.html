@@ -44,6 +44,8 @@
       <a href="{{ url_for('dashboard') }}" role="menuitem">Mi cuenta</a>
       {% if usuario.rol == 'admin' %}
       <a href="{{ url_for('admin_inicio') }}" role="menuitem">Admin</a>
+      {% elif usuario.rol == 'barista' %}
+      <a href="{{ url_for('admin_inicio') }}" role="menuitem">Barra</a>
       {% endif %}
       <a class="acct__salir" href="{{ url_for('salir') }}" role="menuitem">Salir</a>
     </div>

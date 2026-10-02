@@ -4,7 +4,9 @@
 #   público  /ruleta/<codigo>            la ruleta de UN giro habilitado
 #            /ruleta/<codigo>/girar      POST: sortea (una sola vez) y responde
 #                                        dónde tiene que caer
-#   admin    /admin/ruleta               habilitar giros, premios e historial
+#   personal /admin/ruleta               habilitar giros e historial (admin y
+#                                        barista); los premios, la
+#                                        configuración y anular, solo el admin
 #
 # No hay /ruleta a secas, ni botón en la portada: la ruleta existe solo para
 # quien compró en el local, y ese giro lo habilita alguien desde el panel.
@@ -18,7 +20,8 @@ from flask import (abort, flash, jsonify, redirect, render_template, request,
 
 from flask_app import app
 from flask_app.config import csrf, qr, tiempo
-from flask_app.controllers.main_controller import requiere_admin
+from flask_app.controllers.main_controller import (es_personal, requiere_admin,
+                                                   requiere_personal)
 from flask_app.models.ruleta_model import (COLORES, LARGO_PREMIO, MAX_GAJOS, MIN_GAJOS,
                                            GiroNoValido, Ruleta,
                                            RuletaIncompleta, _color_texto,
@@ -69,7 +72,7 @@ def ruleta_giro(codigo):
     resp = app.make_response(render_template(
         "ruleta.html", g=g, rueda=rueda, rotacion=round(rotacion, 3),
         premios=premios, monto_minimo=cfg.get("monto_minimo"), colores=COLORES,
-        es_admin=(session.get("usuario") or {}).get("rol") == "admin",
+        es_personal=es_personal(session.get("usuario")),
         csrf_token=csrf.token()))
     resp.headers["Cache-Control"] = "private, no-store"
     return resp
@@ -94,7 +97,7 @@ def ruleta_girar(codigo):
 # ------------------------------------------------------------------ admin
 
 @app.route("/admin/ruleta")
-@requiere_admin
+@requiere_personal
 def admin_ruleta():
     try:
         cfg = Ruleta.config()
@@ -133,11 +136,12 @@ def admin_ruleta():
         colores=len(COLORES),
         paleta=[{"fondo": c, "tinta": _color_texto(c)} for c in COLORES],
         min_gajos=MIN_GAJOS, max_gajos=MAX_GAJOS, largo_premio=LARGO_PREMIO,
+        es_admin=session["usuario"].get("rol") == "admin",
         csrf_token=csrf.token())
 
 
 @app.route("/admin/ruleta/habilitar", methods=["POST"])
-@requiere_admin
+@requiere_personal
 def admin_ruleta_habilitar():
     _protegido_csrf()
     referencia = (request.form.get("referencia") or "").strip()[:80] or None
@@ -182,7 +186,7 @@ def admin_ruleta_config():
 
 
 @app.route("/admin/ruleta/giros/<int:giro_id>/entregado", methods=["POST"])
-@requiere_admin
+@requiere_personal
 def admin_ruleta_entregado(giro_id):
     _protegido_csrf()
     Ruleta.marcar_entregado(giro_id, request.form.get("entregado") == "1")

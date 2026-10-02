@@ -50,7 +50,7 @@
   .marca--sinverif  { background:#FBE6D4; color:#9C4A16 }
   .marca--fecha     { color:var(--text-muted); font-weight:var(--fw-semibold) }
 
-  .fila__acciones { display:flex; gap:var(--sp-3); align-items:center }
+  .fila__acciones { display:flex; flex-wrap:wrap; gap:var(--sp-3); align-items:center }
   .fila__acciones form { margin:0 }
   .fila__nota { font-size:.78rem; color:var(--text-muted); font-style:italic }
 
@@ -159,6 +159,16 @@
         </form>
 
         {% else %}
+        {% if u.estado == 'activo' %}
+        <form method="POST" action="{{ url_for('admin_usuarios_rol', usuario_id=u.id) }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token }}" />
+          <input type="hidden" name="nuevo_rol" value="{{ 'cliente' if u.rol == 'barista' else 'barista' }}" />
+          <input type="hidden" name="busca" value="{{ busca }}" />
+          <input type="hidden" name="rol" value="{{ rol or '' }}" />
+          <input type="hidden" name="estado" value="{{ estado or '' }}" />
+          <button class="btn btn--outline btn--sm" type="submit">{{ 'Quitar barista' if u.rol == 'barista' else 'Hacer barista' }}</button>
+        </form>
+        {% endif %}
         <form method="POST" action="{{ url_for('admin_usuarios_bloquear', usuario_id=u.id) }}"
               onsubmit="return confirm('Se bloquea {{ u.email }}. Podrás deshacerlo cuando quieras.')">
           <input type="hidden" name="csrf" value="{{ csrf_token }}" />

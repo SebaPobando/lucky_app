@@ -353,6 +353,27 @@ class Usuario:
         """, {"id": usuario_id})
 
     @staticmethod
+    def cambiar_rol_personal(usuario_id, rol):
+        """
+        Hace barista a un cliente, o lo devuelve a cliente. Nada más.
+
+        Las condiciones van en el SQL, no solo en el controlador:
+          - nunca toca a un admin, ni convierte a nadie en admin (el admin se
+            crea con crear_admin.py, desde el servidor);
+          - solo cuentas activas: un invitado no tiene contraseña con qué
+            entrar, y una bloqueada primero se desbloquea.
+        Devuelve las filas cambiadas: 0 si no correspondía.
+        """
+        if rol not in ("cliente", "barista"):
+            raise ValueError(rol)
+        return connectToMySQL(DB).query_db("""
+            UPDATE usuarios SET rol = %(rol)s
+            WHERE id = %(id)s AND deleted_at IS NULL
+              AND rol IN ('cliente', 'barista') AND rol <> %(rol)s
+              AND estado = 'activo'
+        """, {"id": usuario_id, "rol": rol})
+
+    @staticmethod
     def desbloquear(usuario_id):
         """
         Devuelve la cuenta al estado que tenía antes.

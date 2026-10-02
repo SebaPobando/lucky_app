@@ -19,7 +19,8 @@ from flask import abort, flash, jsonify, redirect, render_template, request, url
 
 from flask_app import app
 from flask_app.config import csrf, tiempo
-from flask_app.controllers.main_controller import requiere_admin
+from flask_app.controllers.main_controller import (requiere_admin,
+                                                   requiere_personal)
 from flask_app.models.carta_model import Carta
 from flask_app.models.combo_model import Combo
 
@@ -119,27 +120,43 @@ def _datos_del_formulario(marca):
 # --------------------------------------------------------------------- vistas
 
 @app.route("/admin")
-@requiere_admin
+@requiere_personal
 def admin_inicio():
     """
     El panel. Existe para que el menú de arriba no crezca: cada sección nueva
     de administración era un enlace más en la barra, y con dos ya se partía
     en dos líneas. Ahora la barra lleva un solo «Admin» y lo demás vive acá.
+
+    El barista también entra, pero ve solo las tarjetas de la barra (vales y
+    ruleta). Lo demás ni se consulta para él.
     """
-    from flask_app.models.actividad_model import Actividad
-    from flask_app.models.muro_model import Muro
-    from flask_app.models.pedido_shopify_model import Pedido
-    from flask_app.models.promo_model import Promo
-    from flask_app.models.usuario_model import Usuario
-    # La ruleta puede no estar instalada todavía (falta schema/ruleta.sql):
-    # el panel no se cae por eso, la tarjeta simplemente no sale.
+    from flask import session
+    es_admin = session["usuario"].get("rol") == "admin"
+    # Cada módulo opcional va en su try: sin su migración, la tarjeta no
+    # sale y el panel no se cae.
+    try:
+        from flask_app.models.vale_model import Vale
+        vales = Vale.resumen()
+    except Exception:
+        vales = None
     try:
         from flask_app.models.ruleta_model import Ruleta
         ruleta = Ruleta.resumen()
     except Exception:
         ruleta = None
+    if not es_admin:
+        return render_template("admin_inicio.html", es_admin=False,
+                               vales=vales, ruleta=ruleta)
+
+    from flask_app.models.actividad_model import Actividad
+    from flask_app.models.muro_model import Muro
+    from flask_app.models.pedido_shopify_model import Pedido
+    from flask_app.models.promo_model import Promo
+    from flask_app.models.usuario_model import Usuario
     return render_template(
         "admin_inicio.html",
+        es_admin=True,
+        vales=vales,
         ruleta=ruleta,
         promos=Promo.resumen(),
         pedidos=Pedido.resumen(),

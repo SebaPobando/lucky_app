@@ -135,6 +135,34 @@ def requiere_admin(vista):
     return envoltura
 
 
+# Quienes trabajan en el local. El barista entra a lo que se usa en la barra
+# (vales, ruleta) y a nada más: ni precios, ni ventas, ni cuentas.
+PERSONAL = ("admin", "barista")
+
+
+def es_personal(usuario):
+    return bool(usuario) and usuario.get("rol") in PERSONAL
+
+
+def requiere_personal(vista):
+    """
+    Como requiere_admin, pero también deja pasar al barista. Para las
+    pantallas de la barra. Con el mismo 404 para el resto, y revalidando el
+    rol contra la base en cada página: quitarle el rol a un barista surte
+    efecto al tiro, no cuando cierre sesión (ver _sesion_vigente).
+    """
+    @wraps(vista)
+    def envoltura(*args, **kwargs):
+        usuario = _sesion_vigente()
+        if not usuario:
+            flash("Inicia sesión para ver esa página.", "error")
+            return redirect(url_for("login"))
+        if not es_personal(usuario):
+            abort(404)
+        return vista(*args, **kwargs)
+    return envoltura
+
+
 # --- Correos de cuenta ------------------------------------------------------
 # Los dos correos que manda esta app. El texto vive acá y no en plantillas
 # porque son cuatro líneas cada uno; si crecen o se les pone diseño, se pasan

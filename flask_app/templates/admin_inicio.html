@@ -24,16 +24,27 @@
 
 {% block contenido %}
 <main class="section"><div class="container" style="max-width:860px">
-  <div class="auth__eyebrow">Administración</div>
-  <h1 style="margin:6px 0 0">Panel</h1>
+  <div class="auth__eyebrow">{{ 'Administración' if es_admin else 'Personal' }}</div>
+  <h1 style="margin:6px 0 0">{{ 'Panel' if es_admin else 'Barra' }}</h1>
   <p style="color:var(--text-muted);margin:var(--sp-2) 0 0">
-    Solo tú ves esto. Para el resto, estas páginas no existen.
+    {{ 'Solo tú ves esto.' if es_admin else 'Lo que se usa en la barra.' }} Para el resto, estas páginas no existen.
   </p>
 
   {# Todo lo de admin cuelga de acá y no del menú de arriba: cada enlace nuevo
      en la barra la empujaba a partirse en dos líneas. Así la barra queda fija
      y este panel crece lo que haga falta. #}
   <div class="panel">
+    {% if vales %}
+    <a class="panel__card" href="{{ url_for('admin_vales') }}">
+      <h2 class="panel__tit">Vales</h2>
+      <p class="panel__desc">
+        Emitir vales de regalo y gift cards, enviarlos por WhatsApp e
+        imprimir los de un evento. Se canjean escaneando su QR.
+      </p>
+      <span class="panel__dato">{{ vales.vigentes }} vigente{{ 's' if vales.vigentes != 1 }}</span>
+    </a>
+    {% endif %}
+
     {% if ruleta %}
     <a class="panel__card" href="{{ url_for('admin_ruleta') }}">
       <h2 class="panel__tit">Ruleta</h2>
@@ -51,6 +62,8 @@
     </a>
     {% endif %}
 
+    {# Lo que sigue es solo para el admin: el barista ve la barra y nada más. #}
+    {% if es_admin %}
     <a class="panel__card" href="{{ url_for('admin_carta_inicio') }}">
       <h2 class="panel__tit">Carta</h2>
       <p class="panel__desc">
@@ -155,6 +168,7 @@
       </span>
       {% endif %}
     </a>
+    {% endif %}
   </div>
 </div></main>
 {% endblock %}
