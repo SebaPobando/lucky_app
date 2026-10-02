@@ -13,9 +13,10 @@
    pestana pasara a segundo plano —donde el navegador frena los timers— para
    que el contador se fuera quedando atras, y al volver mostraria de menos.
 
-   Que se muestra al cargar lo decide el script inline de _promo.html, que
-   corre antes del primer pintado. Aca no se toca esa decision: solo se cuenta
-   y se responde a los clics.
+   El banner sale siempre al cargar (lo abre el script inline de
+   _promo.html). Cerrarlo o esconder la burbuja vale solo para esta visita:
+   no se guarda nada en el navegador. Aca solo se cuenta y se responde a los
+   clics.
    =========================================================================== */
 (function (window, document) {
   "use strict";
@@ -24,7 +25,6 @@
   var burbuja = document.getElementById('lpPromoBurbuja');
   if (!banner) { return; }
 
-  var CLAVE = 'lp_promo_v1';
   var idPromo = banner.dataset.promo;
 
   var elDias = banner.querySelector('[data-promo-dias]');
@@ -49,14 +49,6 @@
   var porScroll = false;   /* la burbuja la abrio el scroll, no la persona */
 
   function dos(n) { return (n < 10 ? '0' : '') + n; }
-
-  function recordar(modo) {
-    /* La decision se guarda POR PROMO: la siguiente vuelve a mostrarse entera
-       en vez de quedar silenciada por un clic de hace tres semanas. */
-    try {
-      window.localStorage.setItem(CLAVE, JSON.stringify({ id: idPromo, modo: modo }));
-    } catch (e) { /* modo privado o storage lleno: no es motivo para fallar */ }
-  }
 
   /* ------------------------------------------------------------ contador */
 
@@ -113,14 +105,12 @@
   function cerrarBanner() {
     banner.hidden = true;
     porScroll = false;
-    recordar('burbuja');
     mostrarBurbuja();
   }
 
   function abrirBanner() {
     if (burbuja) { burbuja.hidden = true; }
     banner.hidden = false;
-    recordar('abierta');
     banner.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
 
@@ -136,7 +126,6 @@
       btnDescartar.addEventListener('click', function (e) {
         e.stopPropagation();
         burbuja.hidden = true;
-        recordar('descartada');
       });
     }
   }

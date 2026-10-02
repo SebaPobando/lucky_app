@@ -7,12 +7,14 @@
   pegado arriba, como siempre. Un banner fijo habría obligado a calcular su
   altura por JS y a sumarla al header en cada resize.
 
-  LOS DOS ELEMENTOS NACEN `hidden` Y LOS ABRE EL SCRIPT DE ABAJO, que es inline
-  y síncrono a propósito: quien ya cerró esta promo tiene que ver la burbuja y
-  no el banner, y esa decisión vive en el navegador. Pintando el banner y
-  escondiéndolo después se vería un salto del contenido en cada carga. Mismo
-  criterio que el catálogo de la tienda, que se inyecta resuelto en vez de
-  pedirse por fetch.
+  Mientras la promo esté vigente, el banner sale SIEMPRE al entrar a la
+  portada, con cuenta o sin ella (decisión de Seba, 2026-10-02). Cerrarlo lo
+  esconde solo durante esa visita: no se guarda nada en el navegador. Antes
+  se recordaba por promo, y quien lo cerraba una vez no lo volvía a ver más
+  — ni el mismo admin, que creía que la promo no estaba saliendo.
+
+  Nace `hidden` y lo abre el script inline de abajo, igual que antes: sin
+  JavaScript el contador no corre y la X no cierra, así que mejor no pintarlo.
 
   El contador cambia cada segundo, así que va `aria-hidden`: un lector de
   pantalla anunciando los segundos es insoportable. El plazo viaja en texto
@@ -70,8 +72,8 @@
 </section>
 
 {# La burbuja es la promo en reposo: sigue disponible sin estorbar. Aparece al
-   cerrar el banner y también cuando el banner se pierde de vista por scroll,
-   pero eso último NO se recuerda — no es una decisión de la persona. #}
+   cerrar el banner y también cuando el banner se pierde de vista por scroll.
+   Nada de esto se recuerda: en la próxima visita vuelve el banner. #}
 <div class="promo-burbuja" id="lpPromoBurbuja" hidden>
   <img class="promo-burbuja__mascota"
        src="{{ url_for('static', filename='img/mascotas/point-mano.png') }}"
@@ -86,7 +88,7 @@
       <span class="promo-burbuja__reloj" data-promo-mini aria-hidden="true">--:--:--</span>
     </button>
     <button class="promo-burbuja__descartar" type="button" data-promo-descartar
-            aria-label="No mostrar más esta promoción">
+            aria-label="Esconder la promoción">
       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
            stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
@@ -94,26 +96,13 @@
 </div>
 
 <script>
-/* Decide QUÉ se muestra antes del primer pintado. Todo lo demás (el contador,
-   cerrar, reabrir) vive en static/js/promo.js, que carga al final como el
-   resto. Acá solo va lo que no puede esperar sin provocar un salto visual. */
 (function () {
   "use strict";
   var banner = document.getElementById('lpPromo');
-  var burbuja = document.getElementById('lpPromoBurbuja');
   if (!banner) { return; }
-  var modo = 'banner';
-  try {
-    var guardado = JSON.parse(window.localStorage.getItem('lp_promo_v1') || 'null');
-    /* La decisión se guarda POR PROMO: una promo nueva vuelve a mostrarse
-       entera, en vez de quedar silenciada por un clic de hace tres semanas. */
-    if (guardado && String(guardado.id) === banner.dataset.promo) {
-      modo = guardado.modo === 'descartada' ? 'nada' : 'burbuja';
-    }
-  } catch (e) { /* modo privado o storage bloqueado: se muestra el banner */ }
-
-  if (modo === 'banner') { banner.hidden = false; }
-  else if (modo === 'burbuja' && burbuja) { burbuja.hidden = false; }
+  /* Limpieza de la versión anterior, que recordaba qué promo se cerró. */
+  try { window.localStorage.removeItem('lp_promo_v1'); } catch (e) { /* storage bloqueado */ }
+  banner.hidden = false;
 })();
 </script>
 {% endif %}
