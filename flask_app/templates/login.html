@@ -13,8 +13,8 @@
    evaluado: se llama acá y no antes para no ponerle cookie de sesión a todo
    el que abre la portada. #}
 <input type="hidden" name="csrf" value="{{ csrf_actual() }}" />
-<div class="field"><label class="field__label" for="loginEmail">Correo</label><input class="field__input" id="loginEmail" name="email" type="email" placeholder="tu@correo.cl" required /></div>
-<div class="field"><label class="field__label" for="loginPass">Contraseña</label><input class="field__input" id="loginPass" name="password" type="password" required /></div>
+<div class="field"><label class="field__label" for="loginEmail">Correo</label><input class="field__input" id="loginEmail" name="email" type="email" placeholder="tu@correo.cl" required autocomplete="username" autocapitalize="none" spellcheck="false" /></div>
+<div class="field"><label class="field__label" for="loginPass">Contraseña</label><input class="field__input" id="loginPass" name="password" type="password" required autocomplete="current-password" enterkeyhint="go" /></div>
 <div class="field__between"><label class="remember"><input type="checkbox" name="recordarme" value="1" checked /> Recordarme</label><a href="{{ url_for('recuperar_password') }}">¿Olvidaste tu contraseña?</a></div>
 <button class="btn btn--primary btn--block" type="submit">Iniciar sesión</button>
 </form>

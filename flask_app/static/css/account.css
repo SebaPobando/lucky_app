@@ -191,3 +191,15 @@ img{max-width:100%;display:block}
 .quick-link--pronto{background:var(--surface-sand);border-style:dashed;border-color:var(--border-strong);cursor:default}
 .quick-link--pronto:hover{transform:none;box-shadow:none}
 .quick-link__pill{align-self:flex-start;background:var(--lp-gold-bg);color:#8A5E13;font-size:.6rem;font-weight:var(--fw-semibold);letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:var(--r-pill)}
+
+/* --- Formularios en el celular ----------------------------------------------
+   iOS agranda la página (zoom) al tocar un campo con letra de menos de 16px, y
+   al terminar de escribir la deja agrandada: el botón queda corrido o bajo el
+   teclado y hay que mover la página para poder tocarlo. Con 16px no hace zoom.
+   Además, en el celular la tarjeta de entrar/registrarse deja de centrarse en
+   vertical: el alto disponible cambia cuando el teclado se abre y se cierra, y
+   la tarjeta centrada se corría justo bajo el dedo. */
+@media (max-width:760px){
+  .field__input{font-size:16px}
+  .auth{min-height:0;align-items:flex-start;padding-block:var(--sp-6)}
+}
