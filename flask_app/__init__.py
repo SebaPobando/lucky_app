@@ -59,10 +59,24 @@ if os.environ.get("DETRAS_DE_PROXY") == "1":
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 # Cookie de sesión endurecida (ver Fase 2 del roadmap).
+#
+# CUÁNTO DURA LA SESIÓN. Con «Recordarme» marcado (viene marcado), 30 días
+# desde la ÚLTIMA visita: Flask renueva la fecha en cada página
+# (SESSION_REFRESH_EACH_REQUEST, encendido por defecto), así que quien usa el
+# sitio seguido no vuelve a escribir su clave nunca. Sin «Recordarme», la
+# sesión muere al cerrar el navegador, para un computador compartido.
+#
+# Una sesión larga no es una sesión sin control: cada página protegida
+# relee la cuenta de la base (_sesion_vigente), así que bloquear a alguien
+# o quitarle el rol sigue surtiendo efecto al tiro, aunque su cookie dure
+# un mes. Y «Salir» la borra.
+from datetime import timedelta
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.environ.get("FLASK_ENV") == "production",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=30),
 )
 
 # Flask ordena alfabéticamente las claves de todo lo que serializa a JSON, y

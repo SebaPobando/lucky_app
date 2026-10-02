@@ -472,7 +472,10 @@ def login():
     # evita la fijación de sesión (que alguien te deje una cookie preparada).
     session.clear()
     session["usuario"] = Usuario.para_sesion(fila)
-    session.permanent = False
+    # «Recordarme»: 30 días renovables (ver flask_app/__init__.py). Antes el
+    # checkbox era solo dibujo —no tenía name y nadie lo leía— y la sesión
+    # moría siempre al cerrar el navegador.
+    session.permanent = request.form.get("recordarme") == "1"
 
     destino = request.args.get("next")
     if destino and destino.startswith("/") and not destino.startswith("//"):
@@ -643,7 +646,9 @@ def registro():
     # justo después de crearla no aporta seguridad, solo fricción.
     session.clear()
     session["usuario"] = Usuario.para_sesion(fila)
-    session.permanent = False
+    # Quien se registra lo hace desde su propio teléfono: queda recordado,
+    # igual que al entrar con «Recordarme» marcado.
+    session.permanent = True
     flash(f"¡Bienvenido, {fila['nombre'] or 'a Lucky Point'}!", "info")
     return redirect(url_for("dashboard"))
 
