@@ -231,16 +231,30 @@ class Actividad:
     @staticmethod
     def eliminar(actividad_id):
         """
-        Solo si nadie se inscribió. Con inscripciones la llave foránea lo
-        impide, y está bien que lo impida: hay personas que contaban con eso.
-        Para esos casos existe el estado 'cancelada'.
+        Borra la actividad. Devuelve True si se borró.
+
+        Sin inscripciones se borra directo. Con inscripciones, SOLO si está
+        cancelada: ahí se borran también sus inscripciones (y sus vouchers
+        dejan de funcionar), todo en una transacción. Una actividad viva con
+        gente inscrita no se borra: hay personas que contaban con ella, y para
+        eso está primero el estado 'cancelada', que ellos ven al entrar.
         """
-        try:
-            connectToMySQL(DB).query_db(
-                "DELETE FROM actividades WHERE id = %(id)s", {"id": actividad_id})
+        with transaccion(DB) as cur:
+            cur.execute("SELECT estado FROM actividades WHERE id = %s FOR UPDATE",
+                        (actividad_id,))
+            fila = cur.fetchone()
+            if not fila:
+                return False
+            estado = fila["estado"] if isinstance(fila, dict) else fila[0]
+            cur.execute("SELECT COUNT(*) AS n FROM usuarios_en_actividad WHERE actividad_id = %s",
+                        (actividad_id,))
+            c = cur.fetchone()
+            n = c["n"] if isinstance(c, dict) else c[0]
+            if n and estado != "cancelada":
+                return False
+            cur.execute("DELETE FROM usuarios_en_actividad WHERE actividad_id = %s", (actividad_id,))
+            cur.execute("DELETE FROM actividades WHERE id = %s", (actividad_id,))
             return True
-        except pymysql.err.IntegrityError:
-            return False
 
     # --------------------------------------------------------- inscripción
 

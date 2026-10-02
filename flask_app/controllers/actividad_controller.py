@@ -466,7 +466,8 @@ def admin_actividades_eliminar(actividad_id):
         flash(f"«{actual['nombre']}» eliminada.", "info")
     else:
         flash(f"No se puede eliminar «{actual['nombre']}»: hay gente inscrita. "
-              "Márcala como cancelada, así queda el registro y ellos lo ven.", "error")
+              "Primero márcala como Cancelada y guarda (así ellos lo ven al "
+              "entrar); después ya se puede eliminar.", "error")
     return redirect(url_for("admin_actividades"))
 
 
