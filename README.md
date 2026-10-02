@@ -541,9 +541,16 @@ carta», «1 Latte + 1 brownie», «$10.000 en consumo»). Sin saldo parcial.
 
 ## El rol barista
 
-En **Panel → Cuentas**, el admin toca «Hacer barista» en una cuenta activa
-(la persona se registra primero en el sitio). El barista ve un panel
-reducido —**Vales** y **Ruleta**— y nada más: lo demás le responde 404. En
+Dos formas, las dos en **Panel → Cuentas**:
+
+- **Crear la cuenta** («Crear cuenta de barista»): nombre, correo y, si se
+  quiere, celular. Nace **sin contraseña** y el panel muestra un enlace para
+  mandárselo por WhatsApp (también le llega por correo). Con él elige su
+  contraseña y entra directo a la barra. Dura 72 horas y sirve una vez; si
+  vence, «Nuevo enlace» en su fila. El admin nunca conoce la contraseña.
+- **Ascender una cuenta que ya existe:** «Hacer barista» en su fila.
+
+El barista ve un panel reducido —**Vales** y **Ruleta**— y nada más: lo demás le responde 404. En
 la ruleta habilita giros y marca premios entregados; los premios los edita
 el admin. Quitarle el rol surte efecto al tiro. Desde el panel no se crea
 ni se quita un admin.

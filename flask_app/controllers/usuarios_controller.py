@@ -6,9 +6,15 @@
 # persona con su propia cuenta, y esto es lo que hace el admin con las de
 # los demás.
 #
-# Qué se puede hacer hoy: mirar quién hay, bloquear o desbloquear, y hacer
-# barista a una cuenta (o devolverla a cliente). El barista entra a lo que
-# se usa en la barra —vales y ruleta— y a nada más.
+# Qué se puede hacer hoy: mirar quién hay, bloquear o desbloquear, hacer
+# barista a una cuenta (o devolverla a cliente), y CREAR la cuenta de un
+# barista nuevo. El barista entra a lo que se usa en la barra —vales y
+# ruleta— y a nada más.
+#
+# Crear un barista no le inventa una contraseña: la cuenta nace sin clave y
+# el admin le manda un enlace (por WhatsApp, y además le llega por correo)
+# para que la elija él. Así el admin nunca conoce la contraseña de nadie, y
+# no hay claves «temporales» dando vueltas en un chat.
 #
 # Qué NO se puede, y es a propósito:
 #
@@ -23,13 +29,19 @@
 #     no puede dejar el sistema sin administradores, ni crear uno nuevo.
 # ==========================================================================
 
+from urllib.parse import quote
+
 from flask import (abort, flash, redirect, render_template, request, session,
                    url_for)
 
 from flask_app import app
 from flask_app.config import csrf, tiempo
-from flask_app.controllers.main_controller import requiere_admin
-from flask_app.models.usuario_model import Usuario
+from flask_app.controllers.actividad_controller import _telefono, _whatsapp
+from flask_app.controllers.main_controller import (enlace_invitacion,
+                                                   enviar_invitacion,
+                                                   requiere_admin)
+from flask_app.config.enlaces import HORAS_INVITACION
+from flask_app.models.usuario_model import Usuario, normalizar_email
 
 ROLES = ("cliente", "barista", "admin")
 ESTADOS = ("invitado", "activo", "bloqueado")
@@ -58,6 +70,8 @@ def _vista(fila):
         or d["email"].split("@")[0]
     # Un admin no se puede tocar desde acá, y uno mismo tampoco.
     d["intocable"] = d["rol"] == "admin"
+    # Un barista creado desde el panel que todavía no elige su contraseña.
+    d["invitacion_pendiente"] = (d["rol"] == "barista" and d["estado"] == "invitado")
     return d
 
 
@@ -88,8 +102,31 @@ def admin_usuarios():
 
     filas = Usuario.listar_para_admin(busca=busca or None, rol=rol, estado=estado)
 
+    # La invitación recién creada (o pedida de nuevo): ?invitado=<id>. El
+    # enlace se genera al mostrarlo y no se guarda en ningún lado.
+    invitacion = None
+    try:
+        invitado_id = int(request.args.get("invitado") or 0)
+    except ValueError:
+        invitado_id = 0
+    if invitado_id:
+        fila = Usuario.por_id(invitado_id)
+        if fila and fila["rol"] == "barista" and fila["estado"] == "invitado":
+            enlace = enlace_invitacion(fila)
+            texto = (f"Hola {fila['nombre'] or ''}, te creé tu cuenta de barista en "
+                     "Lucky Point Coffee. Entra a este enlace para elegir tu "
+                     f"contraseña (vence en {HORAS_INVITACION} horas): {enlace}")
+            invitacion = {
+                "nombre": fila["nombre"] or fila["email"], "email": fila["email"],
+                "enlace": enlace, "horas": HORAS_INVITACION,
+                "wsp": (_whatsapp(fila["telefono"], texto) if fila["telefono"]
+                        else f"https://wa.me/?text={quote(texto)}"),
+                "correo_enviado": request.args.get("correo") == "1",
+            }
+
     return render_template(
         "admin_usuarios.html",
+        invitacion=invitacion,
         usuarios=[_vista(u) for u in filas],
         busca=busca,
         rol=rol,
@@ -151,6 +188,54 @@ def admin_usuarios_rol(usuario_id):
         flash("No se pudo cambiar el rol: solo cuentas activas, y nunca la de "
               "un administrador.", "error")
     return redirect(_volver())
+
+
+@app.route("/admin/usuarios/crear-barista", methods=["POST"])
+@requiere_admin
+def admin_usuarios_crear_barista():
+    _protegido_csrf()
+    volver = redirect(url_for("admin_usuarios") + "#crear")
+    nombre = " ".join((request.form.get("nombre") or "").split())[:45]
+    apellido = " ".join((request.form.get("apellido") or "").split())[:45] or None
+    email = normalizar_email(request.form.get("email"))
+    if not nombre:
+        flash("Escribe el nombre de la persona.", "error")
+        return volver
+    if "@" not in email or "." not in email.split("@")[-1]:
+        flash("Ese correo no parece válido.", "error")
+        return volver
+
+    telefono = None
+    if (request.form.get("telefono") or "").strip():
+        telefono, error = _telefono(request.form.get("telefono"))
+        if error:
+            flash(error.replace("por ahí te mandamos el voucher", "para mandarle el enlace"), "error")
+            return volver
+
+    existente = Usuario.por_email(email)
+    if existente:
+        # No se pisa nada: si ya tiene cuenta, se busca y se hace barista
+        # con el botón de su fila (o se ve por qué no se puede).
+        if existente["rol"] == "barista":
+            flash(f"{email} ya es barista.", "info")
+        elif existente["rol"] == "admin":
+            flash(f"{email} es una cuenta de administrador.", "error")
+        else:
+            flash(f"{email} ya tiene cuenta en el sitio. Búscala abajo y toca "
+                  "«Hacer barista».", "info")
+        return redirect(url_for("admin_usuarios", busca=email))
+
+    # Nace sin contraseña y como 'invitado': así funcionan todas las reglas
+    # que ya existen. Al crear su clave desde el enlace pasa a 'activo' (ver
+    # Usuario.restablecer_password). Y como su rol no es 'cliente', nadie
+    # puede «reclamarla» registrándose con su correo: la regla C1.
+    Usuario.crear(email, password_hash=None, nombre=nombre, apellido=apellido,
+                  rol="barista", estado="invitado", telefono=telefono)
+    fila = Usuario.por_email(email)
+    enviado = enviar_invitacion(fila, enlace_invitacion(fila))
+    flash(f"Cuenta de barista creada para {nombre}.", "success")
+    return redirect(url_for("admin_usuarios", invitado=fila["id"],
+                            correo="1" if enviado else None) + "#invitacion")
 
 
 def _volver():

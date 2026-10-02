@@ -216,6 +216,26 @@ def enviar_reset(fila):
                          texto, logger=app.logger)
 
 
+def enlace_invitacion(fila):
+    """El enlace para que alguien del personal cree su contraseña."""
+    token = enlaces.token_invitacion(fila["id"], fila["password_hash"])
+    return _url_absoluta("bienvenida_personal", token=token)
+
+
+def enviar_invitacion(fila, enlace):
+    """Además del enlace que el admin le pasa a mano, va por correo."""
+    nombre = fila.get("nombre") or "hola"
+    texto = (
+        f"{nombre}:\n\n"
+        "Te crearon una cuenta de barista en Lucky Point Coffee. Abre este "
+        "enlace para elegir tu contraseña:\n\n"
+        f"{enlace}\n\n"
+        f"Vence en {enlaces.HORAS_INVITACION} horas y sirve una sola vez.\n"
+    )
+    return correo.enviar(fila["email"], "Tu cuenta de barista · Lucky Point Coffee",
+                         texto, logger=app.logger)
+
+
 # --- Freno a los intentos fallidos -----------------------------------------
 # Contador en memoria: simple, sin dependencias, suficiente para un servidor.
 # Limitaciones que conviene tener presentes: se borra al reiniciar Flask y no
@@ -675,19 +695,38 @@ def restablecer_password():
     una huella del hash actual de la contraseña, así que cambiarla lo mata.
     Ver config/enlaces.py.
     """
+    return _crear_clave_con_enlace(
+        enlaces.leer_reset, "restablecer_password", bienvenida=False,
+        vencido=("Este enlace venció. Pide uno nuevo, vencen a los "
+                 f"{enlaces.MINUTOS_RESET} minutos."),
+        invalido="Este enlace no es válido. Pide uno nuevo desde «¿Olvidaste tu contraseña?».")
+
+
+@app.route("/bienvenida", methods=["GET", "POST"])
+def bienvenida_personal():
+    """
+    El enlace que recibe un barista cuando el admin le crea la cuenta: acá
+    elige su contraseña. Es la misma pantalla que restablecer, con otro
+    token (dura días, no minutos) y otros textos.
+    """
+    return _crear_clave_con_enlace(
+        enlaces.leer_invitacion, "bienvenida_personal", bienvenida=True,
+        vencido=("Este enlace venció: duran "
+                 f"{enlaces.HORAS_INVITACION} horas. Pídele al administrador uno nuevo."),
+        invalido="Este enlace no es válido. Pídele al administrador uno nuevo.")
+
+
+def _crear_clave_con_enlace(leer, endpoint, bienvenida, vencido, invalido):
     token = request.values.get("token", "")
     # Segundo valor: el motivo del rechazo si falló, la huella si sirvió.
-    usuario_id, huella_o_motivo = enlaces.leer_reset(token)
+    usuario_id, huella_o_motivo = leer(token)
 
     def enlace_muerto(texto):
-        return render_template("restablecer_password.html", invalido=texto), 400
+        return render_template("restablecer_password.html", invalido=texto,
+                               bienvenida=bienvenida), 400
 
     if not usuario_id:
-        return enlace_muerto(
-            "Este enlace venció. Pide uno nuevo, vencen a los "
-            f"{enlaces.MINUTOS_RESET} minutos."
-            if huella_o_motivo == "expirado" else
-            "Este enlace no es válido. Pide uno nuevo desde «¿Olvidaste tu contraseña?».")
+        return enlace_muerto(vencido if huella_o_motivo == "expirado" else invalido)
 
     fila = Usuario.por_id(usuario_id)
     if not fila or fila["estado"] == "bloqueado":
@@ -702,7 +741,8 @@ def restablecer_password():
 
     if request.method != "POST":
         return render_template("restablecer_password.html", token=token,
-                               csrf_token=csrf.token())
+                               accion=url_for(endpoint), bienvenida=bienvenida,
+                               fila=fila, csrf_token=csrf.token())
 
     if not csrf.valido(request.form.get("csrf")):
         abort(400, "Token de seguridad inválido. Recarga la página.")
@@ -712,7 +752,8 @@ def restablecer_password():
     if problema:
         flash(problema, "error")
         return render_template("restablecer_password.html", token=token,
-                               csrf_token=csrf.token()), 400
+                               accion=url_for(endpoint), bienvenida=bienvenida,
+                               fila=fila, csrf_token=csrf.token()), 400
 
     Usuario.restablecer_password(fila["id"], hashear(clave))
     app.logger.info("Contraseña restablecida para el usuario %s", fila["id"])
@@ -721,6 +762,10 @@ def restablecer_password():
     session.clear()
     session["usuario"] = Usuario.para_sesion(Usuario.por_id(fila["id"]))
     session.permanent = False
+    if bienvenida:
+        flash("¡Listo! Ya tienes tu cuenta. Desde «Barra», en tu menú, entras "
+              "a vales y ruleta.", "info")
+        return redirect(url_for("admin_inicio"))
     flash("Listo, tu contraseña quedó cambiada.", "info")
     return redirect(url_for("dashboard"))
 
